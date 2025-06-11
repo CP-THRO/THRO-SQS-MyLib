@@ -1,5 +1,6 @@
 package de.throsenheim.inf.sqs.christophpircher.mylibbackend.api.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
@@ -9,6 +10,7 @@ import java.util.List;
  * This class contains is used to automatically parse the relevant fields for the search api results with Jackson
  */
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true) // To ignore everything not explicitly specified
 public class OpenLibraryAPISearchWork {
 
     /**

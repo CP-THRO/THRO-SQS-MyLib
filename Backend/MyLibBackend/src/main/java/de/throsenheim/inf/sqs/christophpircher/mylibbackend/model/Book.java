@@ -56,10 +56,21 @@ public class Book {
      * List of ISBNs. Contains ISBN-10 and ISBN-13 numbers
      */
     private List<String> isbns;
+
     /**
-     * OpenLibrary cover ID. I could also use the ISBN to fetch it, but that is rate limited.
+     * OpenLibrary cover image URL for the small sized version
      */
-    private int coverID;
+    private String coverURLSmall;
+
+    /**
+     * OpenLibrary cover image URL for the medium sized version
+     */
+    private String coverURLMedium;
+
+    /**
+     * OpenLibrary cover image URL for the large sized version
+     */
+    private String coverURLLarge;
 
     /**
      * Date/Year it was published

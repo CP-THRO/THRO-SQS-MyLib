@@ -1,8 +1,10 @@
 package de.throsenheim.inf.sqs.christophpircher.mylibbackend.api.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -10,19 +12,20 @@ import java.util.List;
  * Mainly the ISBN10/ISBN13 numbers.
  */
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true) // To ignore everything not explicitly specified
 public class OpenLibraryAPIBook {
 
     /**
      * List of ISBN 10 numbers
      */
     @JsonProperty("isbn_10")
-    private List<String> isbn10s;
+    private List<String> isbn10s = new ArrayList<>(); //default value so I don't have to do a null check if there are no isbn10s. Some books don't have an isbn10.
 
     /**
      * List of ISBN 13 numbers
      */
     @JsonProperty("isbn_13")
-    private List<String> isbn13s;
+    private List<String> isbn13s  = new ArrayList<>(); //default value so I don't have to do a null check if there are no isbn13s. Some books don't have an isbn13.
 
     /**
      * OpenLibrary Book ID / key.
@@ -33,8 +36,8 @@ public class OpenLibraryAPIBook {
     /**
      * List of cover IDs. I will use the first entry only.
      */
-    @JsonProperty("cover_i")
-    private List<Integer> coverIDs;
+    @JsonProperty("covers")
+    private List<Integer> coverIDs = new ArrayList<>(); // default value so I don't have to do a null check if there are no covers. Some books don't have a cover.
 
     /**
      * The title of the book
@@ -55,12 +58,6 @@ public class OpenLibraryAPIBook {
     private String publishDate;
 
     /**
-     * List which contains all the authors.
-     */
-    @JsonProperty("author_name")
-    private List<AuthorKey> authorKeys;
-
-    /**
      * List of work keys. I will always use just the first entry.
      */
     @JsonProperty("works")
@@ -73,21 +70,6 @@ public class OpenLibraryAPIBook {
      */
     public String getBookIDWithoutURL(){
         return bookID.replace("/books/", "");
-    }
-
-    /**
-     * Helper class to parse the author keys.
-     */
-    @Data
-    public static class AuthorKey{
-        /** Key String */
-        @JsonProperty("key")
-        private String key;
-
-        /** Parse out the actual key since the returned format is /authors/[key]  */
-        public String getKeyWithoutURL(){
-            return key.replace("/authors/", "");
-        }
     }
 
     /**

@@ -1,15 +1,51 @@
 package de.throsenheim.inf.sqs.christophpircher.mylibbackend.controller;
 
+import de.throsenheim.inf.sqs.christophpircher.mylibbackend.dto.SearchResultDTO;
+import de.throsenheim.inf.sqs.christophpircher.mylibbackend.exceptions.UnexpectedStatusException;
+import de.throsenheim.inf.sqs.christophpircher.mylibbackend.model.SearchResult;
+import de.throsenheim.inf.sqs.christophpircher.mylibbackend.service.SearchService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.io.IOException;
 
 @RestController
 @Slf4j
 @AllArgsConstructor
 @Tag(name="Search")
+@RequestMapping("/api/v1/search")
 public class SearchController {
+
+    private final SearchService searchService;
+
+    /**
+     * Returns the search results from the OpenLibrary API. Calls the searchExternalKeyword of the search service, which will then call the API. The result is converted to the SearchResultDTO.
+     * @param keywords Keywords to search for
+     * @param startIndex Starting index from which to get the results (for pagination)
+     * @param numResultsToGet Number of results to get (for pagination)
+     * @return Response with the search results.
+     */
+    @Operation(summary = "Keyword search on the OpenLibrary API", description = "Do a keywords search on the OpenLibrary API",
+    responses = {
+            @ApiResponse(responseCode = "200", description = "Search results"),
+            @ApiResponse(responseCode = "502", description = "Something went wrong while accessing the OpenLibrary API (e.g. the server is not responding etc.)")
+    })
+    @GetMapping(value = "/external/keyword", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<SearchResultDTO> searchExternalKeyword(@RequestParam(value = "keywords", required = true) String keywords, @RequestParam(value = "startIndex", defaultValue = "0") int startIndex, @RequestParam(value="numResultsToGet", defaultValue = "100")  int numResultsToGet) throws UnexpectedStatusException, IOException {
+        log.info("Incoming request to search OpenLibrary with keywords \"{}\"", keywords);
+        SearchResult searchResult = searchService.searchKeywordsExternal(keywords,startIndex,numResultsToGet);
+        return new ResponseEntity<>(SearchResultDTO.fromSearchResult(searchResult), HttpStatus.OK);
+    }
 
 
 

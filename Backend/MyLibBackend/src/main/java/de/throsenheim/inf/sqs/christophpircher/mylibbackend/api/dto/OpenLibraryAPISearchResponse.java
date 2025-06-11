@@ -1,5 +1,6 @@
 package de.throsenheim.inf.sqs.christophpircher.mylibbackend.api.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
@@ -9,6 +10,7 @@ import java.util.List;
  * Class to parse the response of the search API with Jackson
  */
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true) // To ignore everything not explicitly specified
 public class OpenLibraryAPISearchResponse {
 
     /**

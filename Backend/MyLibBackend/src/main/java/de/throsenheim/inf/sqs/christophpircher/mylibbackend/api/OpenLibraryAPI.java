@@ -13,6 +13,8 @@ import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 import retrofit2.http.GET;
 import retrofit2.http.Path;
+import retrofit2.http.Query;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,17 +27,17 @@ import java.util.Optional;
 @Slf4j
 public class OpenLibraryAPI {
     private interface OpenLibraryAPIInterface {
-        @GET("/search.json?q={keywords}&offset={startingIndex}&limit={limit}")
-        Call<OpenLibraryAPISearchResponse>  search(@Path("keywords") String keywords, @Path("startingIndex") int startingIndex, @Path("limit") int limit);
+        @GET("/search.json")
+        Call<OpenLibraryAPISearchResponse>  search(@Query("q") String keywords, @Query("offset") int startingIndex, @Query("limit") int limit);
 
         @GET("/books/{bookID}.json")
-        Call<OpenLibraryAPIBook> getBookById(@Path("bookId") String bookId);
+        Call<OpenLibraryAPIBook> getBookById(@Path("bookID") String bookId);
 
         @GET("/isbn/{isbn}.json")
         Call<OpenLibraryAPIBook> getBookByIsbn(@Path("isbn") String isbn);
 
         @GET("/works/{workID}.json")
-        Call<OpenLibraryAPIWork> getWorkById(@Path("workId") String workId);
+        Call<OpenLibraryAPIWork> getWorkById(@Path("workID") String workId);
 
         @GET("/authors/{authorID}.json")
         Call<OpenLibraryAPIAuthor> getAuthorById(@Path("authorID") String authorId);
@@ -43,9 +45,17 @@ public class OpenLibraryAPI {
     }
 
     private OpenLibraryAPIInterface api = null;
-    private Environment environment;
+    private final Environment environment;
 
     private static final String UNEXPECTED_STATUS_MESSAGE = "OpenLibraryAPI: Unexpected status code: ";
+
+    /**
+     * Instantiate the class with the SpringBoot environment. This is called automatically by SpringBoot on startup.
+     * @param environment SpringBoot environment
+     */
+    public OpenLibraryAPI(Environment environment) {
+        this.environment = environment;
+    }
 
     /**
      * Searches for a book by keywords.
@@ -144,15 +154,22 @@ public class OpenLibraryAPI {
                 bookBuilder.title(bookDTO.getTitle());
                 bookBuilder.subtitle(bookDTO.getSubtitle());
                 bookBuilder.publishDate(bookDTO.getPublishDate());
-                bookBuilder.coverID(bookDTO.getCoverIDs().getFirst());
                 bookBuilder.bookID(bookDTO.getBookIDWithoutURL());
+
+                int coverID = bookDTO.getCoverIDs().getFirst();
+                String coverURLTemplate = "https://covers.openlibrary.org/b/id/%d-%s.jpg";
+                bookBuilder.coverURLSmall(String.format(coverURLTemplate, coverID, "S"));
+                bookBuilder.coverURLMedium(String.format(coverURLTemplate, coverID, "M"));
+                bookBuilder.coverURLLarge(String.format(coverURLTemplate, coverID, "L"));
 
                 OpenLibraryAPIWork work = getWorkByWorkID(bookDTO.getWorkKeys().getFirst().getKeyWithoutURL());
                 bookBuilder.description(work.getDescription().getValue());
 
-                List<String> authors = new ArrayList<>(bookDTO.getAuthorKeys().size());
-                for(OpenLibraryAPIBook.AuthorKey authorKey : bookDTO.getAuthorKeys()){
-                    authors.add(getAuthorByAuthorID(authorKey.getKeyWithoutURL()).getName());
+                List<String> authors = new ArrayList<>(work.getAuthors().size());
+
+                List<OpenLibraryAPIWork.Author> dtoAuthorList = work.getAuthors();
+                for(OpenLibraryAPIWork.Author author : dtoAuthorList){
+                    authors.add(getAuthorByAuthorID(author.getAuthorKey().getKeyWithoutURL()).getName());
                 }
                 bookBuilder.authors(authors);
 
