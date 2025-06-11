@@ -67,14 +67,14 @@ public class BookDTO {
     /**
      * OpenLibrary cover image URL for the medium sized version
      */
-    @JsonProperty("coverURLSmall")
+    @JsonProperty("coverURLMedium")
     @Schema(description = "URL to the medium cover image of the book", example = "https://covers.openlibrary.org/b/id/12394458-M.jpg")
     private String coverURLMedium;
 
     /**
      * OpenLibrary cover image URL for the large sized version
      */
-    @JsonProperty("coverURLSmall")
+    @JsonProperty("coverURLLarge")
     @Schema(description = "URL to the large cover image of the book", example = "https://covers.openlibrary.org/b/id/12394458-L.jpg")
     private String coverURLLarge;
 
@@ -107,6 +107,9 @@ public class BookDTO {
         builder.description(book.getDescription());
         builder.isbns(book.getIsbns());
         builder.publishDate(book.getPublishDate());
+        builder.coverURLSmall(book.getCoverURLSmall());
+        builder.coverURLMedium(book.getCoverURLMedium());
+        builder.coverURLLarge(book.getCoverURLLarge());
         return builder.build();
     }
 }

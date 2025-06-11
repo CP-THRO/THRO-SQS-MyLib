@@ -42,6 +42,9 @@ public class OpenLibraryAPI {
         @GET("/authors/{authorID}.json")
         Call<OpenLibraryAPIAuthor> getAuthorById(@Path("authorID") String authorId);
 
+        @GET("/works/{workID}/editions.json")
+        Call<OpenLibraryAPIEditions> getEditionsByWorkId(@Path("workID") String workId);
+
     }
 
     private OpenLibraryAPIInterface api = null;
@@ -88,12 +91,29 @@ public class OpenLibraryAPI {
                  * In theory, all search results contain part of the information. But since I need to call the Books API anyway for the ISBN, and I need that API for storing books in a personal library, I am getting everything from there.
                  */
                 for (OpenLibraryAPISearchWork work : searchWorks) {
-                    Optional<Book> book = getBookByBookID(work.getCoverEditionKey());
-                    if(book.isPresent()) {
-                        resultBooks.add(book.get());
-                    }else{
-                        //Just skip. No need to kill the whole search because the API is missing an entry. Should never happen anyway
-                        log.warn("Book with id {} not found", work.getCoverEditionKey());
+                    String coverEditionKey = work.getCoverEditionKey();
+                    if(coverEditionKey == null) { // basically: If there is a book without a cover, I have to get an edition to get a book ID.
+                        OpenLibraryAPIEditions editions = getWorkEditionsByID(work.getWorkKeyWithoutURL());
+
+                        String editionBookKey = null;
+
+                        for(int i = 0; i < editions.getEditions().size(); i++) {
+                            editionBookKey = editions.getEditions().get(i).getBookKeyWithoutURL();
+                            if(editionBookKey != null) {
+                                coverEditionKey = editionBookKey;
+                                break;
+                            }
+                        }
+                    }
+
+                    if(coverEditionKey != null) { //Skip book if no book key can be found
+                        Optional<Book> book = getBookByBookID(coverEditionKey);
+                        if(book.isPresent()) {
+                            resultBooks.add(book.get());
+                        }else{
+                            //Just skip. No need to kill the whole search because the API is missing an entry. Should never happen anyway
+                            log.warn("Book with id {} not found", work.getCoverEditionKey());
+                        }
                     }
                 }
 
@@ -156,11 +176,13 @@ public class OpenLibraryAPI {
                 bookBuilder.publishDate(bookDTO.getPublishDate());
                 bookBuilder.bookID(bookDTO.getBookIDWithoutURL());
 
-                int coverID = bookDTO.getCoverIDs().getFirst();
-                String coverURLTemplate = "https://covers.openlibrary.org/b/id/%d-%s.jpg";
-                bookBuilder.coverURLSmall(String.format(coverURLTemplate, coverID, "S"));
-                bookBuilder.coverURLMedium(String.format(coverURLTemplate, coverID, "M"));
-                bookBuilder.coverURLLarge(String.format(coverURLTemplate, coverID, "L"));
+                if(!bookDTO.getCoverIDs().isEmpty()){
+                    int coverID = bookDTO.getCoverIDs().getFirst();
+                    String coverURLTemplate = "https://covers.openlibrary.org/b/id/%d-%s.jpg";
+                    bookBuilder.coverURLSmall(String.format(coverURLTemplate, coverID, "S"));
+                    bookBuilder.coverURLMedium(String.format(coverURLTemplate, coverID, "M"));
+                    bookBuilder.coverURLLarge(String.format(coverURLTemplate, coverID, "L"));
+                }
 
                 OpenLibraryAPIWork work = getWorkByWorkID(bookDTO.getWorkKeys().getFirst().getKeyWithoutURL());
                 bookBuilder.description(work.getDescription().getValue());
@@ -168,9 +190,14 @@ public class OpenLibraryAPI {
                 List<String> authors = new ArrayList<>(work.getAuthors().size());
 
                 List<OpenLibraryAPIWork.Author> dtoAuthorList = work.getAuthors();
-                for(OpenLibraryAPIWork.Author author : dtoAuthorList){
-                    authors.add(getAuthorByAuthorID(author.getAuthorKey().getKeyWithoutURL()).getName());
+                if(!dtoAuthorList.isEmpty()) {
+                    for(OpenLibraryAPIWork.Author author : dtoAuthorList){
+                        authors.add(getAuthorByAuthorID(author.getAuthorKey().getKeyWithoutURL()).getName());
+                    }
+                }else{
+                    authors.add("No author found"); //the only author info is in the search api... but I cannot do that outside of the search endpoint
                 }
+
                 bookBuilder.authors(authors);
 
                 List<String> isbns = new ArrayList<>(bookDTO.getIsbn10s().size() + bookDTO.getIsbn13s().size());
@@ -240,6 +267,32 @@ public class OpenLibraryAPI {
     }
 
     /**
+     * Helper function to get the editions of a work.
+     * @param workID The work ID to get the editions for.
+     * @return Object with a list of all editions with their keys. I will take the first one with a key != 0. There must be at least one edition for there to be a work, so no optional-
+     * @throws UnexpectedStatusException OpenLibrary API returned unexpected status code
+     * @throws IOException Something went wrong with the connection
+     */
+    private OpenLibraryAPIEditions getWorkEditionsByID(String workID) throws UnexpectedStatusException, IOException {
+        if(api == null) {
+            createNewApi();
+        }
+        Call<OpenLibraryAPIEditions> call = api.getEditionsByWorkId(workID);
+        try {
+            Response<OpenLibraryAPIEditions> response = call.execute();
+            if(response.isSuccessful() && response.body() != null) {
+                return response.body();
+            }else{
+                log.info("OpenLibraryAPI: Could not get editions for work ID {}: {} {}", workID, response.code(), response.message());
+                throw new UnexpectedStatusException(UNEXPECTED_STATUS_MESSAGE + response.code());
+            }
+        } catch (IOException e) {
+            throw alterIOException(e);
+        }
+
+    }
+
+    /**
      * Lazy-instantiates the api object.
      * Required for WireMock:
      * In order to test with WireMock I need the baseURL to be configured in the application properties,
@@ -259,5 +312,6 @@ public class OpenLibraryAPI {
         altered.setStackTrace(original.getStackTrace());
         return altered;
     }
+
 
 }

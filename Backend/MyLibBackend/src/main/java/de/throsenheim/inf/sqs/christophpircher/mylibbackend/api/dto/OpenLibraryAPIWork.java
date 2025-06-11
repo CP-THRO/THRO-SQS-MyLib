@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import lombok.Data;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -16,14 +17,13 @@ import java.util.List;
 public class OpenLibraryAPIWork {
 
     @JsonProperty("description")
-    private Description description;
-
+    private Description description = new Description();
 
     /**
      * List of authors
      */
     @JsonProperty("authors")
-    private List<Author> authors;
+    private List<Author> authors = new ArrayList<>();
 
     @Data
     @JsonDeserialize(using = DescriptionDeserializer.class)

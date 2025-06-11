@@ -1,10 +1,13 @@
 package de.throsenheim.inf.sqs.christophpircher.mylibbackend.controller;
 
+import de.throsenheim.inf.sqs.christophpircher.mylibbackend.dto.ApiError;
 import de.throsenheim.inf.sqs.christophpircher.mylibbackend.dto.SearchResultDTO;
 import de.throsenheim.inf.sqs.christophpircher.mylibbackend.exceptions.UnexpectedStatusException;
 import de.throsenheim.inf.sqs.christophpircher.mylibbackend.model.SearchResult;
 import de.throsenheim.inf.sqs.christophpircher.mylibbackend.service.SearchService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
@@ -38,7 +41,7 @@ public class SearchController {
     @Operation(summary = "Keyword search on the OpenLibrary API", description = "Do a keywords search on the OpenLibrary API",
     responses = {
             @ApiResponse(responseCode = "200", description = "Search results"),
-            @ApiResponse(responseCode = "502", description = "Something went wrong while accessing the OpenLibrary API (e.g. the server is not responding etc.)")
+            @ApiResponse(responseCode = "502", description = "Something went wrong while accessing the OpenLibrary API (e.g. the server is not responding etc.)", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiError.class)))
     })
     @GetMapping(value = "/external/keyword", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<SearchResultDTO> searchExternalKeyword(@RequestParam(value = "keywords", required = true) String keywords, @RequestParam(value = "startIndex", defaultValue = "0") int startIndex, @RequestParam(value="numResultsToGet", defaultValue = "100")  int numResultsToGet) throws UnexpectedStatusException, IOException {

@@ -14,6 +14,12 @@ import java.util.List;
 public class OpenLibraryAPISearchWork {
 
     /**
+     * Key of the work, as a backup option to get a book key.
+     */
+    @JsonProperty("key")
+    private String workKey;
+
+    /**
      * Key of the "Cover edition": The edition which represents all editions. This will be shown.
      * Everything else will be fetched from this.
      * In theory, all search results contain part of the information. But since I need to call the Books API anyway for the ISBN, and I need that API for storing books in a personal library, I am getting everything from there.
@@ -21,5 +27,13 @@ public class OpenLibraryAPISearchWork {
      */
     @JsonProperty("cover_edition_key")
     private String coverEditionKey;
+
+    /**
+     * Remove the "/works/" part from the work key
+     * @return Work key without "/works/"
+     */
+    public String getWorkKeyWithoutURL(){
+        return workKey.replace("/works/","");
+    }
 
 }
