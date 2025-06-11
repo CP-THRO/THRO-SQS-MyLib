@@ -33,7 +33,7 @@ public class BookDTO {
      * Subtitle of the book
      */
     @JsonProperty("subtitle")
-    @Schema(description = "Book Subtitle", example = "Ascension")
+    @Schema(description = "Book Subtitle. Not included in search result.", example = "Ascension")
     private String subtitle;
 
     /**
@@ -47,14 +47,14 @@ public class BookDTO {
      * Description text for the book
      */
     @JsonProperty("description")
-    @Schema(description = "Description text of the book", example = "Every advanced society in the galaxy relies on the technology of the Protheans, an ancient species that vanished fifty thousand years ago. After discovering a cache of Prothean technology on Mars in 2148, humanity is spreading to the stars; the newest interstellar species, struggling to carve out its place in the greater galactic community.On the edge of colonized space, ship commander and Alliance war hero David Anderson investigates the remains of a top secret military research station; smoking ruins littered with bodies and unanswered questions. Who attacked this post and for what purpose? And where is Kahlee Sanders, the young scientist who mysteriously vanished from the base--hours before her colleagues were slaughtered?Sanders is now the prime suspect, but finding her creates more problems for Anderson than it solves. Partnered with a rogue alien agent he can't trust and pursued by an assassin he can't escape, Anderson battles impossible odds on uncharted worlds to uncover a sinister conspiracy . . . one he won't live to tell about. Or so the enemy thinks.From the Paperback edition.")
+    @Schema(description = "Description text of the book. Not included in search result", example = "Every advanced society in the galaxy relies on the technology of the Protheans, an ancient species that vanished fifty thousand years ago. After discovering a cache of Prothean technology on Mars in 2148, humanity is spreading to the stars; the newest interstellar species, struggling to carve out its place in the greater galactic community.On the edge of colonized space, ship commander and Alliance war hero David Anderson investigates the remains of a top secret military research station; smoking ruins littered with bodies and unanswered questions. Who attacked this post and for what purpose? And where is Kahlee Sanders, the young scientist who mysteriously vanished from the base--hours before her colleagues were slaughtered?Sanders is now the prime suspect, but finding her creates more problems for Anderson than it solves. Partnered with a rogue alien agent he can't trust and pursued by an assassin he can't escape, Anderson battles impossible odds on uncharted worlds to uncover a sinister conspiracy . . . one he won't live to tell about. Or so the enemy thinks.From the Paperback edition.")
     private String description;
 
     /**
      * List of ISBNs. Contains ISBN-10 and ISBN-13 numbers
      */
     @JsonProperty("isbns")
-    @Schema(description = "If found in the API, this contains the ISBN numbers of the book. This contains both ISBN-10 and ISBN-13 numbers", example = "[\"9780345498526\"]")
+    @Schema(description = "If found in the API, this contains the ISBN numbers of the book. This contains both ISBN-10 and ISBN-13 numbers. Not included in search result", example = "[\"9780345498526\"]")
     private List<String> isbns;
 
     /**
@@ -89,7 +89,7 @@ public class BookDTO {
      * Rating between 1 and 5. Average for all books in library page, Individual for personal library page.
      */
     @JsonProperty("rating")
-    @Schema(description = "Rating of a book from 1 to 5. Not existent, Average or user-specific, depending on the context", example = "4")
+    @Schema(description = "Rating of a book from 1 to 5. Not existent, Average or user-specific, depending on the context. Not included in search result", example = "4")
     @Builder.Default
     private int rating = 0;
 

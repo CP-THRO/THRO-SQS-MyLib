@@ -4,9 +4,9 @@ import de.throsenheim.inf.sqs.christophpircher.mylibbackend.api.dto.*;
 import de.throsenheim.inf.sqs.christophpircher.mylibbackend.exceptions.UnexpectedStatusException;
 import de.throsenheim.inf.sqs.christophpircher.mylibbackend.model.Book;
 import de.throsenheim.inf.sqs.christophpircher.mylibbackend.model.SearchResult;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.env.Environment;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import retrofit2.Call;
 import retrofit2.Response;
@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 
 /**
  * Proxy implementation of the OpenLibrary API.
@@ -70,9 +69,6 @@ public class OpenLibraryAPI {
      * @return A search result object. No optional, since there is always a valid response.
      */
     public SearchResult searchBooks(String searchString, int startingIndex, int numResultsToGet) throws UnexpectedStatusException, IOException {
-        if(api == null) {
-            createNewApi();
-        }
         log.info("Searching for keywords \"{}\"", searchString);
         searchString = searchString.trim().replaceAll("\\s", "+"); // replace whitespaces with "+", because the API requires it.
 
@@ -87,41 +83,32 @@ public class OpenLibraryAPI {
                 builder.startIndex(response.getStart());
 
                 List<OpenLibraryAPISearchWork> searchWorks = response.getSearchResults();
-                /*
-                 * In theory, all search results contain part of the information. But since I need to call the Books API anyway for the ISBN, and I need that API for storing books in a personal library, I am getting everything from there.
-                 */
-                List<CompletableFuture<Optional<Book>>> futures = new ArrayList<>();
+                List<Book> books = new ArrayList<>(searchWorks.size());
+
                 for (OpenLibraryAPISearchWork work : searchWorks) {
                     String coverEditionKey = work.getCoverEditionKey();
                     if(coverEditionKey == null) { // basically: If there is a book without a cover, I have to get an edition to get a book ID.
                         OpenLibraryAPIEditions editions = getWorkEditionsByID(work.getWorkKeyWithoutURL());
-
-                        String editionBookKey = null;
-
-                        for(int i = 0; i < editions.getEditions().size(); i++) {
-                            editionBookKey = editions.getEditions().get(i).getBookKeyWithoutURL();
-                            if(editionBookKey != null) {
-                                coverEditionKey = editionBookKey;
-                                break;
-                            }
+                        if(!editions.getEditions().isEmpty()){ // this can actually happen... The API is so scuffed. Skip
+                            coverEditionKey = editions.getEditions().getFirst().getBookKeyWithoutURL(); //an edition must have its own key. I am taking the first, since it does not really matter.
+                        }else{
+                            continue; // skip it.
                         }
                     }
 
-                    if(coverEditionKey != null) { //Skip book if no book key can be found
-                        futures.add(getBookByBookIDAsync(coverEditionKey));
-                    }
+                    Book.BookBuilder bookBuilder = Book.builder();
+                    bookBuilder.bookID(coverEditionKey);
+                    bookBuilder.title(work.getTitle());
+                    bookBuilder.authors(work.getAuthors());
+                    bookBuilder.publishDate(Integer.toString(work.getFirstPublishYear()));
+
+                    String[] coverURLs = getCoverURLs(work.getCoverID());
+                    bookBuilder.coverURLSmall(coverURLs[0]);
+                    bookBuilder.coverURLMedium(coverURLs[1]);
+                    bookBuilder.coverURLLarge(coverURLs[2]);
+
+                    books.add(bookBuilder.build());
                 }
-
-                // Wait for all to finish
-                CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
-
-                // Collect successful books
-                List<Book> books = futures.stream()
-                        .map(CompletableFuture::join)
-                        .filter(Optional::isPresent)
-                        .map(Optional::get)
-                        .toList();
-
 
                 builder.searchResults(books);
                 return builder.build();
@@ -141,10 +128,6 @@ public class OpenLibraryAPI {
      * @return Optional with Book object with all the relevant information. Optional because the ISBN might not exist, since it is supplied by my own api endpoint
      */
     public Optional<Book> getBookByISBN(String isbn) throws UnexpectedStatusException, IOException {
-        if(api == null) {
-            createNewApi();
-        }
-
         Call<OpenLibraryAPIBook> call = api.getBookByIsbn(isbn);
         try {
             Response<OpenLibraryAPIBook> response = call.execute();
@@ -168,9 +151,6 @@ public class OpenLibraryAPI {
      * @return Book object with all relevant info. Optional, because a wrong bookid may be supplied on my own API endpoint.
      */
     public Optional<Book> getBookByBookID(String bookID) throws IOException, UnexpectedStatusException {
-        if(api == null) {
-            createNewApi();
-        }
         Call<OpenLibraryAPIBook> call = api.getBookById(bookID);
         try{
             Response<OpenLibraryAPIBook> bookResponse = call.execute();
@@ -183,11 +163,10 @@ public class OpenLibraryAPI {
                 bookBuilder.bookID(bookDTO.getBookIDWithoutURL());
 
                 if(!bookDTO.getCoverIDs().isEmpty()){
-                    int coverID = bookDTO.getCoverIDs().getFirst();
-                    String coverURLTemplate = "https://covers.openlibrary.org/b/id/%d-%s.jpg";
-                    bookBuilder.coverURLSmall(String.format(coverURLTemplate, coverID, "S"));
-                    bookBuilder.coverURLMedium(String.format(coverURLTemplate, coverID, "M"));
-                    bookBuilder.coverURLLarge(String.format(coverURLTemplate, coverID, "L"));
+                    String[] coverURLs = getCoverURLs(bookDTO.getCoverIDs().getFirst());
+                    bookBuilder.coverURLSmall(coverURLs[0]);
+                    bookBuilder.coverURLMedium(coverURLs[1]);
+                    bookBuilder.coverURLLarge(coverURLs[2]);
                 }
 
                 OpenLibraryAPIWork work = getWorkByWorkID(bookDTO.getWorkKeys().getFirst().getKeyWithoutURL());
@@ -196,6 +175,7 @@ public class OpenLibraryAPI {
                 List<String> authors = new ArrayList<>(work.getAuthors().size());
 
                 List<OpenLibraryAPIWork.Author> dtoAuthorList = work.getAuthors();
+
                 if(!dtoAuthorList.isEmpty()) {
                     for(OpenLibraryAPIWork.Author author : dtoAuthorList){
                         authors.add(getAuthorByAuthorID(author.getAuthorKey().getKeyWithoutURL()).getName());
@@ -224,26 +204,12 @@ public class OpenLibraryAPI {
         }
     }
 
-    @Async
-    public CompletableFuture<Optional<Book>> getBookByBookIDAsync(String bookID) {
-        try {
-            return CompletableFuture.completedFuture(getBookByBookID(bookID));
-        } catch (Exception e) {
-            log.error("Failed to fetch book {}", bookID, e);
-            return CompletableFuture.completedFuture(Optional.empty());
-        }
-    }
-
     /**
      * Helper function to get the work information by work id. Used to get the description of the book/work
      * @param workID Work ID to get the information for.
      * @return Work DTO. No model class, since this is internal for the API proxy. Also no Optional, since a book is always associated with a work.
      */
     private OpenLibraryAPIWork getWorkByWorkID(String workID) throws IOException, UnexpectedStatusException {
-        if(api == null) {
-            createNewApi();
-        }
-
         Call<OpenLibraryAPIWork> call = api.getWorkById(workID);
         try{
             Response<OpenLibraryAPIWork> workResponse = call.execute();
@@ -265,9 +231,6 @@ public class OpenLibraryAPI {
      * @return Author DTO object. No Optional, since I am taking the ID straight from the Book API results. If that is broken
      */
     private OpenLibraryAPIAuthor getAuthorByAuthorID(String authorID) throws UnexpectedStatusException, IOException {
-        if(api == null) {
-            createNewApi();
-        }
         Call<OpenLibraryAPIAuthor> call = api.getAuthorById(authorID);
         try {
             Response<OpenLibraryAPIAuthor> response = call.execute();
@@ -290,9 +253,6 @@ public class OpenLibraryAPI {
      * @throws IOException Something went wrong with the connection
      */
     private OpenLibraryAPIEditions getWorkEditionsByID(String workID) throws UnexpectedStatusException, IOException {
-        if(api == null) {
-            createNewApi();
-        }
         Call<OpenLibraryAPIEditions> call = api.getEditionsByWorkId(workID);
         try {
             Response<OpenLibraryAPIEditions> response = call.execute();
@@ -314,6 +274,7 @@ public class OpenLibraryAPI {
      * In order to test with WireMock I need the baseURL to be configured in the application properties,
      * but I cannot access the spring environment in the constructor.
      */
+    @PostConstruct
     private void createNewApi() {
         log.info("Creating OpenLibraryAPI object");
         String baseurl = environment.getProperty("external.openLibraryAPIBaseURL");
@@ -327,6 +288,21 @@ public class OpenLibraryAPI {
         IOException altered = new IOException("OpenLibraryAPI: " + original.getMessage());
         altered.setStackTrace(original.getStackTrace());
         return altered;
+    }
+
+    /**
+     * Build the cover ID urls
+     * @param coverID cover ID to build the URLs for
+     * @return Array with three elements. First element is small, second element is medium and third element is large
+     */
+    private String[] getCoverURLs(int coverID){
+        String[] coverURLs = new String[3];
+        String coverURLTemplate = "https://covers.openlibrary.org/b/id/%d-%s.jpg";
+        coverURLs[0] =String.format(coverURLTemplate, coverID, "S");
+        coverURLs[1] =String.format(coverURLTemplate, coverID, "M");
+        coverURLs[2] =String.format(coverURLTemplate, coverID, "L");
+
+        return coverURLs;
     }
 
 

@@ -20,13 +20,36 @@ public class OpenLibraryAPISearchWork {
     private String workKey;
 
     /**
+     * The title of the book
+     */
+    @JsonProperty("title")
+    private String title;
+
+    /**
      * Key of the "Cover edition": The edition which represents all editions. This will be shown.
-     * Everything else will be fetched from this.
-     * In theory, all search results contain part of the information. But since I need to call the Books API anyway for the ISBN, and I need that API for storing books in a personal library, I am getting everything from there.
      *
      */
     @JsonProperty("cover_edition_key")
     private String coverEditionKey;
+
+    /**
+     * ID of the cover
+     */
+    @JsonProperty("cover_i")
+    private int coverID;
+
+    /**
+     * List of authors of the book
+     */
+    @JsonProperty("author_name")
+    private List<String> authors;
+
+    /**
+     * Year when the book was first published
+     */
+    @JsonProperty("first_publish_year")
+    private int firstPublishYear;
+
 
     /**
      * Remove the "/works/" part from the work key
