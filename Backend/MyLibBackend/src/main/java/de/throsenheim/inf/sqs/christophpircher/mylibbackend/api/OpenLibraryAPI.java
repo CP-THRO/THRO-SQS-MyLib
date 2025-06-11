@@ -6,6 +6,7 @@ import de.throsenheim.inf.sqs.christophpircher.mylibbackend.model.Book;
 import de.throsenheim.inf.sqs.christophpircher.mylibbackend.model.SearchResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.env.Environment;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import retrofit2.Call;
 import retrofit2.Response;
@@ -19,6 +20,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Proxy implementation of the OpenLibrary API.
@@ -85,11 +87,10 @@ public class OpenLibraryAPI {
                 builder.startIndex(response.getStart());
 
                 List<OpenLibraryAPISearchWork> searchWorks = response.getSearchResults();
-                List<Book> resultBooks = new ArrayList<>(searchWorks.size());
-
                 /*
                  * In theory, all search results contain part of the information. But since I need to call the Books API anyway for the ISBN, and I need that API for storing books in a personal library, I am getting everything from there.
                  */
+                List<CompletableFuture<Optional<Book>>> futures = new ArrayList<>();
                 for (OpenLibraryAPISearchWork work : searchWorks) {
                     String coverEditionKey = work.getCoverEditionKey();
                     if(coverEditionKey == null) { // basically: If there is a book without a cover, I have to get an edition to get a book ID.
@@ -107,17 +108,22 @@ public class OpenLibraryAPI {
                     }
 
                     if(coverEditionKey != null) { //Skip book if no book key can be found
-                        Optional<Book> book = getBookByBookID(coverEditionKey);
-                        if(book.isPresent()) {
-                            resultBooks.add(book.get());
-                        }else{
-                            //Just skip. No need to kill the whole search because the API is missing an entry. Should never happen anyway
-                            log.warn("Book with id {} not found", work.getCoverEditionKey());
-                        }
+                        futures.add(getBookByBookIDAsync(coverEditionKey));
                     }
                 }
 
-                builder.searchResults(resultBooks);
+                // Wait for all to finish
+                CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+
+                // Collect successful books
+                List<Book> books = futures.stream()
+                        .map(CompletableFuture::join)
+                        .filter(Optional::isPresent)
+                        .map(Optional::get)
+                        .toList();
+
+
+                builder.searchResults(books);
                 return builder.build();
             }else{
                 log.error("OpenLibraryAPI: Could not search OpenLibraryAPI: {} {}", apiSearchResponse.code(), apiSearchResponse.message());
@@ -215,6 +221,16 @@ public class OpenLibraryAPI {
             }
         } catch (IOException e) {
             throw alterIOException(e);
+        }
+    }
+
+    @Async
+    public CompletableFuture<Optional<Book>> getBookByBookIDAsync(String bookID) {
+        try {
+            return CompletableFuture.completedFuture(getBookByBookID(bookID));
+        } catch (Exception e) {
+            log.error("Failed to fetch book {}", bookID, e);
+            return CompletableFuture.completedFuture(Optional.empty());
         }
     }
 
