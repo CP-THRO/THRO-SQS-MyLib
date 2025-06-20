@@ -67,5 +67,4 @@ public class BookController {
         List<Book> books = bookService.getAllKnownBooks(startIndex, numResultsToGet);
         return new ResponseEntity<>(books.stream().map(BookDTO::fromBook).toList(), HttpStatus.OK);
     }
-
 }

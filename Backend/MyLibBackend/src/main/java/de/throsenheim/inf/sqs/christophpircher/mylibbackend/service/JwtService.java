@@ -3,22 +3,17 @@ package de.throsenheim.inf.sqs.christophpircher.mylibbackend.service;
 import de.throsenheim.inf.sqs.christophpircher.mylibbackend.model.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
-import io.jsonwebtoken.security.DigestAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import lombok.AllArgsConstructor;
 import org.springframework.core.env.Environment;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
-import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
-import java.util.function.Function;
+
 
 /**
  * Service for handling JWT tokens
@@ -45,7 +40,7 @@ public class JwtService {
     }
 
     public UUID extractUserID(String token) {
-        return extractClaim(token, Claims.SUBJECT, UUID.class);
+        return  UUID.fromString(extractClaim(token, Claims.SUBJECT, String.class)); //Because I cannot use UUID.class as requiredType for claims.get()
     }
 
     public Date extractExpiration(String token) {
@@ -58,7 +53,7 @@ public class JwtService {
     }
 
     private Claims extractAllClaims(String token) {
-        return Jwts.parser().decryptWith(getSignKey()).build().parseEncryptedClaims(token).getPayload();
+        return Jwts.parser().verifyWith(getSignKey()).build().parseSignedClaims(token).getPayload();
     }
 
     private Boolean isTokenExpired(String token) {

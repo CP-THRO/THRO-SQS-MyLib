@@ -2,6 +2,7 @@ package de.throsenheim.inf.sqs.christophpircher.mylibbackend.service;
 
 import de.throsenheim.inf.sqs.christophpircher.mylibbackend.model.User;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -11,6 +12,8 @@ import java.util.UUID;
 
 @AllArgsConstructor
 public class UserPrincipal implements UserDetails {
+
+    @Getter
     private transient User user;
 
     @Override
