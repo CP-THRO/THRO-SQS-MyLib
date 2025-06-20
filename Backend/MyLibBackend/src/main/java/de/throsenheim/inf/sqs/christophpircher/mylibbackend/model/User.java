@@ -3,6 +3,7 @@ package de.throsenheim.inf.sqs.christophpircher.mylibbackend.model;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.util.Set;
@@ -15,6 +16,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Getter
 @Table(name = "usertable") //User is a SQL keyword...
 public class User {
     /**
