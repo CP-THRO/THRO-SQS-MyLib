@@ -10,33 +10,63 @@ import java.util.List;
 
 
 /**
- *  Class to parse the description from the works API for a work with Jackson.
+ * Data Transfer Object (DTO) for parsing a work object from the OpenLibrary Works API.
+ * <p>
+ * This class handles the retrieval of descriptive metadata and authorship information
+ * for a given work. It uses Jackson to deserialize nested and sometimes inconsistent
+ * structures in the API.
+ * </p>
+ *
+ * <p>Example fields handled:</p>
+ * <pre>
+ * {
+ *   "description": "A great book",
+ *   "authors": [
+ *     { "author": { "key": "/authors/OL12345A" }, "type": { "key": "/type/author_role" } }
+ *   ]
+ * }
+ * </pre>
+ *
+ * <p>Unknown fields are ignored via {@code @JsonIgnoreProperties}.</p>
+ *
+ * @see DescriptionDeserializer
+ * @see com.fasterxml.jackson.databind.ObjectMapper
+ *
  */
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true) // To ignore everything not explicitly specified
 public class OpenLibraryAPIWork {
 
+    /**
+     * The description of the work, which may be a simple string or a structured object.
+     * <p>Deserialized using a custom {@link DescriptionDeserializer}.</p>
+     */
     @JsonProperty("description")
     private Description description = new Description();
 
     /**
-     * List of authors
+     * List of authors associated with the work.
      */
     @JsonProperty("authors")
     private List<Author> authors = new ArrayList<>();
 
+    /**
+     * Inner class representing the work's description.
+     * <p>This class supports both simple string and structured formats.</p>
+     */
     @Data
     @JsonDeserialize(using = DescriptionDeserializer.class)
     public static class Description{
 
+
         /**
-         * Type. Always "/type/text"
+         * The type of the description (e.g., {@code "/type/text"}).
          */
         @JsonProperty("type")
         private String type;
 
         /**
-         * Actual text of the description. This is what I want.
+         * The actual descriptive text of the work.
          */
         @JsonProperty("value")
         private String value;
@@ -44,27 +74,38 @@ public class OpenLibraryAPIWork {
 
 
     /**
-     * Helper class to parse author object, which is kinda weird: { author: {key: "/authors/OL26320A"}, type: {key: "/type/author_role"} }
+     * Inner class representing an author entry from the work.
+     * <p>Each author object wraps an {@link AuthorKey} instance.</p>
      */
     @Data
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Author{
+        /**
+         * The OpenLibrary author key (e.g., {@code "/authors/OL12345A"}).
+         */
         @JsonProperty("author")
         private AuthorKey authorKey;
     }
 
 
     /**
-     * Helper class to parse the author keys.
+     * Inner class representing the author key structure.
+     * <p>Used to extract a clean author identifier string.</p>
      */
     @Data
     @JsonIgnoreProperties(ignoreUnknown = true) // To ignore everything not explicitly specified
     public static class AuthorKey{
-        /** Key String */
+        /**
+         * The full author key (e.g., {@code "/authors/OL12345A"}).
+         */
         @JsonProperty("key")
         private String key;
 
-        /** Parse out the actual key since the returned format is /authors/[key]  */
+        /**
+         * Removes the {@code "/authors/"} prefix to extract the actual author ID.
+         *
+         * @return the author ID without the "/authors/" prefix
+         */
         public String getKeyWithoutURL(){
             return key.replace("/authors/", "");
         }

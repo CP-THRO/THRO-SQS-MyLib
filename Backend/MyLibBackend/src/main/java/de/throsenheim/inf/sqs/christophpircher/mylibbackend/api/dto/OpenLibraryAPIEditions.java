@@ -7,27 +7,53 @@ import lombok.Data;
 import java.util.List;
 
 /**
- * Class to parse the editions API response. This is used to get a book for a work that does not have cover, and therefore do not have a cover_edition_key field
+ * Data Transfer Object (DTO) for parsing the response from the OpenLibrary Editions API.
+ * <p>
+ * This class is used specifically when a work does not have a {@code cover_edition_key},
+ * allowing the application to fall back on other editions associated with the work.
+ * </p>
+ *
+ * <p>Jackson is configured to ignore any unexpected or unused fields in the API response.</p>
+ *
+ * <p>Example JSON structure handled:</p>
+ * <pre>
+ * {
+ *   "entries": [
+ *     { "key": "/books/OL12345M" },
+ *     { "key": "/books/OL67890M" }
+ *   ]
+ * }
+ * </pre>
+ *
+ * @see OpenLibraryAPIEditions.Edition
  */
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true) // To ignore everything not explicitly specified
 public class OpenLibraryAPIEditions {
     /**
-     * List of editions. I will search for the first that has a key.
+     * List of book edition entries returned by the API.
+     * <p>Typically, only the first entry with a valid key is used.</p>
      */
     @JsonProperty("entries")
     List<Edition> editions;
 
+    /**
+     * Inner class representing a single book edition entry.
+     */
     @Data
     @JsonIgnoreProperties(ignoreUnknown = true) // To ignore everything not explicitly specified
     public static class Edition{
 
+        /**
+         * The full OpenLibrary key for this edition (e.g., {@code "/books/OL12345M"}).
+         */
         @JsonProperty("key")
         private String bookKey;
 
         /**
-         * Remove the URL part of the key
-         * @return Key without "/books/"
+         * Extracts the edition key by removing the {@code "/books/"} prefix from the full key.
+         *
+         * @return the book key without the "/books/" prefix
          */
         public String getBookKeyWithoutURL(){
             return bookKey.replace("/books/", "");

@@ -25,6 +25,19 @@ import org.springframework.web.bind.annotation.RestController;
 import java.io.IOException;
 import java.util.Optional;
 
+/**
+ * REST controller responsible for exposing search functionality to the OpenLibrary API.
+ * <p>
+ * Provides endpoints for searching books by keyword or ISBN and returns results in DTO format.
+ * This controller delegates API interaction logic to the {@link SearchService}.
+ * </p>
+ *
+ * <p>All endpoints are prefixed with <code>/api/v1/search</code>.</p>
+ *
+ * @see SearchService
+ * @see SearchResultDTO
+ * @see BookDTO
+ */
 @RestController
 @Slf4j
 @AllArgsConstructor
@@ -35,13 +48,18 @@ public class SearchController {
     private final SearchService searchService;
 
     /**
-     * Returns the search results from the OpenLibrary API. Calls the searchExternalKeyword of the search service, which will then call the API. The result is converted to the SearchResultDTO.
-     * @param keywords Keywords to search for
-     * @param startIndex Starting index from which to get the results (for pagination)
-     * @param numResultsToGet Number of results to get (for pagination)
-     * @throws UnexpectedStatusException The OpenLibrary API has returned an unexpected status code
-     * @throws IOException Something went wrong with the connection to the OpenLibrary API
-     * @return Response with the search results.
+     * Searches the OpenLibrary API for books using provided keywords.
+     * <p>
+     * Supports pagination through {@code startIndex} and {@code numResultsToGet} parameters.
+     * Converts the {@link SearchResult} model into a {@link SearchResultDTO} for response.
+     * </p>
+     *
+     * @param keywords         The keywords to search for (required)
+     * @param startIndex       The result offset for pagination (default = 0)
+     * @param numResultsToGet  The number of results to return (default = 100)
+     * @return A {@link ResponseEntity} containing the search results or an error
+     * @throws UnexpectedStatusException If OpenLibrary returns an unexpected status code
+     * @throws IOException If there is a network or API error
      */
     @Operation(summary = "Keyword search on the OpenLibrary API", description = "Do a keywords search on the OpenLibrary API",
     responses = {
@@ -56,11 +74,15 @@ public class SearchController {
     }
 
     /**
-     * Endpoint for getting a book from the OpenLibrary API by an ISBN
-     * @param isbn ISBN to search for
-     * @return Response with the book info. Or 404
-     * @throws UnexpectedStatusException The OpenLibrary API has returned an unexpected status code
-     * @throws IOException Something went wrong with the connection to the OpenLibrary API
+     * Searches the OpenLibrary API for a book using its ISBN.
+     * <p>
+     * Converts the resulting {@link Book} to a {@link BookDTO}. Returns 404 if no match is found.
+     * </p>
+     *
+     * @param isbn The ISBN number to search for (required)
+     * @return A {@link ResponseEntity} containing the book or a 404 Not Found response
+     * @throws UnexpectedStatusException If OpenLibrary returns an unexpected status code
+     * @throws IOException If there is a network or API error
      */
     @Operation(summary = "ISBN search on the OpenLibrary API", description = "Searches for a book on the OpenLibrary API by its ISBN number",
     responses = {

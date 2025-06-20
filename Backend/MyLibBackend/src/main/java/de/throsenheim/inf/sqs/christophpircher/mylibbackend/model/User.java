@@ -10,7 +10,13 @@ import java.util.Set;
 import java.util.UUID;
 
 /**
- * Class for storing users and their books in the database and for internal handling of users
+ * Entity class representing a user of the application.
+ * <p>
+ * This class stores authentication details as well as the user's personal library and wishlist.
+ * </p>
+ *
+ * @see Book
+ * @see LibraryBook
  */
 @Entity
 @AllArgsConstructor
@@ -20,29 +26,35 @@ import java.util.UUID;
 @Table(name = "usertable") //User is a SQL keyword...
 public class User {
     /**
-     * Unique Database key
+     * Unique identifier for the user in the database.
      */
     @Id
     private UUID id;
 
     /**
-     * Username of the user
+     * Username of the user. Must be unique within the application.
      */
     private String username;
 
     /**
-     * Bcrypt hash of the password
+     * Password hash (bcrypt) used for authentication.
      */
     private String passwordHash;
 
     /**
-     * Books in the library of the user
+     * The books owned by the user, including metadata such as rating and reading status.
+     * <p>
+     * This is part of a many-to-many relationship using a join entity {@link LibraryBook}.
+     * </p>
      */
     @OneToMany(mappedBy = "user")
     private Set<LibraryBook> libraryBooks;
 
     /**
-     * Books on the wishlist of the library user
+     * The books the user has added to their wishlist.
+     * <p>
+     * This is a many-to-many relationship directly between users and books.
+     * </p>
      */
     @ManyToMany
     private Set<Book> wishlistBooks;

@@ -20,7 +20,21 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import static org.springframework.boot.autoconfigure.security.servlet.PathRequest.toH2Console;
 
-
+/**
+ * Configuration class for Spring Security setup.
+ * <p>
+ * Defines security filters, endpoint access rules, authentication providers,
+ * and integrates JWT-based authentication into the Spring Security filter chain.
+ * </p>
+ *
+ * <p>Key features:</p>
+ * <ul>
+ *     <li>Permits access to Swagger/OpenAPI and public endpoints</li>
+ *     <li>Protects all other endpoints using JWT authentication</li>
+ *     <li>Disables CSRF and sets session policy to stateless</li>
+ *     <li>Registers custom JWT filter and authentication provider</li>
+ * </ul>
+ */
 @Configuration
 @EnableWebSecurity
 @AllArgsConstructor
@@ -36,9 +50,16 @@ public class SecurityConfig {
             "/swagger-ui.html",
     };
 
-    /*
-     * Main security configuration
-     * Defines endpoint access rules and JWT filter setup
+    /**
+     * Configures the main Spring Security filter chain.
+     * <p>
+     * Sets up endpoint authorization, disables CSRF, configures stateless sessions,
+     * and adds a custom JWT authentication filter.
+     * </p>
+     *
+     * @param http the HttpSecurity object to configure
+     * @return the configured SecurityFilterChain bean
+     * @throws Exception if an error occurs during configuration
      */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -71,9 +92,14 @@ public class SecurityConfig {
     }
 
 
-    /*
-     * Authentication provider configuration
-     * Links UserDetailsService and PasswordEncoder
+    /**
+     * Configures the {@link AuthenticationProvider} used for authenticating users.
+     * <p>
+     * Uses a {@link DaoAuthenticationProvider} with the application's custom
+     * {@link CustomUserDetailsService} and {@link PasswordEncoder}.
+     * </p>
+     *
+     * @return the configured AuthenticationProvider bean
      */
     @Bean
     public AuthenticationProvider authenticationProvider() {
@@ -82,14 +108,23 @@ public class SecurityConfig {
         return provider;
     }
 
+    /**
+     * Provides an instance of the custom JWT authentication filter.
+     *
+     * @return a new {@link JwtAuthFilter} configured with required services
+     */
     @Bean
     public JwtAuthFilter jwtAuthFilter() {
         return new JwtAuthFilter(userDetailsService, jwtService);
     }
 
-    /*
-     * Authentication manager bean
-     * Required for programmatic authentication (e.g., in /generateToken)
+    /**
+     * Provides an {@link AuthenticationManager} for programmatic authentication use,
+     * such as login endpoints or token generation.
+     *
+     * @param config the authentication configuration
+     * @return the AuthenticationManager bean
+     * @throws Exception if configuration fails
      */
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {

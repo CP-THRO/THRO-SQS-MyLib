@@ -6,13 +6,32 @@ import jakarta.persistence.Embeddable;
 import java.util.UUID;
 
 
+
 /**
- * Class for the mixed primary/foreign keys of the library many-to-many relationship of the user.
+ * Embeddable class representing the composite primary key for the {@link LibraryBook} entity.
+ * <p>
+ * This key is composed of the foreign keys from both the {@link Book} and {@link User} entities.
+ * It is used in the many-to-many relationship between users and books, allowing for extra attributes
+ * (such as ratings and reading status) to be added on the relationship.
+ * </p>
+ *
+ * @see LibraryBook
+ * @see Book
+ * @see User
  */
 @Embeddable
 public class LibraryBookKey {
+    /**
+     * UUID of the associated book.
+     * <p>This acts as a foreign key to the {@link Book} entity and is also part of the composite primary key.</p>
+     */
     @Column(name="book_id")
     private UUID bookId;
+
+    /**
+     * UUID of the associated user.
+     * <p>This acts as a foreign key to the {@link User} entity and is also part of the composite primary key.</p>
+     */
     @Column(name="user_id")
     private UUID userId;
 }

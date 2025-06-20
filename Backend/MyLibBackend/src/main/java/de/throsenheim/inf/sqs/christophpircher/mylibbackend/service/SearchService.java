@@ -12,7 +12,10 @@ import java.io.IOException;
 import java.util.Optional;
 
 /**
- * Handles the internal search logic
+ * Service class for handling search-related functionality using the OpenLibrary API.
+ * <p>
+ * Acts as a thin wrapper around {@link OpenLibraryAPI} to decouple controller logic from API access logic.
+ * </p>
  */
 @Service
 @Slf4j
@@ -22,24 +25,27 @@ public class SearchService {
     private OpenLibraryAPI openLibraryAPI;
 
     /**
-     * Calls the OpenLibraryAPI to get the search results for the keywords
-     * @param keywords Keywords to search for
-     * @param startIndex Starting index from which to get the results (for pagination)
-     * @param numResultsToGet Number of results to get (for pagination)
-     * @return Search result object
-     * @throws UnexpectedStatusException If the API returns an unexpected status
-     * @throws IOException If something goes wrong with the connection
+     * Searches for books using the OpenLibrary API with the provided keyword string.
+     * Used primarily for full-text search features.
+     *
+     * @param keywords        the keywords to search for
+     * @param startIndex      the starting index for pagination
+     * @param numResultsToGet the number of results to retrieve
+     * @return {@link SearchResult} object containing a list of books and metadata
+     * @throws UnexpectedStatusException if the OpenLibrary API returns an unexpected status code
+     * @throws IOException               if a connection or read error occurs
      */
     public SearchResult searchKeywordsExternal(String keywords, int startIndex, int numResultsToGet) throws UnexpectedStatusException, IOException {
         return openLibraryAPI.searchBooks(keywords, startIndex, numResultsToGet);
     }
 
     /**
-     * Calls the OpenLibraryAPI to get the details of a book by its ISBN
-     * @param isbn ISBN to search for
-     * @return Optional with the book, if it has been found. Empty Optional if there is no book.
-     * @throws UnexpectedStatusException If the API returns an unexpected status
-     * @throws IOException If something goes wrong with the connection
+     * Searches for a single book using its ISBN via the OpenLibrary API.
+     *
+     * @param isbn the ISBN of the book to search
+     * @return an {@link Optional} containing the book if found, or an empty Optional if not found
+     * @throws UnexpectedStatusException if the OpenLibrary API returns an unexpected status code
+     * @throws IOException               if a connection or read error occurs
      */
     public Optional<Book> searchISBNExternal(String isbn) throws UnexpectedStatusException, IOException {
         return openLibraryAPI.getBookByISBN(isbn);

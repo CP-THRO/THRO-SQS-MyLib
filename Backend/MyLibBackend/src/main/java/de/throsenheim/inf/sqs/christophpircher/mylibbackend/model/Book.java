@@ -11,7 +11,14 @@ import java.util.Set;
 import java.util.UUID;
 
 /**
- * Model Class for storing books in the database and internal handling of books.
+ * Entity representing a book in the system.
+ * <p>
+ * This model is used both for internal application logic and for persistent storage in the database.
+ * It includes data obtained from the OpenLibrary API and user-specific metadata such as library ownership and ratings.
+ * </p>
+ *
+ * @see LibraryBook
+ * @see User
  */
 @Entity
 @AllArgsConstructor
@@ -21,76 +28,79 @@ import java.util.UUID;
 public class Book {
 
     /**
-     * Unique ID in the database
+     * Unique identifier for this book record in the database.
      */
     @Id
     private UUID id;
 
     /**
-     * OpenLibrary API book id. Needed for duplicity check.
+     * OpenLibrary book identifier (e.g., "OL9698350M").
+     * Used to prevent duplicate imports and link with OpenLibrary data.
      */
     private String bookID;
 
     /**
-     * Title of the book
+     * Title of the book.
      */
     private String title;
 
     /**
-     * Subtitle of the book
+     * Subtitle of the book, if available.
      */
     private String subtitle;
 
     /**
-     * List of authors of the book
+     * List of authors.
      */
     private List<String> authors;
 
     /**
-     * Description text for the book
+     * Description or summary text for the book.
      */
     private String description;
 
     /**
-     * List of ISBNs. Contains ISBN-10 and ISBN-13 numbers
+     * List of ISBNs, including both ISBN-10 and ISBN-13 values.
      */
     private List<String> isbns;
 
     /**
-     * OpenLibrary cover image URL for the small sized version
+     * URL to a small-sized cover image provided by OpenLibrary.
      */
     private String coverURLSmall;
 
     /**
-     * OpenLibrary cover image URL for the medium sized version
+     * URL to a medium-sized cover image provided by OpenLibrary.
      */
     private String coverURLMedium;
 
     /**
-     * OpenLibrary cover image URL for the large sized version
+     * URL to a large-sized cover image provided by OpenLibrary.
      */
     private String coverURLLarge;
 
     /**
-     * Date/Year it was published
+     * Publish date of the book, as provided by OpenLibrary.
      */
     private String publishDate;
 
     /**
-     * Mapping for the library many-to-many relationship with the users
+     * Mapping to the {@link LibraryBook} entities, which represent a many-to-many relationship
+     * between users and books stored in their libraries, with additional metadata like rating.
      */
     @OneToMany(mappedBy = "book")
     private Set<LibraryBook> libraryBooks;
 
     /**
-     * Mapping for the wishlist many-to-many relationship with the user
+     * Many-to-many mapping between books and users who have added this book to their wishlist.
      */
     @ManyToMany
     private Set<User> wishlistUsers;
 
     /**
-     * Get the average rating of all users
-     * @return Average rating
+     * Computes the average rating of this book across all users who have rated it.
+     *
+     * @return The average rating (between 1 and 5), or 0 if there are no ratings.
      */
     public float getAverageRating() {
         if(libraryBooks == null || libraryBooks.isEmpty()) {

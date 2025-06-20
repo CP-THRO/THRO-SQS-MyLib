@@ -4,21 +4,33 @@ import jakarta.persistence.*;
 import lombok.Getter;
 
 /**
- * Helper class for the many-to-many relationship between the books and the users. Necessary because of the extra fields for rating and reading status.
- * Adapted from <a href="https://www.baeldung.com/jpa-many-to-many">https://www.baeldung.com/jpa-many-to-many</a>
+ * Entity class representing the many-to-many relationship between {@link User} and {@link Book} entities.
+ * <p>
+ * This intermediate entity allows for additional fields on the relationship, such as user-specific
+ * rating and reading status. This pattern is often referred to as an "association entity."
+ * </p>
+ *
+ * <p>Adapted from:
+ * <a href="https://www.baeldung.com/jpa-many-to-many">Baeldung JPA Many-to-Many Guide</a></p>
+ *
+ * @see LibraryBookKey
+ * @see ReadingStatus
+ * @see User
+ * @see Book
  */
 @Entity
 @Getter
 public class LibraryBook {
 
     /**
-     * Foreign/Primary keys for the relationship
+     * Composite key containing {@code userId} and {@code bookId} for uniquely identifying the relationship.
      */
     @EmbeddedId
     private LibraryBookKey id;
 
     /**
-     * Mapping to the book
+     * Reference to the associated {@link Book}.
+     * <p>Uses {@code @MapsId("bookId")} to link to the composite key.</p>
      */
     @ManyToOne
     @MapsId("bookId")
@@ -26,7 +38,8 @@ public class LibraryBook {
     private Book book;
 
     /**
-     * Mapping to the user
+     * Reference to the associated {@link User}.
+     * <p>Uses {@code @MapsId("userId")} to link to the composite key.</p>
      */
     @ManyToOne
     @MapsId("userId")
@@ -34,12 +47,18 @@ public class LibraryBook {
     private User user;
 
     /**
-     * Relationship-specific attribute: User rating between 1 and 5 for the book
+     * User-specific rating for the book.
+     * <p>
+     * Should be in the range 1 to 5. A value of 0 indicates no rating.
+     * </p>
      */
     private int rating;
 
     /**
-     * Relationship-specific attribute: User reading status.
+     * Reading status of the book for the associated user.
+     * <p>
+     * This is an enum field representing whether the user has read, is reading, or plans to read the book.
+     * </p>
      */
     private ReadingStatus readingStatus;
 }

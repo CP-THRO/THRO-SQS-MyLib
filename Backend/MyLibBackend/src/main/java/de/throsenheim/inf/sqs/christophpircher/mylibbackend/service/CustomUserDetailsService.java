@@ -15,7 +15,10 @@ import org.springframework.stereotype.Service;
 import java.util.UUID;
 
 /**
- * Class for providing Spring Security with the user information from the database, and to add new users
+ * Service class that integrates with Spring Security to load user data from the database.
+ * <p>
+ * Also provides a method to add new users to the system and to load users by their internal UUID.
+ * </p>
  */
 @Service
 @AllArgsConstructor
@@ -26,10 +29,14 @@ public class CustomUserDetailsService implements UserDetailsService {
     private PasswordEncoder passwordEncoder;
 
     /**
-     * Load a user from the database by their username
-     * @param username the username identifying the user whose data is required.
-     * @return Custom UserDetails object
-     * @throws UsernameNotFoundException If the user does not exist in the database
+     * Loads a user from the database by their username.
+     * <p>
+     * This method is used by Spring Security for authentication.
+     * </p>
+     *
+     * @param username the username identifying the user
+     * @return a {@link UserDetails} implementation wrapping the {@link User}
+     * @throws UsernameNotFoundException if no user exists with the given username
      */
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -41,9 +48,14 @@ public class CustomUserDetailsService implements UserDetailsService {
     }
 
     /**
-     * Function to load a User by their ID
+     * Loads a user by their internal UUID.
+     * <p>
+     * This is useful when decoding JWT tokens that contain user IDs instead of usernames.
+     * </p>
+     *
      * @param id UUID of the user
-     * @return UserDetails object
+     * @return a {@link UserDetails} instance for the user
+     * @throws UserIDNotFoundException if no user with the given ID exists
      */
     public UserDetails loadByUserID(UUID id){
         User user = userRepository.findById(id).orElseThrow(() -> new UserIDNotFoundException(String.valueOf(id)));
@@ -51,10 +63,14 @@ public class CustomUserDetailsService implements UserDetailsService {
     }
 
     /**
-     * Method for adding a new user to the database
-     * @param username Username for the new user
-     * @param password Password for the new user. This will be encrypted with BCrypt
-     * @throws UsernameExistsException If th
+     * Adds a new user to the system.
+     * <p>
+     * This method first checks if the username is already taken and encodes the password with BCrypt.
+     * </p>
+     *
+     * @param username the new user's username
+     * @param password the new user's plain-text password
+     * @throws UsernameExistsException if the username already exists in the system
      */
     public void addUser(String username, String password) throws UsernameExistsException {
         User existingUser = userRepository.getUserByUsername(username);

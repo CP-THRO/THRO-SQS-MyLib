@@ -11,6 +11,9 @@ import lombok.Data;
 @JsonIgnoreProperties(ignoreUnknown = true) // To ignore everything not explicitly specified
 public class OpenLibraryAPIAuthor {
 
+    /**
+     * Name of the author
+     */
     @JsonProperty("name")
     private String name;
 }

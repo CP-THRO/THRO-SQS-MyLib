@@ -7,26 +7,50 @@ import lombok.Data;
 import java.util.List;
 
 /**
- * Class to parse the response of the search API with Jackson
+ * Data Transfer Object (DTO) for parsing the response from the OpenLibrary Search API.
+ * <p>
+ * This class is deserialized using Jackson and captures relevant search metadata
+ * and a list of matched works. It is used in responses to keyword searches
+ * </p>
+ *
+ * <p>Example API response fields handled by this class:</p>
+ * <pre>
+ * {
+ *   "numFound": 4321,
+ *   "start": 0,
+ *   "docs": [ {...}, {...} ]
+ * }
+ * </pre>
+ *
+ * <p>All unspecified fields from the API are ignored due to {@code @JsonIgnoreProperties}.</p>
+ *
+ * @see OpenLibraryAPISearchWork
+ * @see com.fasterxml.jackson.databind.ObjectMapper
+ * @see com.fasterxml.jackson.annotation.JsonProperty
+ *
+ * Author:
  */
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true) // To ignore everything not explicitly specified
 public class OpenLibraryAPISearchResponse {
 
     /**
-     * Number of entries found by the API
+     * Total number of works found by the search query.
      */
     @JsonProperty("numFound")
     private int numFound;
 
     /**
-     * Starting entry index, since it is paginated.
+     * The starting index of the current page of results.
+     * <p>Useful for paginated responses.</p>
      */
     @JsonProperty("start")
     private int start;
 
     /**
-     * Search result works returned by the search API.
+     * List of search result entries (works) returned by the OpenLibrary Search API.
+     *
+     * @see OpenLibraryAPISearchWork
      */
     @JsonProperty("docs")
     private List<OpenLibraryAPISearchWork> searchResults;

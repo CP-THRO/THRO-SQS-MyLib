@@ -23,21 +23,35 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Exception handler for all Rest Controllers.
- * This automatically generates the ResponseEntities for the Exceptions handled here instead of in the controllers.
+ * Global exception handler for all REST controllers.
+ * <p>
+ * This class centralizes exception handling logic and converts exceptions into structured {@link ApiError} responses.
+ * It extends {@link ResponseEntityExceptionHandler} to override default Spring behaviors and to provide
+ * application-specific handling of known exceptions such as validation failures, deserialization errors,
+ * API connectivity issues, and domain-specific problems.
+ * </p>
+ *
+ * <p>All exceptions handled here return appropriate HTTP status codes and JSON-formatted error details.</p>
+ *
+ * @see ApiError
+ * @see ControllerAdvice
+ * @see ExceptionHandler
  */
 @Slf4j
 @ControllerAdvice
 public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
 
     /**
-     * Handles the exceptions caused by violation of the jakarta constraint annotations.
+     * Handles validation errors thrown when incoming JSON fails to meet Jakarta Bean Validation constraints.
+     * <p>
+     * Constructs an {@link ApiError} response with status 400 (Bad Request) including field-level error messages.
+     * </p>
      *
-     * @param ex      the exception to handle
-     * @param headers the headers to be written to the response
-     * @param status  the selected response status
-     * @param request the current request
-     * @return ResponseEntity with ApiError object
+     * @param ex      the validation exception
+     * @param headers HTTP headers
+     * @param status  HTTP status (will be 400)
+     * @param request the web request
+     * @return structured {@link ApiError} response
      */
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, @NotNull HttpHeaders headers, @NotNull HttpStatusCode status, @NotNull WebRequest request) {
@@ -54,13 +68,16 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     /**
-     * Handles the exceptions caused by Jackson not being able to deserialize fields due to format error (e.g. price is a string instead of an int).
+     * Handles malformed JSON or deserialization errors caused by invalid data types or formats in the request body.
+     * <p>
+     * Returns a 400 (Bad Request) response with details about the parse failure.
+     * </p>
      *
-     * @param ex      the exception to handle
-     * @param headers the headers to use for the response
-     * @param status  the status code to use for the response
-     * @param request the current request
-     * @return ResponseEntity with ApiError object
+     * @param ex      the exception thrown by Jackson
+     * @param headers HTTP headers
+     * @param status  HTTP status code (400)
+     * @param request the web request
+     * @return structured {@link ApiError} response
      */
     @Override
     protected ResponseEntity<Object> handleHttpMessageNotReadable(@NotNull HttpMessageNotReadableException ex, @NotNull HttpHeaders headers, @NotNull HttpStatusCode status, @NotNull WebRequest request) {
@@ -69,12 +86,14 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     /**
-     * Handles the exceptions caused by connection errors during customer service api calls.
-     * This does not apply to OrderController, as the car dealer service is only called in the background worker.
+     * Handles {@link IOException}s, typically thrown when external APIs are unavailable or unresponsive.
+     * <p>
+     * Returns a 502 (Bad Gateway) response indicating upstream failure.
+     * </p>
      *
-     * @param ex      the exception to handle
-     * @param request the current request
-     * @return ResponseEntity with ApiError object
+     * @param ex      the I/O exception
+     * @param request the current web request
+     * @return structured {@link ApiError} response
      */
     @ExceptionHandler(IOException.class)
     public ResponseEntity<ApiError> handleIOException(IOException ex, WebRequest request) {
@@ -86,12 +105,14 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
 
 
     /**
-     * Handles the exceptions caused by unexpected status codes of customer service api calls.
-     * This does not apply to car dealer service api calls as the car dealer service api is only called in the background worker.
+     * Handles {@link UnexpectedStatusException}s thrown when an external API responds with an unexpected HTTP status code.
+     * <p>
+     * Returns a 502 (Bad Gateway) to reflect an upstream failure or inconsistency.
+     * </p>
      *
-     * @param ex      the exception to handle
-     * @param request the current request
-     * @return ResponseEntity with ApiError object
+     * @param ex      the exception
+     * @param request the web request
+     * @return structured {@link ApiError} response
      */
     @ExceptionHandler(UnexpectedStatusException.class)
     public ResponseEntity<ApiError> handleUnexpectedStatusException(UnexpectedStatusException ex, WebRequest request) {
@@ -100,10 +121,14 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     /**
-     * Handles the UsernameExistsException caused by trying to create a user with a username that already exists
-     * @param ex the exception to handle
-     * @param request the current request
-     * @return ResponseEntity with ApiError object
+     * Handles {@link UsernameExistsException}s thrown when attempting to create a user with an existing username.
+     * <p>
+     * Returns a 409 (Conflict) with error details.
+     * </p>
+     *
+     * @param ex      the exception
+     * @param request the web request
+     * @return structured {@link ApiError} response
      */
     @ExceptionHandler(UsernameExistsException.class)
     public ResponseEntity<ApiError> handleUsernameExistsException(UsernameExistsException ex, WebRequest request) {

@@ -5,18 +5,31 @@ import lombok.Data;
 
 import java.util.List;
 
-/** Class for inner handling of search results */
+/**
+ * Internal model class for handling search results returned by the OpenLibrary API or internal book repository.
+ * <p>
+ * Used to encapsulate the pagination metadata and the list of matching books.
+ * </p>
+ *
+ * @see Book
+ */
 @Data
 @Builder
 public class SearchResult {
 
-    /** Number of total search results */
+    /**
+     * The total number of search results found for the given query.
+     */
     private int numResults;
 
-    /** Starting index within the total search results */
+    /**
+     * The index of the first search result returned (used for pagination).
+     */
     private int startIndex;
 
-    /** List of books contained in search result */
+    /**
+     * The list of {@link Book} objects included in this page of search results.
+     */
     private List<Book> searchResults;
 
 }

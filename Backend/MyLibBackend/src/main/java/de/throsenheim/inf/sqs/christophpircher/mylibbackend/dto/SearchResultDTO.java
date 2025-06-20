@@ -8,30 +8,50 @@ import lombok.Data;
 import java.util.List;
 
 /**
- * Class to transfer search results to the API caller.
+ * Data Transfer Object (DTO) for returning book search results to API callers.
+ * <p>
+ * Represents a paginated list of books returned from the OpenLibrary search endpoint,
+ * along with total result count and start index for pagination purposes.
+ * </p>
+ *
+ * <p>This class is typically returned by the {@code /search/external/keyword} endpoint.</p>
+ *
+ * @see BookDTO
+ * @see SearchResult
+ * @see de.throsenheim.inf.sqs.christophpircher.mylibbackend.controller.SearchController
+ * @see de.throsenheim.inf.sqs.christophpircher.mylibbackend.service.SearchService
+ *
+ * Author:
  */
 @Data
 @Builder
 public class SearchResultDTO {
-    /** Number of total search results */
+    /**
+     * Total number of search results available (ignores pagination).
+     */
     @JsonProperty("numResults")
     @Schema(description = "Number of total results (without pagination)", example = "801")
     private int numResults;
 
-    /** Starting index within the total search results */
+    /**
+     * Index of the first result in the current page (zero-based).
+     */
     @JsonProperty("startIndex")
     @Schema(description = "Start index within the total number of search results", example = "100")
     private int startIndex;
 
-    /** List of books contained in the search result */
+    /**
+     * List of books returned for the current page.
+     */
     @JsonProperty("searchResults")
     //@Schema(description = "Book DTOs of search results")
     private List<BookDTO> searchResults;
 
     /**
-     * Convert a Search Result object to a Search Result DTO object
-     * @param searchResult Search Result object to convert
-     * @return Converted Search Result DTO object
+     * Converts a {@link SearchResult} domain model into a {@link SearchResultDTO} for API response.
+     *
+     * @param searchResult the domain model to convert
+     * @return a {@link SearchResultDTO} populated with converted data
      */
     public static SearchResultDTO fromSearchResult(SearchResult searchResult) {
         SearchResultDTOBuilder builder = SearchResultDTO.builder();

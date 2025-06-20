@@ -7,13 +7,24 @@ import de.throsenheim.inf.sqs.christophpircher.mylibbackend.model.repository.Boo
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.web.PageableArgumentResolver;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Service for managing book-related operations.
+ * <p>
+ * Provides access to book data from both the internal database and the external OpenLibrary API.
+ * If a book is not found locally, the service attempts to retrieve it from OpenLibrary.
+ * </p>
+ *
+ * <p>Supports pagination for retrieving lists of known (persisted) books.</p>
+ *
+ * @see BookRepository
+ * @see OpenLibraryAPI
+ */
 @Service
 @Slf4j
 @AllArgsConstructor
@@ -22,11 +33,15 @@ public class BookService {
     private OpenLibraryAPI openLibraryAPI;
 
     /**
-     * Get a book by its OpenLibrary API ID/key string. First searches for the book internally. If it cannot be found internally, it will try to get it from the OpenLibrary API
-     * @param bookID OpenLibrary Book ID/key string of the book to get.
-     * @return Optional with the book if the book has been found
-     * @throws UnexpectedStatusException If the API returns an unexpected status
-     * @throws IOException If something goes wrong with the connection
+     * Retrieves a book by its OpenLibrary ID.
+     * <p>
+     * First checks the internal database. If the book is not found, it will attempt to fetch it from the OpenLibrary API.
+     * </p>
+     *
+     * @param bookID The OpenLibrary book ID (e.g., "OL12345M")
+     * @return An {@link Optional} containing the {@link Book}, or empty if not found in either source
+     * @throws UnexpectedStatusException if the OpenLibrary API returns an unexpected status
+     * @throws IOException if the external API call fails due to network issues
      */
     public Optional<Book> getBookById(String bookID) throws UnexpectedStatusException, IOException {
         List<Book> book = bookRepository.getBookByBookID(bookID);
@@ -37,10 +52,14 @@ public class BookService {
     }
 
     /**
-     * Get a list with all books that are stored in the database, i.e. that are part in at least one Library
-     * @param startIndex starting index from which to get the books. For pagination
-     * @param numResultsToGet number of books to get starting from startIndex. For pagination
-     * @return List with books
+     * Retrieves a paginated list of all books stored in the internal database.
+     * <p>
+     * These books are considered "known" and are typically associated with libraries or previously queried data.
+     * </p>
+     *
+     * @param startIndex       the starting index (zero-based) for pagination
+     * @param numResultsToGet  the number of results to return
+     * @return a list of {@link Book} instances from the internal database
      */
     public List<Book> getAllKnownBooks(int startIndex, int numResultsToGet){
         return bookRepository.findAll(PageRequest.of(startIndex, numResultsToGet)).toList();

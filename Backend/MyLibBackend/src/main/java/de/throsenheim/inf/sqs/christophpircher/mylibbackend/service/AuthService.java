@@ -10,9 +10,20 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 /**
- * Class for handling authentication requests
- */
-@Service
+ * Service class responsible for handling authentication-related operations.
+ * <p>
+ * This includes user registration and authentication, as well as issuing JWT tokens
+ * upon successful login.
+ * </p>
+ *
+ * <p>Key responsibilities:</p>
+ * <ul>
+ *     <li>Create new users via {@link CustomUserDetailsService}</li>
+ *     <li>Authenticate credentials using {@link AuthenticationManager}</li>
+ *     <li>Generate JWT tokens via {@link JwtService}</li>
+ * </ul>
+ * */
+ @Service
 @AllArgsConstructor
 public class AuthService {
 
@@ -23,15 +34,24 @@ public class AuthService {
     private AuthenticationManager authenticationManager;
 
     /**
-     * Add a new user to the database
-     * @param username Username of the new user
-     * @param password Password of the new user
-     * @throws UsernameExistsException If the username already exists in the database
+     * Registers a new user in the application.
+     *
+     * @param username the desired username for the new user
+     * @param password the desired password for the new user
+     * @throws UsernameExistsException if a user with the given username already exists
      */
     public void createNewUser(String username, String password) throws UsernameExistsException {
         customUserDetailsService.addUser(username, password);
     }
 
+    /**
+     * Authenticates a user using username and password, and generates a JWT token upon success.
+     *
+     * @param username the user's username
+     * @param password the user's password
+     * @return a JWT token if authentication is successful
+     * @throws UsernameNotFoundException if the credentials are invalid
+     */
     public String authenticate(String username, String password) throws UsernameNotFoundException {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(username, password)
@@ -42,6 +62,4 @@ public class AuthService {
             throw new UsernameNotFoundException("Invalid username or password");
         }
     }
-
-
 }

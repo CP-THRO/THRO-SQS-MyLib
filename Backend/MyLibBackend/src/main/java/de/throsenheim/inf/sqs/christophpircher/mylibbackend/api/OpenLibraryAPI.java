@@ -22,30 +22,60 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Proxy implementation of the OpenLibrary API.
+ * Service that acts as a proxy for interacting with the OpenLibrary API using Retrofit.
+ * <p>
+ * It wraps multiple OpenLibrary endpoints, including search, book lookup by ID or ISBN,
+ * work and author retrieval, and fallback handling for incomplete data (e.g., missing covers editions).
+ * </p>
+ *
+ * <p>This proxy also performs transformation into the application's internal {@link Book} and {@link SearchResult} models.</p>
+ *
+ * <p>The API base URL is dynamically loaded from Spring's {@link Environment} to support environments like WireMock during testing.</p>
+ *
  */
 @Service
 @Slf4j
 public class OpenLibraryAPI {
+
+    /**
+     * Retrofit interface defining all OpenLibrary REST API endpoints used.
+     */
     private interface OpenLibraryAPIInterface {
+        /**
+         * Search for works (books) by keyword.
+         */
         @GET("/search.json")
         Call<OpenLibraryAPISearchResponse>  search(@Query("q") String keywords, @Query("offset") int startingIndex, @Query("limit") int limit);
 
+        /**
+         * Retrieve detailed book information by book ID.
+         */
         @GET("/books/{bookID}.json")
         Call<OpenLibraryAPIBook> getBookById(@Path("bookID") String bookId);
 
+        /**
+         * Retrieve book data by ISBN.
+         */
         @GET("/isbn/{isbn}.json")
         Call<OpenLibraryAPIBook> getBookByIsbn(@Path("isbn") String isbn);
 
+        /**
+         * Retrieve work data by work ID.
+         */
         @GET("/works/{workID}.json")
         Call<OpenLibraryAPIWork> getWorkById(@Path("workID") String workId);
 
+        /**
+         * Retrieve author data by author ID.
+         */
         @GET("/authors/{authorID}.json")
         Call<OpenLibraryAPIAuthor> getAuthorById(@Path("authorID") String authorId);
 
+        /**
+         * Retrieve all editions associated with a work.
+         */
         @GET("/works/{workID}/editions.json")
         Call<OpenLibraryAPIEditions> getEditionsByWorkId(@Path("workID") String workId);
-
     }
 
     private OpenLibraryAPIInterface api = null;
@@ -54,19 +84,26 @@ public class OpenLibraryAPI {
     private static final String UNEXPECTED_STATUS_MESSAGE = "OpenLibraryAPI: Unexpected status code: ";
 
     /**
-     * Instantiate the class with the SpringBoot environment. This is called automatically by SpringBoot on startup.
-     * @param environment SpringBoot environment
+     * Constructor used by Spring Boot to inject environment variables.
+     *
+     * @param environment Spring Boot environment object for accessing properties like base URL.
      */
     public OpenLibraryAPI(Environment environment) {
         this.environment = environment;
     }
 
     /**
-     * Searches for a book by keywords.
-     * @param searchString String with the keywords to search for
-     * @param startingIndex Starting search result index. For pagination.
-     * @param numResultsToGet The number of results to get, starting from the startingIndex. For pagination.
-     * @return A search result object. No optional, since there is always a valid response.
+     * Searches for books using keywords and returns a structured {@link SearchResult}.
+     * <p>
+     * Handles pagination and fallback logic when some results are missing data.
+     * </p>
+     *
+     * @param searchString The keyword(s) to search for.
+     * @param startingIndex The result offset for pagination.
+     * @param numResultsToGet Number of results to return.
+     * @return A {@link SearchResult} containing found books.
+     * @throws UnexpectedStatusException if OpenLibrary returns a non-200 status code.
+     * @throws IOException if a connection or parsing error occurs.
      */
     public SearchResult searchBooks(String searchString, int startingIndex, int numResultsToGet) throws UnexpectedStatusException, IOException {
         log.info("Searching for keywords \"{}\"", searchString);
@@ -123,9 +160,12 @@ public class OpenLibraryAPI {
     }
 
     /**
-     * Get the Information of a book by searching for a specific ISBN.
-     * @param isbn ISBN to get the book for
-     * @return Optional with Book object with all the relevant information. Optional because the ISBN might not exist, since it is supplied by my own api endpoint
+     * Retrieves a book using its ISBN.
+     *
+     * @param isbn ISBN to search for.
+     * @return An Optional {@link Book}, or empty if not found (404).
+     * @throws UnexpectedStatusException if OpenLibrary returns a non-200 or unexpected status.
+     * @throws IOException if a network error occurs.
      */
     public Optional<Book> getBookByISBN(String isbn) throws UnexpectedStatusException, IOException {
         Call<OpenLibraryAPIBook> call = api.getBookByIsbn(isbn);
@@ -146,9 +186,12 @@ public class OpenLibraryAPI {
     }
 
     /**
-     * Get A book by its OpenLibrary API key
-     * @param bookID Book ID of the book to get
-     * @return Book object with all relevant info. Optional, because a wrong bookid may be supplied on my own API endpoint.
+     * Retrieves a book using its OpenLibrary book ID.
+     *
+     * @param bookID Book ID (e.g., "OL12345M").
+     * @return Optional {@link Book}, empty if not found (404).
+     * @throws IOException if the request fails.
+     * @throws UnexpectedStatusException if the API response is invalid or unexpected.
      */
     public Optional<Book> getBookByBookID(String bookID) throws IOException, UnexpectedStatusException {
         Call<OpenLibraryAPIBook> call = api.getBookById(bookID);
@@ -205,9 +248,12 @@ public class OpenLibraryAPI {
     }
 
     /**
-     * Helper function to get the work information by work id. Used to get the description of the book/work
-     * @param workID Work ID to get the information for.
-     * @return Work DTO. No model class, since this is internal for the API proxy. Also no Optional, since a book is always associated with a work.
+     * Retrieves metadata for a work using its ID.
+     *
+     * @param workID ID of the work (e.g., "OL123456W").
+     * @return {@link OpenLibraryAPIWork} object with description and author info.
+     * @throws IOException if a request fails.
+     * @throws UnexpectedStatusException if the response status is not successful.
      */
     private OpenLibraryAPIWork getWorkByWorkID(String workID) throws IOException, UnexpectedStatusException {
         Call<OpenLibraryAPIWork> call = api.getWorkById(workID);
@@ -226,9 +272,12 @@ public class OpenLibraryAPI {
 
 
     /**
-     * Helper function to get the name of an author by autor id.
-     * @param authorID Id of the author to get
-     * @return Author DTO object. No Optional, since I am taking the ID straight from the Book API results. If that is broken
+     * Retrieves metadata for an author by their ID.
+     *
+     * @param authorID OpenLibrary author ID (e.g., "OL12345A").
+     * @return An {@link OpenLibraryAPIAuthor} DTO.
+     * @throws UnexpectedStatusException if OpenLibrary returns an error.
+     * @throws IOException on network failure.
      */
     private OpenLibraryAPIAuthor getAuthorByAuthorID(String authorID) throws UnexpectedStatusException, IOException {
         Call<OpenLibraryAPIAuthor> call = api.getAuthorById(authorID);
@@ -246,11 +295,12 @@ public class OpenLibraryAPI {
     }
 
     /**
-     * Helper function to get the editions of a work.
-     * @param workID The work ID to get the editions for.
-     * @return Object with a list of all editions with their keys. I will take the first one with a key != 0. There must be at least one edition for there to be a work, so no optional-
-     * @throws UnexpectedStatusException OpenLibrary API returned unexpected status code
-     * @throws IOException Something went wrong with the connection
+     * Retrieves all editions of a work to fall back when no direct cover edition is available.
+     *
+     * @param workID ID of the work to fetch editions for.
+     * @return An {@link OpenLibraryAPIEditions} DTO with edition entries.
+     * @throws UnexpectedStatusException if OpenLibrary returns an error.
+     * @throws IOException on connection failure.
      */
     private OpenLibraryAPIEditions getWorkEditionsByID(String workID) throws UnexpectedStatusException, IOException {
         Call<OpenLibraryAPIEditions> call = api.getEditionsByWorkId(workID);
@@ -269,10 +319,10 @@ public class OpenLibraryAPI {
     }
 
     /**
-     * Lazy-instantiates the api object.
-     * Required for WireMock:
-     * In order to test with WireMock I need the baseURL to be configured in the application properties,
-     * but I cannot access the spring environment in the constructor.
+     * Initializes the Retrofit client after dependency injection completes.
+     * <p>
+     * Loads the base URL from application properties, allowing dynamic switching for test environments.
+     * </p>
      */
     @PostConstruct
     private void createNewApi() {
@@ -283,17 +333,25 @@ public class OpenLibraryAPI {
         api = retrofit.create(OpenLibraryAPIInterface.class);
     }
 
-    /** Alter an IO exception for better logging. */
+
+    /**
+     * Creates a custom IOException with a prefixed message for consistent logging.
+     *
+     * @param original The original IOException.
+     * @return Modified IOException with additional context.
+     */
     private IOException alterIOException(IOException original) {
         IOException altered = new IOException("OpenLibraryAPI: " + original.getMessage());
         altered.setStackTrace(original.getStackTrace());
         return altered;
     }
 
+
     /**
-     * Build the cover ID urls
-     * @param coverID cover ID to build the URLs for
-     * @return Array with three elements. First element is small, second element is medium and third element is large
+     * Builds full-size image URLs for a given cover ID.
+     *
+     * @param coverID The numeric ID of the cover.
+     * @return A String array with URLs in small [0], medium [1], and large [2] sizes.
      */
     private String[] getCoverURLs(int coverID){
         String[] coverURLs = new String[3];
