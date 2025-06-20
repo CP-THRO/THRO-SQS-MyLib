@@ -86,12 +86,20 @@ public class BookDTO {
     private String publishDate;
 
     /**
-     * Rating between 1 and 5. Average for all books in library page, Individual for personal library page.
+     * Rating between 1 and 5 of an individual user
      */
-    @JsonProperty("rating")
-    @Schema(description = "Rating of a book from 1 to 5. Not existent, Average or user-specific, depending on the context. Not included in search result", example = "4")
+    @JsonProperty("individualRating")
+    @Schema(description = "Rating of a book from 1 to 5 of the user. 0 = no rating yet", example = "4")
     @Builder.Default
-    private int rating = 0;
+    private int individualRating = 0;
+
+    /**
+     * Average rating between 1 and 5 of all users that have rated the book.
+     */
+    @JsonProperty("averageRating")
+    @Schema(description = "Average rating of a book from 1 to 5 of all users that have rated the book. 0 = no rating yet", example = "4.5")
+    @Builder.Default
+    private float averageRating = 0;
 
     /**
      * Generate a BookDTO from a Book
@@ -110,6 +118,7 @@ public class BookDTO {
         builder.coverURLSmall(book.getCoverURLSmall());
         builder.coverURLMedium(book.getCoverURLMedium());
         builder.coverURLLarge(book.getCoverURLLarge());
+        builder.averageRating(book.getAverageRating());
         return builder.build();
     }
 }

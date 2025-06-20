@@ -88,4 +88,24 @@ public class Book {
      */
     @ManyToMany
     private Set<User> wishlistUsers;
+
+    /**
+     * Get the average rating of all users
+     * @return Average rating
+     */
+    public float getAverageRating() {
+        float sum = 0;
+        int count = 0;
+        for(LibraryBook libraryBook : libraryBooks){
+            if(libraryBook.getRating() > 0){
+                sum += libraryBook.getRating();
+                ++count;
+            }
+        }
+        if(count != 0){
+            return  sum/count;
+        }else{
+            return sum;
+        }
+    }
 }
