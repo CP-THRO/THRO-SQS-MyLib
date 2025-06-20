@@ -2,6 +2,7 @@ package de.throsenheim.inf.sqs.christophpircher.mylibbackend.controller;
 
 import de.throsenheim.inf.sqs.christophpircher.mylibbackend.dto.ApiError;
 import de.throsenheim.inf.sqs.christophpircher.mylibbackend.exceptions.UnexpectedStatusException;
+import de.throsenheim.inf.sqs.christophpircher.mylibbackend.exceptions.UsernameExistsException;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpHeaders;
@@ -98,5 +99,15 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(apiError, new HttpHeaders(), apiError.getStatus());
     }
 
-
+    /**
+     * Handles the UsernameExistsException caused by trying to create a user with a username that already exists
+     * @param ex the exception to handle
+     * @param request the current request
+     * @return ResponseEntity with ApiError object
+     */
+    @ExceptionHandler(UsernameExistsException.class)
+    public ResponseEntity<ApiError> handleUsernameExistsException(UsernameExistsException ex, WebRequest request) {
+        ApiError apiError = new ApiError(HttpStatus.CONFLICT, ex.getLocalizedMessage(), ex.getMessage());
+        return new ResponseEntity<>(apiError, new HttpHeaders(), apiError.getStatus());
+    }
 }
