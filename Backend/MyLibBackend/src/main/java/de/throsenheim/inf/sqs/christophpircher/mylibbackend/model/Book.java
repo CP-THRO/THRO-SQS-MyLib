@@ -1,6 +1,5 @@
 package de.throsenheim.inf.sqs.christophpircher.mylibbackend.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -94,6 +93,9 @@ public class Book {
      * @return Average rating
      */
     public float getAverageRating() {
+        if(libraryBooks == null || libraryBooks.isEmpty()) {
+            return 0;
+        }
         float sum = 0;
         int count = 0;
         for(LibraryBook libraryBook : libraryBooks){

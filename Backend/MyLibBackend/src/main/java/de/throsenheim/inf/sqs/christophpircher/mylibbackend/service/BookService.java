@@ -4,6 +4,7 @@ import de.throsenheim.inf.sqs.christophpircher.mylibbackend.api.OpenLibraryAPI;
 import de.throsenheim.inf.sqs.christophpircher.mylibbackend.exceptions.UnexpectedStatusException;
 import de.throsenheim.inf.sqs.christophpircher.mylibbackend.model.Book;
 import de.throsenheim.inf.sqs.christophpircher.mylibbackend.model.repository.BookRepository;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.web.PageableArgumentResolver;
@@ -15,14 +16,10 @@ import java.util.Optional;
 
 @Service
 @Slf4j
+@AllArgsConstructor
 public class BookService {
-    private final PageableArgumentResolver pageableArgumentResolver;
     private BookRepository bookRepository;
     private OpenLibraryAPI openLibraryAPI;
-
-    public BookService(PageableArgumentResolver pageableArgumentResolver) {
-        this.pageableArgumentResolver = pageableArgumentResolver;
-    }
 
     /**
      * Get a book by its OpenLibrary API ID/key string. First searches for the book internally. If it cannot be found internally, it will try to get it from the OpenLibrary API
