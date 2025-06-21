@@ -1,7 +1,7 @@
 package de.throsenheim.inf.sqs.christophpircher.mylibbackend.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import de.throsenheim.inf.sqs.christophpircher.mylibbackend.model.SearchResult;
+import de.throsenheim.inf.sqs.christophpircher.mylibbackend.model.BookList;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Data;
@@ -17,7 +17,7 @@ import java.util.List;
  * <p>This class is typically returned by the {@code /search/external/keyword} endpoint.</p>
  *
  * @see BookDTO
- * @see SearchResult
+ * @see BookList
  * @see de.throsenheim.inf.sqs.christophpircher.mylibbackend.controller.SearchController
  * @see de.throsenheim.inf.sqs.christophpircher.mylibbackend.service.SearchService
  *
@@ -25,7 +25,7 @@ import java.util.List;
  */
 @Data
 @Builder
-public class SearchResultDTO {
+public class BookListDTO {
     /**
      * Total number of search results available (ignores pagination).
      */
@@ -44,21 +44,31 @@ public class SearchResultDTO {
      * List of books returned for the current page.
      */
     @JsonProperty("searchResults")
-    //@Schema(description = "Book DTOs of search results")
-    private List<BookDTO> searchResults;
+    @Schema(description = "Book DTOs of search result or database or library")
+    private List<BookDTO> books;
 
     /**
-     * Converts a {@link SearchResult} domain model into a {@link SearchResultDTO} for API response.
-     *
-     * @param searchResult the domain model to convert
-     * @return a {@link SearchResultDTO} populated with converted data
+     * Due to some inconsistencies in the OpenLibrary, some search results will be skipped if they don't have an associated addition.
      */
-    public static SearchResultDTO fromSearchResult(SearchResult searchResult) {
-        SearchResultDTOBuilder builder = SearchResultDTO.builder();
-        builder.numResults(searchResult.getNumResults());
-        builder.startIndex(searchResult.getStartIndex());
-        List<BookDTO> bookDTOS = searchResult.getSearchResults().stream().map(BookDTO::fromBook).toList();
-        builder.searchResults(bookDTOS);
+    @JsonProperty("skippedBooks")
+    @Schema(description = "Due to some inconsistencies in the OpenLibrary, some search results will be skipped if they don't have an associated addition", example = "1")
+    @Builder.Default
+    private int skippedBooks = 0;
+
+    /**
+     * Converts a {@link BookList} domain model into a {@link BookListDTO} for API response.
+     *
+     * @param bookList the domain model to convert
+     * @return a {@link BookListDTO} populated with converted data
+     */
+    public static BookListDTO fromSearchResult(BookList bookList) {
+        BookListDTOBuilder builder = BookListDTO.builder();
+        builder.numResults(bookList.getNumResults());
+        builder.startIndex(bookList.getStartIndex());
+        builder.skippedBooks(bookList.getSkippedBooks());
+        List<BookDTO> bookDTOS = bookList.getBooks().stream().map(BookDTO::fromBook).toList();
+
+        builder.books(bookDTOS);
         return builder.build();
     }
 }

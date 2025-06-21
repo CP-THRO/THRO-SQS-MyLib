@@ -15,4 +15,5 @@ public interface LibraryBookRepository extends JpaRepository<LibraryBook, Librar
 
     Optional<LibraryBook> getLibraryBooksById(LibraryBookKey id);
 
+    long countByUser(User user);
 }

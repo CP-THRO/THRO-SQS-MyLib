@@ -3,7 +3,7 @@ package de.throsenheim.inf.sqs.christophpircher.mylibbackend.api;
 import de.throsenheim.inf.sqs.christophpircher.mylibbackend.api.dto.*;
 import de.throsenheim.inf.sqs.christophpircher.mylibbackend.exceptions.UnexpectedStatusException;
 import de.throsenheim.inf.sqs.christophpircher.mylibbackend.model.Book;
-import de.throsenheim.inf.sqs.christophpircher.mylibbackend.model.SearchResult;
+import de.throsenheim.inf.sqs.christophpircher.mylibbackend.model.BookList;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.env.Environment;
@@ -28,7 +28,7 @@ import java.util.Optional;
  * work and author retrieval, and fallback handling for incomplete data (e.g., missing covers editions).
  * </p>
  *
- * <p>This proxy also performs transformation into the application's internal {@link Book} and {@link SearchResult} models.</p>
+ * <p>This proxy also performs transformation into the application's internal {@link Book} and {@link BookList} models.</p>
  *
  * <p>The API base URL is dynamically loaded from Spring's {@link Environment} to support environments like WireMock during testing.</p>
  *
@@ -93,7 +93,7 @@ public class OpenLibraryAPI {
     }
 
     /**
-     * Searches for books using keywords and returns a structured {@link SearchResult}.
+     * Searches for books using keywords and returns a structured {@link BookList}.
      * <p>
      * Handles pagination and fallback logic when some results are missing data.
      * </p>
@@ -101,11 +101,11 @@ public class OpenLibraryAPI {
      * @param searchString The keyword(s) to search for.
      * @param startingIndex The result offset for pagination.
      * @param numResultsToGet Number of results to return.
-     * @return A {@link SearchResult} containing found books.
+     * @return A {@link BookList} containing found books.
      * @throws UnexpectedStatusException if OpenLibrary returns a non-200 status code.
      * @throws IOException if a connection or parsing error occurs.
      */
-    public SearchResult searchBooks(String searchString, int startingIndex, int numResultsToGet) throws UnexpectedStatusException, IOException {
+    public BookList searchBooks(String searchString, int startingIndex, int numResultsToGet) throws UnexpectedStatusException, IOException {
         log.info("Searching for keywords \"{}\"", searchString);
         searchString = searchString.trim().replaceAll("\\s", "+"); // replace whitespaces with "+", because the API requires it.
 
@@ -115,12 +115,14 @@ public class OpenLibraryAPI {
             Response<OpenLibraryAPISearchResponse> apiSearchResponse = apiSearchCall.execute();
             if(apiSearchResponse.isSuccessful()  && apiSearchResponse.body() != null) {
                 OpenLibraryAPISearchResponse response = apiSearchResponse.body();
-                SearchResult.SearchResultBuilder builder = SearchResult.builder();
+                BookList.BookListBuilder builder = BookList.builder();
                 builder.numResults(response.getNumFound());
                 builder.startIndex(response.getStart());
 
                 List<OpenLibraryAPISearchWork> searchWorks = response.getSearchResults();
                 List<Book> books = new ArrayList<>(searchWorks.size());
+
+                int skippedBooks = 0;
 
                 for (OpenLibraryAPISearchWork work : searchWorks) {
                     String coverEditionKey = work.getCoverEditionKey();
@@ -129,6 +131,7 @@ public class OpenLibraryAPI {
                         if(!editions.getEditions().isEmpty()){ // this can actually happen... The API is so scuffed. Skip
                             coverEditionKey = editions.getEditions().getFirst().getBookKeyWithoutURL(); //an edition must have its own key. I am taking the first, since it does not really matter.
                         }else{
+                            ++skippedBooks;
                             continue; // skip it.
                         }
                     }
@@ -147,7 +150,8 @@ public class OpenLibraryAPI {
                     books.add(bookBuilder.build());
                 }
 
-                builder.searchResults(books);
+                builder.books(books);
+                builder.skippedBooks(skippedBooks);
                 return builder.build();
             }else{
                 log.error("OpenLibraryAPI: Could not search OpenLibraryAPI: {} {}", apiSearchResponse.code(), apiSearchResponse.message());

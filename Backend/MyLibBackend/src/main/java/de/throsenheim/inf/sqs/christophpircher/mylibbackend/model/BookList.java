@@ -15,7 +15,7 @@ import java.util.List;
  */
 @Data
 @Builder
-public class SearchResult {
+public class BookList {
 
     /**
      * The total number of search results found for the given query.
@@ -28,8 +28,14 @@ public class SearchResult {
     private int startIndex;
 
     /**
-     * The list of {@link Book} objects included in this page of search results.
+     * The list of {@link Book} objects included in this page of search results or database or library.
      */
-    private List<Book> searchResults;
+    private List<Book> books;
+
+    /**
+     * Due to some inconsistencies in the OpenLibrary, some search results will be skipped if they don't have an associated addition.
+     */
+    @Builder.Default
+    private int skippedBooks = 0;
 
 }

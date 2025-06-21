@@ -2,10 +2,10 @@ package de.throsenheim.inf.sqs.christophpircher.mylibbackend.controller;
 
 import de.throsenheim.inf.sqs.christophpircher.mylibbackend.dto.ApiError;
 import de.throsenheim.inf.sqs.christophpircher.mylibbackend.dto.BookDTO;
-import de.throsenheim.inf.sqs.christophpircher.mylibbackend.dto.SearchResultDTO;
+import de.throsenheim.inf.sqs.christophpircher.mylibbackend.dto.BookListDTO;
 import de.throsenheim.inf.sqs.christophpircher.mylibbackend.exceptions.UnexpectedStatusException;
 import de.throsenheim.inf.sqs.christophpircher.mylibbackend.model.Book;
-import de.throsenheim.inf.sqs.christophpircher.mylibbackend.model.SearchResult;
+import de.throsenheim.inf.sqs.christophpircher.mylibbackend.model.BookList;
 import de.throsenheim.inf.sqs.christophpircher.mylibbackend.service.SearchService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -35,7 +35,7 @@ import java.util.Optional;
  * <p>All endpoints are prefixed with <code>/api/v1/search</code>.</p>
  *
  * @see SearchService
- * @see SearchResultDTO
+ * @see BookListDTO
  * @see BookDTO
  */
 @RestController
@@ -51,7 +51,7 @@ public class SearchController {
      * Searches the OpenLibrary API for books using provided keywords.
      * <p>
      * Supports pagination through {@code startIndex} and {@code numResultsToGet} parameters.
-     * Converts the {@link SearchResult} model into a {@link SearchResultDTO} for response.
+     * Converts the {@link BookList} model into a {@link BookListDTO} for response.
      * </p>
      *
      * @param keywords         The keywords to search for (required)
@@ -63,14 +63,14 @@ public class SearchController {
      */
     @Operation(summary = "Keyword search on the OpenLibrary API", description = "Do a keywords search on the OpenLibrary API",
     responses = {
-            @ApiResponse(responseCode = "200", description = "Search results", content =  @Content(schema = @Schema(implementation = SearchResultDTO.class))),
+            @ApiResponse(responseCode = "200", description = "Search results", content =  @Content(schema = @Schema(implementation = BookListDTO.class))),
             @ApiResponse(responseCode = "502", description = "Something went wrong while accessing the OpenLibrary API (e.g. the server is not responding etc.)", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiError.class)))
     })
     @GetMapping(value = "/external/keyword", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<SearchResultDTO> searchExternalKeyword(@RequestParam(value = "keywords", required = true) String keywords, @RequestParam(value = "startIndex", defaultValue = "0") int startIndex, @RequestParam(value="numResultsToGet", defaultValue = "100")  int numResultsToGet) throws UnexpectedStatusException, IOException {
+    public ResponseEntity<BookListDTO> searchExternalKeyword(@RequestParam(value = "keywords", required = true) String keywords, @RequestParam(value = "startIndex", defaultValue = "0") int startIndex, @RequestParam(value="numResultsToGet", defaultValue = "100")  int numResultsToGet) throws UnexpectedStatusException, IOException {
         log.info("Incoming request to search OpenLibrary with keywords \"{}\"", keywords);
-        SearchResult searchResult = searchService.searchKeywordsExternal(keywords,startIndex,numResultsToGet);
-        return new ResponseEntity<>(SearchResultDTO.fromSearchResult(searchResult), HttpStatus.OK);
+        BookList searchResult = searchService.searchKeywordsExternal(keywords,startIndex,numResultsToGet);
+        return new ResponseEntity<>(BookListDTO.fromSearchResult(searchResult), HttpStatus.OK);
     }
 
     /**

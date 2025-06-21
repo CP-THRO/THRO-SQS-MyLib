@@ -73,10 +73,16 @@ public class BookService {
      *
      * @param startIndex       the starting index (zero-based) for pagination
      * @param numResultsToGet  the number of results to return
-     * @return a list of {@link Book} instances from the internal database
+     * @return A {@link BookList} instance with books from the internal database
      */
-    public List<Book> getAllKnownBooks(int startIndex, int numResultsToGet){
-        return bookRepository.findAll(PageRequest.of(startIndex, numResultsToGet)).toList();
+    public BookList getAllKnownBooks(int startIndex, int numResultsToGet){
+        List<Book> books = bookRepository.findAll(PageRequest.of(startIndex, numResultsToGet)).toList();
+        BookList.BookListBuilder builder = BookList.builder();
+        builder.books(books);
+        builder.numResults((int)bookRepository.count());
+        builder.startIndex(startIndex);
+        builder.skippedBooks(0);
+        return builder.build();
     }
 
     /**
@@ -85,15 +91,24 @@ public class BookService {
      * @param startIndex starting index for pagination
      * @param numResultsToGet number of results to return
      * @param user the user whose library to query
-     * @return list of books in the user's library
+     * @return BookList of books in the user's library
      */
-    public List<Book> getAllBooksInLibrary(int startIndex, int numResultsToGet, User user){
+    public BookList getAllBooksInLibrary(int startIndex, int numResultsToGet, User user){
         List<LibraryBook> libraryBooks =  libraryBookRepository.getLibraryBooksByUser(user, PageRequest.of(startIndex, numResultsToGet));
         List<Book> books = new ArrayList<>(libraryBooks.size());
         for(LibraryBook libraryBook : libraryBooks) {
             books.add(libraryBook.getBook());
         }
-        return books;
+
+        long totalCount = libraryBookRepository.countByUser(user);
+
+        BookList.BookListBuilder bookListBuilder = BookList.builder();
+        bookListBuilder.books(books);
+        bookListBuilder.skippedBooks(0);
+        bookListBuilder.numResults((int)totalCount);
+        bookListBuilder.startIndex(startIndex);
+
+        return bookListBuilder.build();
     }
 
     /**
@@ -102,17 +117,23 @@ public class BookService {
      * @param startIndex starting index for pagination
      * @param numResultsToGet number of results to return
      * @param user the user whose wishlist to query
-     * @return sublist of books currently on the wishlist
+     * @return BookList of books currently on the wishlist
      */
-    public List<Book> getAllBooksOnWishlist(int startIndex, int numResultsToGet, User user){
+    public BookList getAllBooksOnWishlist(int startIndex, int numResultsToGet, User user){
         User newestUser = userRepository.getUserById(user.getId());
         List<Book> books = new ArrayList<>(newestUser.getWishlistBooks());
+        BookList.BookListBuilder builder = BookList.builder();
+        builder.books(books);
+        builder.numResults(books.size());
+        builder.startIndex(startIndex);
+        builder.skippedBooks(0);
 
         if(books.isEmpty()) {
-            return books;
+            builder.books(books);
         }
         int toIndex = Math.min(startIndex + numResultsToGet, books.size());
-        return  books.subList(startIndex, toIndex);
+        builder.books(books.subList(startIndex, toIndex));
+        return  builder.build();
     }
 
     /**
