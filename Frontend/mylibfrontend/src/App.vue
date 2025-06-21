@@ -7,23 +7,23 @@
   <div>
       <nav class="navbar navbar-expand-lg bg-body-tertiary">
         <div class="container-fluid">
-          <a class="navbar-brand" href="#">MyLib</a>
+          <router-link class="navbar-brand" to="/">MyLib</router-link>
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent">
             <span class="navbar-toggler-icon"></span>
           </button>
           <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
               <li class="nav-item">
-                <a class="nav-link active" href="#">Home</a>
+                <router-link class="btn" to="/">Home</router-link>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="#">Search</a>
+                <router-link class="btn" to="/search">Search</router-link>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="#">Library</a>
+                <router-link class="btn" to="/library">Library</router-link>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="#">Wishlist</a>
+                <router-link class="btn" to="/wishlist">Wishlist</router-link>
               </li>
             </ul>
             <ul class="navbar-nav">
@@ -32,8 +32,8 @@
                   Account
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end">
-                  <li><a class="dropdown-item" href="#">Login</a></li>
-                  <li><a class="dropdown-item" href="#">Sign Up</a></li>
+                  <li><router-link class="dropdown-item" to="/login">Login</router-link></li>
+                  <li><router-link class="dropdown-item" to="/login">Sign Up</router-link></li>
                 </ul>
               </li>
             </ul>
@@ -41,6 +41,7 @@
         </div>
 
       </nav>
+    <router-view />
   </div>
 </template>
 
