@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
@@ -57,7 +58,8 @@ public class User {
      * </p>
      */
     @ManyToMany
-    private Set<Book> wishlistBooks;
+    @Builder.Default
+    private Set<Book> wishlistBooks = new HashSet<>();
 
 
 }

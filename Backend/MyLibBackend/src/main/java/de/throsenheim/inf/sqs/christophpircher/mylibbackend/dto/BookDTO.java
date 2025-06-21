@@ -2,6 +2,7 @@ package de.throsenheim.inf.sqs.christophpircher.mylibbackend.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import de.throsenheim.inf.sqs.christophpircher.mylibbackend.model.Book;
+import de.throsenheim.inf.sqs.christophpircher.mylibbackend.model.ReadingStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Data;
@@ -113,6 +114,29 @@ public class BookDTO {
     @Schema(description = "Average rating of a book from 1 to 5 of all users that have rated the book. 0 = no rating yet", example = "4.5")
     @Builder.Default
     private float averageRating = 0;
+
+    /**
+     * User's reading status of the book
+     */
+    @JsonProperty("readingStatus")
+    @Schema(description = "Reading status of the book by the user")
+    private ReadingStatus readingStatus;
+
+    /**
+     * Flag to indicate if the book is in the library of the authenticated user or not
+     */
+    @JsonProperty("bookIsInLibrary")
+    @Schema(description = "Flag to indicate if the book is in the library of the authenticated user or not", example = "true")
+    @Builder.Default
+    private boolean bookIsInLibrary = false;
+
+    /**
+     * Flag to indicate if the book is in the wishlist of the authenticated user or not
+     */
+    @JsonProperty("bookIsOnWishlist")
+    @Schema(description = "Flag to indicate if the book is on the of the authenticated user or not", example = "true")
+    @Builder.Default
+    private boolean bookIsOnWishlist = false;
 
     /**
      * Converts a {@link Book} domain model into a {@link BookDTO} for API output.

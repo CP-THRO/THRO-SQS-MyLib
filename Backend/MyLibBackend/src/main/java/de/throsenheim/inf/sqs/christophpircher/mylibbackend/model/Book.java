@@ -1,11 +1,9 @@
 package de.throsenheim.inf.sqs.christophpircher.mylibbackend.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -30,6 +28,7 @@ public class Book {
     /**
      * Unique identifier for this book record in the database.
      */
+    @Setter
     @Id
     private UUID id;
 
@@ -57,6 +56,7 @@ public class Book {
     /**
      * Description or summary text for the book.
      */
+    @Lob
     private String description;
 
     /**
@@ -95,7 +95,8 @@ public class Book {
      * Many-to-many mapping between books and users who have added this book to their wishlist.
      */
     @ManyToMany
-    private Set<User> wishlistUsers;
+    @Builder.Default
+    private Set<User> wishlistUsers = new HashSet<>();
 
     /**
      * Computes the average rating of this book across all users who have rated it.

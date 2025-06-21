@@ -62,7 +62,7 @@ public class AuthController {
     @PostMapping("/add-user")
     public ResponseEntity<Void> addUser(@RequestBody AuthRequestDTO newUser) throws UsernameExistsException {
         authService.createNewUser(newUser.getUsername(),newUser.getPassword());
-        return ResponseEntity.status(201).build();
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     /**

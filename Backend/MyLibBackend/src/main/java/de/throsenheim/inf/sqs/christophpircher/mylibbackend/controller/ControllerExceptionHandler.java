@@ -1,6 +1,8 @@
 package de.throsenheim.inf.sqs.christophpircher.mylibbackend.controller;
 
 import de.throsenheim.inf.sqs.christophpircher.mylibbackend.dto.ApiError;
+import de.throsenheim.inf.sqs.christophpircher.mylibbackend.exceptions.BookNotFoundException;
+import de.throsenheim.inf.sqs.christophpircher.mylibbackend.exceptions.BookNotInLibraryException;
 import de.throsenheim.inf.sqs.christophpircher.mylibbackend.exceptions.UnexpectedStatusException;
 import de.throsenheim.inf.sqs.christophpircher.mylibbackend.exceptions.UsernameExistsException;
 import lombok.extern.slf4j.Slf4j;
@@ -133,6 +135,38 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(UsernameExistsException.class)
     public ResponseEntity<ApiError> handleUsernameExistsException(UsernameExistsException ex, WebRequest request) {
         ApiError apiError = new ApiError(HttpStatus.CONFLICT, ex.getLocalizedMessage(), ex.getMessage());
+        return new ResponseEntity<>(apiError, new HttpHeaders(), apiError.getStatus());
+    }
+
+    /**
+     * Handles cases where a requested book could not be found.
+     * <p>
+     * Responds with HTTP 404 (Not Found).
+     * </p>
+     *
+     * @param ex      the book not found exception
+     * @param request the current web request
+     * @return {@link ApiError} indicating the book was not found
+     */
+    @ExceptionHandler(BookNotFoundException.class)
+    public ResponseEntity<ApiError> handleBookNotFoundException(BookNotFoundException ex, WebRequest request) {
+        ApiError apiError = new ApiError(HttpStatus.NOT_FOUND, ex.getLocalizedMessage(), ex.getMessage());
+        return new ResponseEntity<>(apiError, new HttpHeaders(), apiError.getStatus());
+    }
+
+    /**
+     * Handles cases where a user attempts to interact with a book not in their library.
+     * <p>
+     * Responds with HTTP 404 (Not Found).
+     * </p>
+     *
+     * @param ex      the book-not-in-library exception
+     * @param request the current web request
+     * @return {@link ApiError} indicating the book is not in the user's library
+     */
+    @ExceptionHandler(BookNotInLibraryException.class)
+    public ResponseEntity<ApiError> handleBookNotInLibraryException(BookNotInLibraryException ex, WebRequest request) {
+        ApiError apiError = new ApiError(HttpStatus.NOT_FOUND, ex.getLocalizedMessage(), ex.getMessage());
         return new ResponseEntity<>(apiError, new HttpHeaders(), apiError.getStatus());
     }
 }

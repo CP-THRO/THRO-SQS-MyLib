@@ -1,7 +1,7 @@
 package de.throsenheim.inf.sqs.christophpircher.mylibbackend.model;
 
 import jakarta.persistence.*;
-import lombok.Getter;
+import lombok.*;
 
 /**
  * Entity class representing the many-to-many relationship between {@link User} and {@link Book} entities.
@@ -19,7 +19,10 @@ import lombok.Getter;
  * @see Book
  */
 @Entity
-@Getter
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class LibraryBook {
 
     /**

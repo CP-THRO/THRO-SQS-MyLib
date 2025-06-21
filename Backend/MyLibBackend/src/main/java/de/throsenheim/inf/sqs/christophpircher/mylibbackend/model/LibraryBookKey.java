@@ -2,6 +2,8 @@ package de.throsenheim.inf.sqs.christophpircher.mylibbackend.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 
 import java.util.UUID;
 
@@ -20,6 +22,8 @@ import java.util.UUID;
  * @see User
  */
 @Embeddable
+@NoArgsConstructor
+@AllArgsConstructor
 public class LibraryBookKey {
     /**
      * UUID of the associated book.

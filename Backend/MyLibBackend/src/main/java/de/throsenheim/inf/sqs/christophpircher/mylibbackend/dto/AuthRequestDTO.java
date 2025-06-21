@@ -2,6 +2,9 @@ package de.throsenheim.inf.sqs.christophpircher.mylibbackend.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 /**
@@ -23,6 +26,9 @@ public class AuthRequestDTO {
      */
     @JsonProperty("username")
     @Schema(description = "The username of the user", example = "imauser123")
+    @NotBlank
+    @NotEmpty
+    @NotNull
     private String username;
 
     /**
@@ -30,5 +36,8 @@ public class AuthRequestDTO {
      */
     @JsonProperty("password")
     @Schema(description = "Password of the user", example = "Pa$$w0rd")
+    @NotBlank
+    @NotEmpty
+    @NotNull
     private String password;
 }
