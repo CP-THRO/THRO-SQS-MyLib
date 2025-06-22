@@ -52,6 +52,12 @@ public class OpenLibraryAPISearchWork {
     private String title;
 
     /**
+     * Subtitle of the book
+     */
+    @JsonProperty("subtitle")
+    private String subtitle;
+
+    /**
      * The cover edition key, used to identify the edition representing the work.
      * <p>Helpful when rendering a representative cover image.</p>
      */

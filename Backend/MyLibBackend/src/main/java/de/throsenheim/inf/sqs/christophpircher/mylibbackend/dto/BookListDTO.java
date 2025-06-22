@@ -43,7 +43,7 @@ public class BookListDTO {
     /**
      * List of books returned for the current page.
      */
-    @JsonProperty("searchResults")
+    @JsonProperty("books")
     @Schema(description = "Book DTOs of search result or database or library")
     private List<BookDTO> books;
 

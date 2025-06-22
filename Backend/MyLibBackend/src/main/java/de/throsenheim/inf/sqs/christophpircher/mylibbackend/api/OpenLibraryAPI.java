@@ -139,6 +139,7 @@ public class OpenLibraryAPI {
                     Book.BookBuilder bookBuilder = Book.builder();
                     bookBuilder.bookID(coverEditionKey);
                     bookBuilder.title(work.getTitle());
+                    bookBuilder.subtitle(work.getSubtitle());
                     bookBuilder.authors(work.getAuthors());
                     bookBuilder.publishDate(Integer.toString(work.getFirstPublishYear()));
 

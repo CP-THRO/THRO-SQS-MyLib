@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -55,7 +56,8 @@ public class BookDTO {
      */
     @JsonProperty("authors")
     @Schema(description = "List with all authors of the book", example = "[\"Drew Karpyshyn\"]")
-    private List<String> authors;
+    @Builder.Default
+    private List<String> authors = new ArrayList<>();
 
     /**
      * Long-form description of the book.
@@ -69,7 +71,8 @@ public class BookDTO {
      */
     @JsonProperty("isbns")
     @Schema(description = "If found in the API, this contains the ISBN numbers of the book. This contains both ISBN-10 and ISBN-13 numbers. Not included in search result", example = "[\"9780345498526\"]")
-    private List<String> isbns;
+    @Builder.Default
+    private List<String> isbns = new ArrayList<>();
 
     /**
      * URL to the small cover image.
