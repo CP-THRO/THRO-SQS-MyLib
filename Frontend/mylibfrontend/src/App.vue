@@ -41,7 +41,7 @@
         </div>
 
       </nav>
-    <router-view />
+    <router-view class="container py-4 px-3 mx-auto" />
   </div>
 </template>
 
