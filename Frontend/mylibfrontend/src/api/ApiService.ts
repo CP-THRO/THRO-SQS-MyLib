@@ -99,9 +99,17 @@ class ApiService {
                 throw error;
             }
         }
-
     }
 
+    public async getLibrary(startIndex: number, numResultsToGet: number){
+        const result = await this.http.get<BookListDTO>(`/api/v1/books/get/library?startIndex=${startIndex}&numResultsToGet=${numResultsToGet}`);
+        return result.data;
+    }
+
+    public async getWishlist(startIndex: number, numResultsToGet: number){
+        const result = await this.http.get<BookListDTO>(`/api/v1/books/get/wishlist?startIndex=${startIndex}&numResultsToGet=${numResultsToGet}`);
+        return result.data;
+    }
 
 
     // Example method to fetch users
