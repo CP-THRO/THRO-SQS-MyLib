@@ -78,7 +78,7 @@ public class SecurityConfig {
                 // Configure endpoint authorization
                 .authorizeHttpRequests(auth -> auth
                         // Permit public access to OpenAPI documentation, h2 console, the auth endpoints, the search endpoints, the get book by ID endpoint and the get all known books endpoint
-                        .requestMatchers(SWAGGER_WHITELIST).permitAll().requestMatchers(toH2Console()).permitAll().requestMatchers("/api/v1/auth/**", "/api/v1/search/**", "/api/v1/books/get/byID/", "/api/v1/books/get/all").permitAll()
+                        .requestMatchers(SWAGGER_WHITELIST).permitAll().requestMatchers(toH2Console()).permitAll().requestMatchers("/api/v1/auth/**", "/api/v1/search/**", "/api/v1/books/get/byID/**", "/api/v1/books/get/all").permitAll()
 
                         // All other endpoints require authentication
                         .anyRequest().authenticated()
