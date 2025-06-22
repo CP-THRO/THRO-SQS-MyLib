@@ -28,7 +28,7 @@
       </template>
 
       <template #authors="{ book }">
-        {{ book.authors.join(', ') }}
+        {{ book.authors ? (book.authors.join(', ')) : ("No author found") }}
       </template>
       <!-- Dynamically forward all named slots -->
       <template v-for="(_, name) in $slots" #[name]="slotProps" :key="name">
