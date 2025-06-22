@@ -43,7 +43,14 @@ class ApiService {
     }
 
     public async getBookByID(bookID : string): Promise<BookDTO> {
-        const response = await this.http.get<BookDTO>(`/api/v1/books/get/byID/${bookID}`)
+        const response = await this.http.get<BookDTO>(`/api/v1/books/get/byID/${bookID}`);
+        return response.data;
+    }
+
+    public async getKeywordSearch(keywords : string, startIndex: number, numResultsToGet: number){
+        keywords = keywords.replace(/\s+/g, "+");
+        console.log(keywords)
+        const response = await this.http.get<BookListDTO>(`/api/v1/search/external/keyword?keywords=${keywords}&startIndex=${startIndex}&numResultsToGet=${numResultsToGet}`);
         return response.data;
     }
 
