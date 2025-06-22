@@ -25,41 +25,43 @@
     <div v-if="error" class="text-danger">{{ error }}</div>
 
     <!-- Show if no books were returned -->
-    <div v-if="books?.numResults === 0 && searchHappened">No books found.</div>
+    <div v-if="!loading && books?.numResults === 0 && searchHappened">No books found.</div>
+
+    <div v-if="books && books?.skippedBooks > 0 && searchHappened">Due to inconsistencies in OpenLibrary, {{books?.skippedBooks}} book {{books?.skippedBooks ===1 ? "has" : "have"}} been omitted</div>
 
     <!-- Render dynamic book table if data is available -->
-    <BookTable
-        v-if="books"
-        :books="books.books"
-        :columns="columns"
-        :currentPage="currentPage"
-        :totalPages="totalPages"
-        :pageSize="pageSize"
-        :pageSizes="pageSizes"
-        @next-page="nextPage"
-        @prev-page="prevPage"
-        @page-size-change="updatePageSize"
-    >
-      <!-- Slot for rendering the cover image -->
-      <template #cover="{ book }">
-        <img :src="book.coverURLSmall" alt="Cover" style="width: 50px;" />
-      </template>
+      <BookTable
+          v-if="books"
+          :books="books.books"
+          :columns="columns"
+          :currentPage="currentPage"
+          :totalPages="totalPages"
+          :pageSize="pageSize"
+          :pageSizes="pageSizes"
+          @next-page="nextPage"
+          @prev-page="prevPage"
+          @page-size-change="updatePageSize"
+      >
+        <!-- Slot for rendering the cover image -->
+        <template #cover="{ book }">
+          <img :src="book.coverURLSmall" alt="Cover" style="width: 50px;" />
+        </template>
 
-      <!-- Slot for rendering title and subtitle -->
-      <template #title="{ book }">
-        {{ book.subtitle ? `${book.title} - ${book.subtitle}` : book.title }}
-      </template>
+        <!-- Slot for rendering title and subtitle -->
+        <template #title="{ book }">
+          {{ book.subtitle ? `${book.title} - ${book.subtitle}` : book.title }}
+        </template>
 
-      <!-- Slot for rendering authors list -->
-      <template #authors="{ book }">
-        {{ book.authors ? book.authors.join(", ") : "No Author found" }}
-      </template>
+        <!-- Slot for rendering authors list -->
+        <template #authors="{ book }">
+          {{ book.authors ? book.authors.join(", ") : "No Author found" }}
+        </template>
 
-      <!-- Slot for action buttons like 'Details' -->
-      <template #actions="{ book }">
-        <button class="btn btn-outline-secondary">Details</button>
-      </template>
-    </BookTable>
+        <!-- Slot for action buttons like 'Details' -->
+        <template #actions="{ book }">
+          <router-link class="btn btn-primary" :to="`/book/${book.bookID}`">Details</router-link>
+        </template>
+      </BookTable>
   </div>
 </template>
 
@@ -84,7 +86,7 @@ export default defineComponent({
 
   setup() {
     // State variables for fetched data and UI status
-    const books = ref<BookListDTO | null>(null);
+    const books = ref<BookListDTO>({numResults: 0, startIndex: 0, books: [], skippedBooks: 0,});
     const loading = ref(false);
     const error = ref<string | null>(null);
     const searchHappened = ref(false); //Flag to tell if there was already a search, to control the "No books found" message.
@@ -114,7 +116,8 @@ export default defineComponent({
       error.value = null;
       const startIndex = (currentPage.value - 1) * pageSize.value;
       try {
-        books.value = await apiService.getKeywordSearch(keywords ,startIndex, pageSize.value);
+        books.value = {numResults: 0, startIndex: 0, books: [], skippedBooks: 0,}; // reset before loading
+        books.value = await apiService.getKeywordSearch(keywords, startIndex, pageSize.value);
       } catch (e: any) {
         error.value = e.message || 'An error occurred';
       } finally {

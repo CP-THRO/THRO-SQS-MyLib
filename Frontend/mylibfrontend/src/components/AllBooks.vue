@@ -47,7 +47,7 @@
 
       <!-- Slot for action buttons like 'Details' -->
       <template #actions="{ book }">
-        <button class="btn btn-outline-secondary">Details</button>
+        <router-link class="btn btn-primary" :to="`/book/${book.bookID}`">Details</router-link>
       </template>
     </BookTable>
   </div>

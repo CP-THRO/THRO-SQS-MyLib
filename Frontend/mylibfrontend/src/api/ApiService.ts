@@ -2,6 +2,7 @@ import axios from 'axios'
 import type {AxiosInstance} from 'axios';
 import type {BookDTO} from "../dto/BookDTO.ts";
 import type {BookListDTO} from "../dto/BookListDTO.ts";
+import type {AuthRequestDTO} from "../dto/AuthRequestDTO.ts";
 
 class ApiService {
     private static instance: ApiService;
@@ -27,6 +28,20 @@ class ApiService {
 
         */
 
+        /**
+         * Add bearer token to request if the user is logged in.
+         */
+        this.http.interceptors.request.use(config => {
+            if(localStorage.getItem("is_authenticated"))
+            {
+                const token = localStorage.getItem('auth_token');
+                if (token) {
+                    config.headers.Authorization = `Bearer ${token}`;
+                }
+            }
+            return config;
+        });
+
     }
 
     public static getInstance(): ApiService {
@@ -42,17 +57,51 @@ class ApiService {
         return response.data;
     }
 
-    public async getBookByID(bookID : string): Promise<BookDTO> {
+    public async getBookByID(bookID: string): Promise<BookDTO> {
         const response = await this.http.get<BookDTO>(`/api/v1/books/get/byID/${bookID}`);
         return response.data;
     }
 
-    public async getKeywordSearch(keywords : string, startIndex: number, numResultsToGet: number){
+    public async getKeywordSearch(keywords: string, startIndex: number, numResultsToGet: number) {
         keywords = keywords.replace(/\s+/g, "+");
-        console.log(keywords)
         const response = await this.http.get<BookListDTO>(`/api/v1/search/external/keyword?keywords=${keywords}&startIndex=${startIndex}&numResultsToGet=${numResultsToGet}`);
         return response.data;
     }
+
+    public async authenticate(username: string, password: string): Promise<number> {
+        let authRequestDTO : AuthRequestDTO = {username: username, password: password}
+
+        try {
+            const result = await this.http.post("/api/v1/auth/authenticate", authRequestDTO);
+            localStorage.setItem("is_authenticated", "true");
+            localStorage.setItem("username", username);
+            localStorage.setItem("auth_token", result.data);
+
+            return result.status;
+        } catch (error) {
+            if (axios.isAxiosError(error) && error.response?.status === 403) {
+                return 403;
+            } else {
+                throw error;
+            }
+        }
+    }
+
+    public async signUp(username: string, password: string): Promise<number>{
+        let authRequestDTO : AuthRequestDTO = {username: username, password: password};
+        try{
+            const result = await this.http.post("/api/v1/auth/add-user", authRequestDTO);
+            return result.status;
+        }catch (error){
+            if (axios.isAxiosError(error) && error.response?.status === 409) {
+                return 409;
+            } else {
+                throw error;
+            }
+        }
+
+    }
+
 
 
     // Example method to fetch users

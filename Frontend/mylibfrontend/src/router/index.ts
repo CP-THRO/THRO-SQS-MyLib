@@ -9,6 +9,8 @@ import AllBooks from "../components/AllBooks.vue";
 const routes = [
     { path: '/', component: AllBooks },
     { path: '/login', component: Login },
+    { path: '/login/:signup', component: Login },
+    { path: '/book/:id', component: Book },
     { path: '/book', component: Book },
     { path: '/library', component: Library},
     { path: '/search', component: Search},

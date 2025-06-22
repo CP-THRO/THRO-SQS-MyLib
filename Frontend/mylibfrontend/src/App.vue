@@ -1,5 +1,18 @@
 <script setup lang="ts">
+import { isAuthenticated, loggedInUsername, syncAuthState } from './wrapper/AuthInfoWrapper.ts'
+import { onMounted } from 'vue'
 
+// Sync once on load
+onMounted(() => {
+  syncAuthState()
+})
+
+const logOut = () =>{
+    localStorage.removeItem('is_authenticated');
+    localStorage.removeItem('username');
+    localStorage.removeItem('auth_token');
+    syncAuthState()
+}
 </script>
 
 <template>
@@ -31,10 +44,19 @@
                 <button class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
                   Account
                 </button>
-                <ul class="dropdown-menu dropdown-menu-end">
-                  <li><router-link class="dropdown-item" to="/login">Login</router-link></li>
-                  <li><router-link class="dropdown-item" to="/login">Sign Up</router-link></li>
-                </ul>
+                <div>
+                  <ul class="dropdown-menu dropdown-menu-end">
+                    <template v-if="!isAuthenticated">
+                      <li><router-link class="dropdown-item" to="/login">Login</router-link></li>
+                      <li><router-link class="dropdown-item" to="/login/signup">Sign Up</router-link></li>
+                    </template>
+                    <template v-else>
+                      <li><button @click="logOut" class="dropdown-item">Logout</button></li>
+                      <li><hr class="dropdown-divider" /></li>
+                      <li><span class="dropdown-item">Logged in as: <strong>{{ loggedInUsername }}</strong></span></li>
+                    </template>
+                  </ul>
+                </div>
               </li>
             </ul>
           </div>
