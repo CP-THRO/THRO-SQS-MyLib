@@ -247,6 +247,23 @@ public class BookService {
     }
 
     /**
+     * Removes a book from the user's library if present.
+     *
+     * @param bookID the book's OpenLibrary ID
+     * @param user the user
+     */
+    public void removeBookFromLibrary(String bookID, User user){
+        LibraryBook libraryBook;
+        try {
+            libraryBook = getBookFromLibrary(bookID, user);
+        } catch (BookNotFoundException | BookNotInLibraryException e) {
+            return; // Do nothing, book does not exist, so it does not concern me
+        }
+        libraryBookRepository.delete(libraryBook);
+    }
+
+
+    /**
      * Removes a book from the user's wishlist if present.
      *
      * @param bookID the book's OpenLibrary ID

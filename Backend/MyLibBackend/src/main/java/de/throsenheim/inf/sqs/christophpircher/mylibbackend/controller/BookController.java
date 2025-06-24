@@ -206,6 +206,7 @@ public class BookController {
      */
     @Operation(summary = "Update the user rating of a book", responses = {
             @ApiResponse(responseCode = "200", description = "Book has been updated with the user rating"),
+            @ApiResponse(responseCode = "400", description = "Malformed request: Rating value incorrect"),
             @ApiResponse(responseCode = "404", description = "Book could not be found in the database or in the Library of the user", content = @Content(schema = @Schema(implementation = ApiError.class))),
             @ApiResponse(responseCode = "403", description = "User is not authenticated"),
     })
@@ -226,6 +227,7 @@ public class BookController {
      */
     @Operation(summary = "Update the reading status of a book in the user library", responses = {
             @ApiResponse(responseCode = "200", description = "Book has been updated with the new reading status"),
+            @ApiResponse(responseCode = "400", description = "Malformed request: Status value incorrect"),
             @ApiResponse(responseCode = "404", description = "Book could not be found in the database or in the Library of the user", content = @Content(schema = @Schema(implementation = ApiError.class))),
             @ApiResponse(responseCode = "403", description = "User is not authenticated"),
     })
@@ -239,16 +241,33 @@ public class BookController {
      * Removes a book from the authenticated user's wishlist.
      *
      * @param userPrincipal the authenticated user's principal
-     * @param addBookRequestDTO contains the book ID to remove
+     * @param bookID contains the book ID to remove
      * @return {@code 200 OK} if the book was removed
      */
     @Operation(summary = "Remove a book from the wishlist of the user", responses = {
             @ApiResponse(responseCode = "200", description = "Book has been removed"),
             @ApiResponse(responseCode = "403", description = "User is not authenticated")
     })
-    @DeleteMapping("/delete/wishlist")
-    public ResponseEntity<Void> deleteBookFromWishlist(@AuthenticationPrincipal UserPrincipal userPrincipal, @RequestBody AddBookRequestDTO addBookRequestDTO){
-        bookService.removeBookFromWishlist(addBookRequestDTO.getBookID(), userPrincipal.getUser());
+    @DeleteMapping("/delete/wishlist/{bookID}")
+    public ResponseEntity<Void> deleteBookFromWishlist(@AuthenticationPrincipal UserPrincipal userPrincipal, @PathVariable("bookID") String bookID){
+        bookService.removeBookFromWishlist(bookID, userPrincipal.getUser());
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    /**
+     * Removes a book from the authenticated user's library
+     *
+     * @param userPrincipal the authenticated user's principal
+     * @param bookID contains the book ID to remove
+     * @return {@code 200 OK} if the book was removed
+     */
+    @Operation(summary = "Remove a book from the library of the user", responses = {
+            @ApiResponse(responseCode = "200", description = "Book has been removed"),
+            @ApiResponse(responseCode = "403", description = "User is not authenticated")
+    })
+    @DeleteMapping("/delete/library/{bookID}")
+    public ResponseEntity<Void> deleteBookFromLibrary(@AuthenticationPrincipal UserPrincipal userPrincipal, @PathVariable("bookID") String bookID){
+        bookService.removeBookFromLibrary(bookID, userPrincipal.getUser());
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

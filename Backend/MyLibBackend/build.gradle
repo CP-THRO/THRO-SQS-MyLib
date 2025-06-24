@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '3.5.0'
     id 'io.spring.dependency-management' version '1.1.7'
+    id "org.sonarqube" version "6.2.0.5505"
 }
 
 group = 'de.th-rosenheim.inf.sqs.christophpircher'
@@ -21,6 +22,14 @@ configurations {
 
 repositories {
     mavenCentral()
+}
+
+sonar {
+    properties {
+        property "sonar.projectKey", "CP-THRO_THRO-SQS-MyLib"
+        property "sonar.organization", "cp-thro"
+        property "sonar.host.url", "https://sonarcloud.io"
+    }
 }
 
 dependencies {
