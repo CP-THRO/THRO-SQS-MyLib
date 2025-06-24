@@ -24,7 +24,7 @@ export function useBookActions(
             await fn();
             await reload(keywords?.());
         } catch (e: any) {
-            target.error.value = e.message || 'An error occurred';
+            target.error.value = e.message ?? 'An error occurred';
         }
     };
 
