@@ -1,4 +1,4 @@
-import { ref, computed, watch } from 'vue';
+import { ref, computed} from 'vue';
 import type {BookListDTO} from "../dto/BookListDTO.ts";
 
 export function useBookList(fetchFn: (startIndex: number, pageSize: number, ...args: any[]) => Promise<any>) {
@@ -20,6 +20,7 @@ export function useBookList(fetchFn: (startIndex: number, pageSize: number, ...a
         error.value = null;
 
         if (args.length > 0) extraArgs.value = args;
+
 
         const startIndex = (currentPage.value - 1) * pageSize.value;
         try {
@@ -59,11 +60,6 @@ export function useBookList(fetchFn: (startIndex: number, pageSize: number, ...a
         currentPage.value = page;
         pageSize.value = size;
     };
-
-    watch(pageSize, () => {
-        currentPage.value = 1;
-        loadBooks();
-    });
 
     return {
         books,

@@ -33,8 +33,13 @@
         @page-size-change="bookList.updatePageSize"
     >
       <template #actions="{ book }">
-        <router-link class="btn btn-primary" :to="`/book/${book.bookID}`">Details</router-link>
+        <div class="d-grid gap-2">
+          <router-link class="btn btn-primary" :to="`/book/${book.bookID}`">Details</router-link>
+          <button @click="onAddToLibrary(book.bookID)" v-if="isAuthenticated.value && !book.bookIsInLibrary" class="btn btn-primary">Add to Library</button>
+          <button @click="onAddToWishlist(book.bookID)" v-if="isAuthenticated.value && !book.bookIsInLibrary && !book.bookIsOnWishlist" class="btn btn-primary">Add to Wishlist</button>
+        </div>
       </template>
+
     </BaseBookList>
   </div>
 </template>
@@ -50,12 +55,19 @@
  */
 
 import BaseBookList from "./BaseBookList.vue";
-import {defineComponent, onMounted, ref} from 'vue';
+import {defineComponent, onMounted, ref, watch} from 'vue';
 import { apiService } from '../api/ApiService';
 import {useBookList} from "../composables/useBookList.ts";
+import {onBeforeRouteLeave} from "vue-router";
+import {isAuthenticated} from "../wrapper/AuthInfoWrapper.ts";
 
 export default defineComponent({
   name: 'BookListComponent',
+  computed: {
+    isAuthenticated() {
+      return isAuthenticated
+    }
+  },
   components: {BaseBookList },
 
   setup() {
@@ -70,6 +82,7 @@ export default defineComponent({
      */
     const onSearchClick = () =>{
       keywords = keywordsFieldValue.value;
+      sessionStorage.setItem("searchKeywords", keywords)
       bookList.loadBooks(keywords);
     };
 
@@ -83,13 +96,65 @@ export default defineComponent({
       { label: 'Actions', field: 'actions', slot: 'actions' },
     ];
 
-    onMounted(bookList.emptyInitBooks)
+    onMounted(() => {
+      const saved = sessionStorage.getItem('searchPage');
+      const searchKeyWords = sessionStorage.getItem("searchKeywords");
+
+      if (saved && searchKeyWords) {
+        try {
+          keywords = searchKeyWords;
+          keywordsFieldValue.value = searchKeyWords;
+          const { page, size } = JSON.parse(saved);
+          bookList.setPagination(page || 1, size || bookList.pageSize.value);
+          bookList.loadBooks(keywords);
+        } catch (e) {
+          console.warn('Invalid pagination data in sessionStorage');
+        }
+      }else{
+        bookList.emptyInitBooks();
+      }
+
+    });
+
+    const onAddToLibrary = async (bookID : string) =>{
+      bookList.error.value = null
+      try{
+        await apiService.addBookToLibrary(bookID as string);
+        await bookList.loadBooks(keywords)
+      } catch (e: any){
+        bookList.error.value = e.message || 'Failed to add book to library';
+      }
+    }
+
+    const onAddToWishlist = async (bookID : string) =>{
+      bookList.error.value = null
+      try{
+        await apiService.addBookToWishlist(bookID as string);
+        await bookList.loadBooks(keywords)
+      } catch (e: any){
+        bookList.error.value = e.message || 'Failed to add book to wishlist';
+      }
+    }
+
+    watch(() => [bookList.currentPage.value, bookList.pageSize.value], ([page, size]) => {
+      sessionStorage.setItem('searchPage', JSON.stringify({ page, size }));
+    });
+
+    onBeforeRouteLeave((to) => {
+      const isLeavingToBooks = to.name === 'Book';
+      if (!isLeavingToBooks) {
+        sessionStorage.removeItem('searchPage');
+        sessionStorage.removeItem('searchKeywords')
+      }
+    });
 
     return {
       bookList,
       columns,
       keywordsFieldValue,
       onSearchClick,
+      onAddToLibrary,
+      onAddToWishlist,
     };
   },
 });

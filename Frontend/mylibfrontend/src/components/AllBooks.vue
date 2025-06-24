@@ -28,11 +28,12 @@
 </template>
 
 <script lang="ts">
-import {defineComponent, onMounted} from 'vue';
+import {defineComponent, onMounted, watch} from 'vue';
 import { useBookList } from '../composables/useBookList';
 import { apiService } from '../api/ApiService';
 import BaseBookList from './BaseBookList.vue';
 import {isAuthenticated} from "../wrapper/AuthInfoWrapper.ts";
+import { onBeforeRouteLeave } from 'vue-router';
 
 
 export default defineComponent({
@@ -54,7 +55,19 @@ export default defineComponent({
       { label: 'Actions', field: 'actions', slot: 'actions' },
     ];
 
-    onMounted(bookList.loadBooks);
+    onMounted(() => {
+      const saved = sessionStorage.getItem('allBooksPage');
+
+      if (saved) {
+        try {
+          const { page, size } = JSON.parse(saved);
+          bookList.setPagination(page || 1, size || bookList.pageSize.value);
+        } catch (e) {
+          console.warn('Invalid pagination data in sessionStorage');
+        }
+      }
+      bookList.loadBooks();
+    });
 
     const onAddToLibrary = async (bookID : string) =>{
       bookList.error.value = null
@@ -76,6 +89,16 @@ export default defineComponent({
       }
     }
 
+    watch(() => [bookList.currentPage.value, bookList.pageSize.value], ([page, size]) => {
+      sessionStorage.setItem('allBooksPage', JSON.stringify({ page, size }));
+    });
+
+    onBeforeRouteLeave((to) => {
+      const isLeavingToBooks = to.name === 'Book';
+      if (!isLeavingToBooks) {
+        sessionStorage.removeItem('allBooksPage');
+      }
+    });
 
     return {
       bookList,

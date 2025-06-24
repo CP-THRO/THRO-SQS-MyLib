@@ -29,11 +29,11 @@
 </template>
 
 <script lang="ts">
-import {defineComponent, onBeforeMount, onMounted} from 'vue';
+import {defineComponent, onBeforeMount, onMounted, watch} from 'vue';
 import { useBookList } from '../composables/useBookList';
 import { apiService } from '../api/ApiService';
 import BaseBookList from './BaseBookList.vue';
-import {useRouter} from "vue-router";
+import {onBeforeRouteLeave, useRouter} from "vue-router";
 
 export default defineComponent({
   name: 'WishlistBooks',
@@ -56,7 +56,30 @@ export default defineComponent({
       }
     });
 
-    onMounted(bookList.loadBooks);
+    onMounted(() => {
+      const saved = sessionStorage.getItem('wishlistPage');
+
+      if (saved) {
+        try {
+          const { page, size } = JSON.parse(saved);
+          bookList.setPagination(page || 1, size || bookList.pageSize.value);
+        } catch (e) {
+          console.warn('Invalid pagination data in sessionStorage');
+        }
+      }
+      bookList.loadBooks();
+    });
+
+    watch(() => [bookList.currentPage.value, bookList.pageSize.value], ([page, size]) => {
+      sessionStorage.setItem('wishlistPage', JSON.stringify({ page, size }));
+    });
+
+    onBeforeRouteLeave((to) => {
+      const isLeavingToBooks = to.name === 'Book';
+      if (!isLeavingToBooks) {
+        sessionStorage.removeItem('wishlistPage');
+      }
+    });
 
     const onAddToLibrary = async (bookID : string) =>{
       bookList.error.value = null

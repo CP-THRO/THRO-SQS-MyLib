@@ -76,7 +76,7 @@ public class BookService {
      * @return A {@link BookList} instance with books from the internal database
      */
     public BookList getAllKnownBooks(int startIndex, int numResultsToGet){
-        List<Book> books = bookRepository.findAll(PageRequest.of(startIndex, numResultsToGet)).toList();
+        List<Book> books = bookRepository.findAll(PageRequest.of(startIndex/numResultsToGet, numResultsToGet)).toList();
         BookList.BookListBuilder builder = BookList.builder();
         builder.books(books);
         builder.numResults((int)bookRepository.count());
@@ -94,7 +94,7 @@ public class BookService {
      * @return BookList of books in the user's library
      */
     public BookList getAllBooksInLibrary(int startIndex, int numResultsToGet, User user){
-        List<LibraryBook> libraryBooks =  libraryBookRepository.getLibraryBooksByUser(user, PageRequest.of(startIndex, numResultsToGet));
+        List<LibraryBook> libraryBooks =  libraryBookRepository.getLibraryBooksByUser(user, PageRequest.of(startIndex/numResultsToGet, numResultsToGet));
         List<Book> books = new ArrayList<>(libraryBooks.size());
         for(LibraryBook libraryBook : libraryBooks) {
             books.add(libraryBook.getBook());
@@ -121,7 +121,7 @@ public class BookService {
      */
     public BookList getAllBooksOnWishlist(int startIndex, int numResultsToGet, User user){
         User newestUser = userRepository.getUserById(user.getId());
-        List<Book> books = new ArrayList<>(newestUser.getWishlistBooks());
+        List<Book> books = newestUser.getWishlistBooks().stream().sorted((b1,b2) -> (b1.getTitle().compareTo(b2.getTitle()))).toList();
         BookList.BookListBuilder builder = BookList.builder();
         builder.books(books);
         builder.numResults(books.size());

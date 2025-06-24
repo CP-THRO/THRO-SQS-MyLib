@@ -143,6 +143,7 @@ onMounted(loadBook);
             <p v-if="book.authors"><strong>Authors:</strong> {{ book.authors.join(', ') }}</p>
             <p v-else><strong>Authors:</strong> No author found</p>
             <p><strong>Published:</strong> {{ book.publishDate }}</p>
+            <p v-if="book.isbns?.length"><strong>ISBN:</strong> {{book.isbns.join(",")}}</p>
             <p><strong>Average Rating:</strong> {{ book.averageRating || 'Not rated yet' }}</p>
           </div>
 
@@ -195,9 +196,7 @@ onMounted(loadBook);
                     <button @click="onEditStatusCancel" type="button" class="btn btn-outline-secondary ms-2">Cancel</button>
                   </span>
                 </p>
-
               </div>
-
             </div>
 
           </div>

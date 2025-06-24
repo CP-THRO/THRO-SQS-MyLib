@@ -165,32 +165,6 @@ public class OpenLibraryAPI {
     }
 
     /**
-     * Retrieves a book using its ISBN.
-     *
-     * @param isbn ISBN to search for.
-     * @return An Optional {@link Book}, or empty if not found (404).
-     * @throws UnexpectedStatusException if OpenLibrary returns a non-200 or unexpected status.
-     * @throws IOException if a network error occurs.
-     */
-    public Optional<Book> getBookByISBN(String isbn) throws UnexpectedStatusException, IOException {
-        Call<OpenLibraryAPIBook> call = api.getBookByIsbn(isbn);
-        try {
-            Response<OpenLibraryAPIBook> response = call.execute();
-            if(response.isSuccessful() && response.body() != null) {
-                OpenLibraryAPIBook book = response.body(); // the body is essentialy the same as from the /books/bookid endpoint. But to not duplicate the code, I let handle getBookByBookID all the work
-                return getBookByBookID(book.getBookIDWithoutURL());
-            } else if (response.code() == 404) {
-                return Optional.empty();
-            }else{
-                log.error("OpenLibraryAPI: Could not get book with ISBN {}: {} {}", isbn, response.code(), response.message());
-                throw new UnexpectedStatusException(UNEXPECTED_STATUS_MESSAGE + response.code());
-            }
-        }catch (IOException e) {
-            throw alterIOException(e);
-        }
-    }
-
-    /**
      * Retrieves a book using its OpenLibrary book ID.
      *
      * @param bookID Book ID (e.g., "OL12345M").

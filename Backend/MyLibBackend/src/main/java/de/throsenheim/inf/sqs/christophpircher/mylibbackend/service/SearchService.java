@@ -39,16 +39,4 @@ public class SearchService {
         return openLibraryAPI.searchBooks(keywords, startIndex, numResultsToGet);
     }
 
-    /**
-     * Searches for a single book using its ISBN via the OpenLibrary API.
-     *
-     * @param isbn the ISBN of the book to search
-     * @return an {@link Optional} containing the book if found, or an empty Optional if not found
-     * @throws UnexpectedStatusException if the OpenLibrary API returns an unexpected status code
-     * @throws IOException               if a connection or read error occurs
-     */
-    public Optional<Book> searchISBNExternal(String isbn) throws UnexpectedStatusException, IOException {
-        return openLibraryAPI.getBookByISBN(isbn);
-    }
-
 }

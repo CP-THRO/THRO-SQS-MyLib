@@ -27,8 +27,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -100,18 +98,9 @@ public class BookController {
     @GetMapping(value = "/get/all", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<BookListDTO> getAllBooks(@RequestParam(value = "startIndex", defaultValue = "0") int startIndex, @RequestParam(value="numResultsToGet", defaultValue = "100") int numResultsToGet){
         BookList bookList = bookService.getAllKnownBooks(startIndex, numResultsToGet);
-
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        /* Only add rating and reading status if the user is authenticated */
-        if (authentication != null &&
-                authentication.isAuthenticated() &&
-                !(authentication instanceof AnonymousAuthenticationToken)) {
-            Object principal = authentication.getPrincipal();
-            User user = ((UserPrincipal) principal).getUser();
-            return new ResponseEntity<>(convertBookListToDTOWithUserSpecificInfo(bookList,user), HttpStatus.OK);
-        }else{
-            return new ResponseEntity<>(BookListDTO.fromSearchResult(bookList), HttpStatus.OK);
-        }
+        return new ResponseEntity<>(Util.convertBookListToDTOWithUserSpecificInfoIfAuthenticated(bookList, bookService, authentication), HttpStatus.OK);
+
     }
 
     /**
@@ -130,7 +119,7 @@ public class BookController {
     @GetMapping(value ="/get/library", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<BookListDTO> getAllBooksInLibrary(@AuthenticationPrincipal UserPrincipal userPrincipal, @RequestParam(value = "startIndex", defaultValue = "0") int startIndex, @RequestParam(value="numResultsToGet", defaultValue = "100") int numResultsToGet) {
         BookList bookList = bookService.getAllBooksInLibrary(startIndex, numResultsToGet, userPrincipal.getUser());
-        return new ResponseEntity<>(convertBookListToDTOWithUserSpecificInfo(bookList, userPrincipal.getUser()), HttpStatus.OK);
+        return new ResponseEntity<>(Util.convertBookListToDTOWithUserSpecificInfo(bookList, userPrincipal.getUser(), bookService), HttpStatus.OK);
     }
 
     /**
@@ -271,39 +260,5 @@ public class BookController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    /**
-     * Converts a {@link BookList} into a {@link BookListDTO}, enriching each {@link BookDTO}
-     * with user-specific metadata such as individual rating, reading status,
-     * library membership, and wishlist membership.
-     * <p>
-     * This method is intended to be used for authenticated users, where personalization
-     * of book data is needed.
-     * </p>
-     *
-     * @param bookList the list of books to convert, including pagination metadata
-     * @param user     the authenticated user whose library and wishlist data will be used
-     * @return a fully populated {@link BookListDTO} containing enriched {@link BookDTO} entries
-     *
-     * @see BookService#getIndividualRating(String, User)
-     * @see BookService#getReadingStatus(String, User)
-     * @see BookService#isBookInLibrary(String, User)
-     * @see BookService#isBookOnWishlist(String, User)
-     */
-    private BookListDTO convertBookListToDTOWithUserSpecificInfo(BookList bookList, User user){
-        BookListDTO.BookListDTOBuilder bookListDTOBuilder = BookListDTO.builder();
-        bookListDTOBuilder.startIndex(bookList.getStartIndex());
-        bookListDTOBuilder.numResults(bookList.getNumResults());
-        bookListDTOBuilder.skippedBooks(bookList.getSkippedBooks());
-        List<BookDTO> bookDTOs = new ArrayList<>(bookList.getBooks().size());
-        for (Book book : bookList.getBooks()) { //need cannot really use fromBook() method here, since I need to set some additional information
-            BookDTO bookDTO = BookDTO.fromBook(book);
-            bookDTO.setIndividualRating(bookService.getIndividualRating(book.getBookID(), user));
-            bookDTO.setReadingStatus(bookService.getReadingStatus(book.getBookID(), user));
-            bookDTO.setBookIsInLibrary(bookService.isBookInLibrary(book.getBookID(), user));
-            bookDTO.setBookIsOnWishlist(bookService.isBookOnWishlist(book.getBookID(), user));
-            bookDTOs.add(bookDTO);
-        }
-        bookListDTOBuilder.books(bookDTOs);
-        return bookListDTOBuilder.build();
-    }
+
 }
