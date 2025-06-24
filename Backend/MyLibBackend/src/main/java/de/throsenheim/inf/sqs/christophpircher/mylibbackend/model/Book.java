@@ -92,13 +92,6 @@ public class Book {
     private Set<LibraryBook> libraryBooks;
 
     /**
-     * Many-to-many mapping between books and users who have added this book to their wishlist.
-     */
-    @ManyToMany
-    @Builder.Default
-    private Set<User> wishlistUsers = new HashSet<>();
-
-    /**
      * Computes the average rating of this book across all users who have rated it.
      *
      * @return The average rating (between 1 and 5), or 0 if there are no ratings.

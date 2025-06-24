@@ -210,8 +210,6 @@ public class BookService {
         if(!newestUser.getWishlistBooks().contains(book)) {
             newestUser.getWishlistBooks().add(book);
             userRepository.save(newestUser);
-            book.getWishlistUsers().add(newestUser);
-            bookRepository.save(book);
         }
     }
 
@@ -277,8 +275,6 @@ public class BookService {
             if(newestUser.getWishlistBooks().contains(book)) {
                 newestUser.getWishlistBooks().remove(book);
                 userRepository.save(newestUser);
-                book.getWishlistUsers().remove(newestUser);
-                bookRepository.save(book);
             }
         }
     }
