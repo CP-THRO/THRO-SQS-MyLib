@@ -59,7 +59,7 @@ jobs:
     - name: Download artifact
       uses: actions/download-artifact@v4
       with:
-        working-directory: ./Backend/MyLibBackend
+        path: ./Backend/MyLibBackend
         name: backend-build
     - name: Sonar
       working-directory: ./Backend/MyLibBackend
