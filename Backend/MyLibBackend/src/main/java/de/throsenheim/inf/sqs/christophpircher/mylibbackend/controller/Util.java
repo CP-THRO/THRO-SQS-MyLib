@@ -16,6 +16,9 @@ import java.util.List;
 
 class Util {
 
+    private Util() {}
+
+
     /**
      * Converts a {@link BookList} into a {@link BookListDTO}, enriching each {@link BookDTO}
      * with user-specific information when the user is authenticated.

@@ -14,7 +14,7 @@ export function usePaginationState(
             try {
                 const { page, size } = JSON.parse(saved);
                 additionalRestoreFn?.();
-                bookList.setPagination(page || 1, size || bookList.pageSize.value);
+                bookList.setPagination(page ?? 1, size ?? bookList.pageSize.value);
             } catch {
                 console.warn(`Invalid pagination data in sessionStorage for ${storageKey}`);
             }
