@@ -337,7 +337,7 @@ public class BookService {
      * @throws BookNotFoundException if the book doesn't exist
      * @throws BookNotInLibraryException if the user does not own this book
      */
-    rivate LibraryBook getBookFromLibrary(String bookID, User user) throws BookNotFoundException, BookNotInLibraryException {
+    private LibraryBook getBookFromLibrary(String bookID, User user) throws BookNotFoundException, BookNotInLibraryException {
         Optional<Book> book = bookRepository.getBookByBookID(bookID);
         if (book.isEmpty()) {
             throw new BookNotFoundException("Book not found: " + bookID);
