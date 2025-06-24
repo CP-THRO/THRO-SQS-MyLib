@@ -61,6 +61,8 @@ jobs:
       with:
         path: ./Backend/MyLibBackend
         name: backend-build
+    - name: Check contents of my-dir
+      run: ls -R ./Backend/MyLibBackend
     - name: Sonar
       working-directory: ./Backend/MyLibBackend
       env:
