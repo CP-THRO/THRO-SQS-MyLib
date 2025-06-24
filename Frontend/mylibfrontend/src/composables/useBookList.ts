@@ -55,6 +55,11 @@ export function useBookList(fetchFn: (startIndex: number, pageSize: number, ...a
         loadBooks();
     };
 
+    const setPagination = (page: number, size: number) => {
+        currentPage.value = page;
+        pageSize.value = size;
+    };
+
     watch(pageSize, () => {
         currentPage.value = 1;
         loadBooks();
@@ -73,5 +78,6 @@ export function useBookList(fetchFn: (startIndex: number, pageSize: number, ...a
         updatePageSize,
         loadBooks,
         emptyInitBooks,
+        setPagination,
     };
 }
