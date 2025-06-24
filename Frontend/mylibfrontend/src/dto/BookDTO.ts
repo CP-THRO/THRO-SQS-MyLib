@@ -5,7 +5,7 @@
  * description, ratings, and user-specific info like reading status or library inclusion.
  */
 
-import {ReadingStatus} from "./ReadingStatus.ts";
+import {type ReadingStatusType} from "./ReadingStatus.ts";
 export interface BookDTO {
     /** OpenLibrary Book ID */
     bookID: string;
@@ -44,7 +44,7 @@ export interface BookDTO {
     averageRating: number;
 
     /** User's reading status (optional; needs enum defined) */
-    readingStatus?: typeof ReadingStatus;
+    readingStatus?: ReadingStatusType;
 
     /** Whether book is in user's library */
     bookIsInLibrary: boolean;

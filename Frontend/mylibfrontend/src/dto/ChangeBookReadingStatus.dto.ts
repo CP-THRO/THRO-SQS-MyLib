@@ -1,4 +1,4 @@
-import {ReadingStatus} from "./ReadingStatus.ts";
+import {type ReadingStatusType} from "./ReadingStatus.ts";
 
 /**
  * DTO used to update the reading status of a specific book in the user's personal library.
@@ -14,5 +14,5 @@ export interface ChangeBookReadingStatusRequestDTO {
     /**
      * New reading status to apply to the book.
      */
-    status: typeof ReadingStatus;
+    status: ReadingStatusType;
 }

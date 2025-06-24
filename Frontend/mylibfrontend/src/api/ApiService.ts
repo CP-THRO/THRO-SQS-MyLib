@@ -3,6 +3,10 @@ import type {AxiosInstance} from 'axios';
 import type {BookDTO} from "../dto/BookDTO.ts";
 import type {BookListDTO} from "../dto/BookListDTO.ts";
 import type {AuthRequestDTO} from "../dto/AuthRequestDTO.ts";
+import type {AddBookRequestDTO} from "../dto/AddBookRequestDTO.ts";
+import type {ChangeBookRatingDTO} from "../dto/ChangeBookRatingDTO.ts";
+import type {ReadingStatusType} from "../dto/ReadingStatus.ts";
+import type {ChangeBookReadingStatusRequestDTO} from "../dto/ChangeBookReadingStatus.dto.ts";
 
 class ApiService {
     private static instance: ApiService;
@@ -111,12 +115,37 @@ class ApiService {
         return result.data;
     }
 
+    public async addBookToLibrary(bookID : string) {
+        let addRequest : AddBookRequestDTO = {bookID: bookID};
+        await this.http.post("/api/v1/books/add/library", addRequest);
 
-    // Example method to fetch users
-//public async getUsers(): Promise<UserDto[]> {
-//        const response = await this.http.get('/users');
-//        return response.data.map((userData: any) => new UserDto(userData));
-//}
+    }
+
+    public async addBookToWishlist(bookID : string){
+        let addRequest : AddBookRequestDTO = {bookID: bookID};
+        await this.http.post("/api/v1/books/add/wishlist", addRequest);
+        // Throws an error if something is wrong
+    }
+
+    public async deleteBookFromLibrary(bookID : string) {
+        await this.http.delete(`/api/v1/books/delete/library/${bookID}`);
+        // Throws an error if something is wrong
+    }
+
+    public async deleteBookFromWishlist(bookID : string){
+        await this.http.delete(`/api/v1/books/delete/wishlist/${bookID}`);
+        // Throws an error if something is wrong
+    }
+
+    public async updateRating(bookID : string, rating : number){
+        let ratingDTO : ChangeBookRatingDTO = {bookID: bookID, rating: rating};
+        await this.http.put(`/api/v1/books/update/rating`, ratingDTO);
+    }
+
+    public async updateStatus(bookID : string, status : ReadingStatusType){
+        let statusDTO : ChangeBookReadingStatusRequestDTO = {bookID : bookID, status : status as ReadingStatusType};
+        await this.http.put(`/api/v1/books/update/status`, statusDTO);
+    }
 
 // Add more methods here as needed
 }
