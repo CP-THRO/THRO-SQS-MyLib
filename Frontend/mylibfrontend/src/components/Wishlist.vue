@@ -18,7 +18,12 @@
     </template>
 
     <template #actions="{ book }">
-      <router-link class="btn btn-primary" :to="`/book/${book.bookID}`">Details</router-link>
+      <div class="d-grid gap-2">
+        <router-link class="btn btn-primary" :to="`/book/${book.bookID}`">Details</router-link>
+        <button @click="onAddToLibrary(book.bookID)" type="button" class="btn btn-primary">Add to Library</button>
+        <button @click="onDeleteFromWishlist(book.bookID)" type="button" class="btn btn-danger">Delete from Wishlist</button>
+      </div>
+
     </template>
   </BaseBookList>
 </template>
@@ -53,9 +58,31 @@ export default defineComponent({
 
     onMounted(bookList.loadBooks);
 
+    const onAddToLibrary = async (bookID : string) =>{
+      bookList.error.value = null
+      try{
+        await apiService.addBookToLibrary(bookID as string);
+        await bookList.loadBooks()
+      } catch (e: any){
+        bookList.error.value = e.message || 'Failed to add book to library';
+      }
+    }
+
+    const onDeleteFromWishlist = async (bookID : string) =>{
+      bookList.error.value = null
+      try{
+        await apiService.deleteBookFromWishlist(bookID as string);
+        await bookList.loadBooks()
+      } catch (e: any){
+        bookList.error.value = e.message || 'Failed to delete book from wishlist';
+      }
+    }
+
     return {
       bookList,
       columns,
+      onAddToLibrary,
+      onDeleteFromWishlist,
     };
   },
 });

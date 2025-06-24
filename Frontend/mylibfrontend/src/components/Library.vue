@@ -22,7 +22,10 @@
     </template>
 
     <template #actions="{ book }">
-      <router-link class="btn btn-primary" :to="`/book/${book.bookID}`">Details</router-link>
+      <div class="d-grid gap-2">
+        <router-link class="btn btn-primary" :to="`/book/${book.bookID}`">Details</router-link>
+        <button @click="onDeleteFromLibrary(book.bookID)" type="button" class="btn btn-danger">Delete from Wishlist</button>
+      </div>
     </template>
   </BaseBookList>
 </template>
@@ -57,11 +60,22 @@ export default defineComponent({
       }
     });
 
+    const onDeleteFromLibrary = async (bookID : string) =>{
+      bookList.error.value = null
+      try{
+        await apiService.deleteBookFromLibrary(bookID as string);
+        await bookList.loadBooks()
+      } catch (e: any){
+        bookList.error.value = e.message || 'Failed to delete book from library';
+      }
+    }
+
     onMounted(bookList.loadBooks);
 
     return {
       bookList,
       columns,
+      onDeleteFromLibrary,
     };
   },
 });

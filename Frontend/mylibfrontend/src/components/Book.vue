@@ -59,7 +59,7 @@ const onDeleteFromWishlist = async () =>{
     await apiService.deleteBookFromWishlist(book.value?.bookID as string);
     await loadBook()
   } catch (e: any){
-    errorPersonalSection.value = e.message || 'Failed to delete book from library';
+    errorPersonalSection.value = e.message || 'Failed to delete book from wishlist';
   }
 }
 
