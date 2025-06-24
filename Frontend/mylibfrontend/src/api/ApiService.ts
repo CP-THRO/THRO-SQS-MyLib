@@ -139,7 +139,7 @@ class ApiService {
     }
 
     public async updateStatus(bookID : string, status : ReadingStatusType){
-        let statusDTO : ChangeBookReadingStatusRequestDTO = {bookID : bookID, status : status as ReadingStatusType};
+        let statusDTO : ChangeBookReadingStatusRequestDTO = {bookID : bookID, status : status};
         await this.http.put(`/api/v1/books/update/status`, statusDTO);
     }
 
