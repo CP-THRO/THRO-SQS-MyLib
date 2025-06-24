@@ -1,17 +1,19 @@
 /**
  * Data Transfer Object (DTO) representing an authentication request.
  *
- * Used for both user registration and login endpoints, where a client provides
- * a username and password to authenticate or create an account.
+ * Used for user registration and login, where the client submits
+ * credentials for account creation or verification.
  */
 export interface AuthRequestDTO {
     /**
-     * The username to be submitted
+     * The username provided by the user.
+     * Required for both login and registration.
      */
     username: string;
 
     /**
-     * The password to be submitted
+     * The user's password.
+     * Used to verify identity or secure a new account.
      */
     password: string;
 }

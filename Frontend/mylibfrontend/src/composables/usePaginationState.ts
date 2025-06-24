@@ -1,6 +1,12 @@
 import { onMounted, watch } from 'vue';
 import { onBeforeRouteLeave } from 'vue-router';
 
+/**
+ * Manages pagination state using sessionStorage and route lifecycle.
+ *
+ * Restores pagination state on mount, persists changes,
+ * and optionally cleans up state on route leave.
+ */
 export function usePaginationState(
     bookList: any,
     storageKey: string,
@@ -8,6 +14,7 @@ export function usePaginationState(
     additionalRestoreFn?: () => void,
     cleanupKeys: string[] = []
 ) {
+    // Restore pagination state from sessionStorage on mount
     onMounted(() => {
         const saved = sessionStorage.getItem(storageKey);
         if (saved) {
@@ -22,6 +29,7 @@ export function usePaginationState(
         loadBooksCallback();
     });
 
+    // Persist pagination state when page or size changes
     watch(
         () => [bookList.currentPage.value, bookList.pageSize.value],
         ([page, size]) => {
@@ -29,6 +37,7 @@ export function usePaginationState(
         }
     );
 
+    // Clean up saved pagination state when leaving the route (unless navigating to a book detail page)
     onBeforeRouteLeave((to) => {
         const isLeavingToBook = to.name === 'Book';
         if (!isLeavingToBook) {

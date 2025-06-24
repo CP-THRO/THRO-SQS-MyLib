@@ -1,54 +1,55 @@
 /**
- * Data Transfer Object (DTO) for representing book details in API responses.
+ * Data Transfer Object (DTO) for book details in API responses.
  *
- * Encapsulates all relevant book metadata such as title, authors, ISBNs, cover images,
- * description, ratings, and user-specific info like reading status or library inclusion.
+ * Includes metadata such as title, authors, ISBNs, cover images, descriptions,
+ * ratings, and user-specific states like reading status or library inclusion.
  */
 
-import {type ReadingStatusType} from "./ReadingStatus.ts";
+import { type ReadingStatusType } from "./ReadingStatus.ts";
+
 export interface BookDTO {
-    /** OpenLibrary Book ID */
+    /** OpenLibrary book identifier (e.g., "OL9698350M") */
     bookID: string;
 
-    /** Title of the book */
+    /** Main title of the book */
     title: string;
 
-    /** Subtitle of the book (optional) */
+    /** Subtitle of the book, if available */
     subtitle?: string;
 
-    /** List of authors */
+    /** List of author names */
     authors: string[];
 
-    /** Long-form book description (optional) */
+    /** Detailed book description, if available */
     description?: string;
 
-    /** List of ISBNs (10 or 13 digit numbers) */
+    /** Array of ISBNs (10- or 13-digit) */
     isbns?: string[];
 
-    /** URL to small cover image */
+    /** URL to small-sized cover image */
     coverURLSmall?: string;
 
-    /** URL to medium cover image */
+    /** URL to medium-sized cover image */
     coverURLMedium?: string;
 
-    /** URL to large cover image */
+    /** URL to large-sized cover image */
     coverURLLarge?: string;
 
-    /** Date of first publication */
+    /** Original publication date (ISO 8601 format preferred) */
     publishDate?: string;
 
-    /** User-specific individual rating (0–5) */
+    /** User's personal rating (0–5 stars) */
     individualRating: number;
 
-    /** Average user rating (0–5, float) */
+    /** Aggregated average rating from all users (0–5, decimal) */
     averageRating: number;
 
-    /** User's reading status (optional; needs enum defined) */
+    /** User's reading status (e.g., 'reading', 'finished', etc.) */
     readingStatus?: ReadingStatusType;
 
-    /** Whether book is in user's library */
+    /** True if the book is in the user's library */
     bookIsInLibrary: boolean;
 
-    /** Whether book is on user's wishlist */
+    /** True if the book is on the user's wishlist */
     bookIsOnWishlist: boolean;
 }

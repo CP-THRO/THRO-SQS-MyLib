@@ -12,12 +12,12 @@
       <tbody>
       <!-- Render each row for a book -->
       <tr v-for="book in books" :key="book.bookID">
-        <!-- Render each cell dynamically -->
+        <!-- Render each cell based on column definition -->
         <td v-for="col in columns" :key="col.field">
-          <!-- If a slot is defined for this column, use it -->
+          <!-- If a slot is defined for this column, render it -->
           <slot v-if="col.slot" :name="col.slot" :book="book" />
 
-          <!-- Otherwise, show the raw field value -->
+          <!-- Otherwise, render the raw field value -->
           <span v-else>{{ book[col.field as keyof BookDTO] }}</span>
         </td>
       </tr>
@@ -26,33 +26,38 @@
 
     <!-- Pagination and page size controls -->
     <div class="d-flex justify-content-between align-items-center mt-3">
+      <!-- Page size selector -->
       <div>
         <label for="pageSize" class="me-2">Results per page:</label>
-
-        <!-- Page size selector -->
-        <select id="pageSize"
-                class="form-select d-inline-block w-auto"
-                :value="pageSize"
-                @change="onPageSizeChange">
+        <select
+            id="pageSize"
+            class="form-select d-inline-block w-auto"
+            :value="pageSize"
+            @change="onPageSizeChange"
+        >
           <option v-for="size in pageSizes" :key="size" :value="size">
             {{ size }}
           </option>
         </select>
       </div>
 
+      <!-- Pagination buttons -->
       <div>
-        <!-- Pagination controls -->
-        <button class="btn btn-primary me-2"
-                :disabled="currentPage <= 1"
-                @click="$emit('prev-page')">
+        <button
+            class="btn btn-primary me-2"
+            :disabled="currentPage <= 1"
+            @click="$emit('prev-page')"
+        >
           Previous
         </button>
 
         <span>Page {{ currentPage }} of {{ totalPages }}</span>
 
-        <button class="btn btn-primary ms-2"
-                :disabled="currentPage >= totalPages"
-                @click="$emit('next-page')">
+        <button
+            class="btn btn-primary ms-2"
+            :disabled="currentPage >= totalPages"
+            @click="$emit('next-page')"
+        >
           Next
         </button>
       </div>
@@ -64,11 +69,12 @@
 /**
  * BookTable Component
  * -------------------
- * A reusable, dynamic table component for displaying book data.
+ * Reusable table for displaying a list of books with dynamic columns and layout.
+ *
  * Features:
- * - Dynamic columns via configuration
- * - Custom content slots for flexible rendering (images, buttons, etc.)
- * - Pagination and page size selection
+ * - Configurable columns with optional custom slots per field
+ * - Pagination controls (current page, total pages)
+ * - Page size selector with event-based updates
  */
 
 import { defineComponent } from 'vue';
@@ -80,70 +86,69 @@ export default defineComponent({
 
   props: {
     /**
-     * List of books to display in the table.
+     * Array of book objects to render.
      */
     books: {
       type: Array as PropType<BookDTO[]>,
-      required: true
+      required: true,
     },
 
     /**
-     * Columns config: defines how headers and fields render.
-     * Each entry may include a named slot for custom rendering.
+     * Column configuration.
+     * Each entry includes a field name, display label, and optional slot name.
      */
     columns: {
       type: Array as PropType<Array<{ label: string; field: string; slot?: string }>>,
-      required: true
+      required: true,
     },
 
     /**
-     * Current page number (used to update pagination controls).
+     * Current page index (1-based).
      */
     currentPage: {
       type: Number,
-      required: true
+      required: true,
     },
 
     /**
-     * Total number of pages (used to disable/enable navigation).
+     * Total number of pages available.
      */
     totalPages: {
       type: Number,
-      required: true
+      required: true,
     },
 
     /**
-     * Current number of results per page.
+     * Current number of items per page.
      */
     pageSize: {
       type: Number,
-      required: true
+      required: true,
     },
 
     /**
-     * List of page size options shown in the selector.
+     * Allowed options for items per page.
      */
     pageSizes: {
       type: Array as PropType<number[]>,
-      required: true
-    }
+      required: true,
+    },
   },
 
   emits: [
-    'next-page',         // Triggered when the user clicks the 'Next' button
-    'prev-page',         // Triggered when the user clicks the 'Previous' button
-    'page-size-change'   // Triggered when the user changes page size
+    'next-page',         // Triggered when clicking the "Next" button
+    'prev-page',         // Triggered when clicking the "Previous" button
+    'page-size-change',  // Triggered when a new page size is selected
   ],
 
   methods: {
     /**
-     * Handle changes to the page size dropdown.
-     * Emits a 'page-size-change' event with the selected size.
+     * Emit page size selection changes to the parent.
      */
     onPageSizeChange(event: Event) {
       const value = +(event.target as HTMLSelectElement).value;
       this.$emit('page-size-change', value);
-    }
-  }
+    },
+  },
 });
 </script>

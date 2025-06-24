@@ -1,29 +1,29 @@
-import type {BookDTO} from "./BookDTO.ts";
+import type { BookDTO } from "./BookDTO.ts";
 
 /**
- * DTO for returning paginated book search results.
+ * DTO for paginated book search results.
  *
- * Represents the result set from a search operation, including pagination metadata,
- * a list of books, and count of any skipped results due to data issues.
+ * Includes total result count, current page metadata,
+ * returned books, and number of skipped entries.
  */
 export interface BookListDTO {
     /**
-     * Total number of search results (not affected by pagination).
+     * Total number of matching results (across all pages).
      */
     numResults: number;
 
     /**
-     * Index of the first result in the current page (zero-based).
+     * Zero-based index of the first result in this page.
      */
     startIndex: number;
 
     /**
-     * List of books returned for the current page.
+     * List of books for the current page.
      */
     books: BookDTO[];
 
     /**
-     * Number of skipped books due to missing or malformed data (e.g., in OpenLibrary).
+     * Number of results skipped due to invalid or incomplete data.
      */
     skippedBooks: number;
 }

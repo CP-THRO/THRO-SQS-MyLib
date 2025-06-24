@@ -1,4 +1,5 @@
 <template>
+  <!-- Reusable paginated book list component for wishlist display -->
   <BaseBookList
       title="Your Wishlist"
       :books="bookList.books.value"
@@ -13,10 +14,12 @@
       @prev-page="bookList.prevPage"
       @page-size-change="bookList.updatePageSize"
   >
+    <!-- Slot: average rating display -->
     <template #averageRating="{ book }">
       {{ book.averageRating ? `${book.averageRating} / 5` : 'Not rated yet' }}
     </template>
 
+    <!-- Slot: action buttons for each book -->
     <template #actions="{ book }">
       <div class="d-grid gap-2">
         <router-link class="btn btn-primary" :to="`/book/${book.bookID}`">Details</router-link>
@@ -40,31 +43,27 @@ import { isAuthenticated } from '../wrapper/AuthInfoWrapper';
 export default defineComponent({
   name: 'WishlistBooks',
   components: { BaseBookList },
+
   setup() {
     const router = useRouter();
+
+    // Initialize paginated book list for the user's wishlist
     const bookList = useBookList((start, size) => apiService.getWishlist(start, size));
 
-    // Redirect to login if not authenticated
+    // Redirect to login if the user is not authenticated
     onBeforeMount(() => {
       if (!localStorage.getItem('is_authenticated')) {
         router.push('/login');
       }
     });
 
+    // Persist and restore pagination state for wishlist
     usePaginationState(bookList, 'wishlistPage', bookList.loadBooks);
 
-    const { onAddToLibrary } = useBookActions(bookList, bookList.loadBooks);
+    // Action handlers for moving a book to the library or removing it from the wishlist
+    const { onAddToLibrary, onDeleteFromWishlist } = useBookActions(bookList, bookList.loadBooks);
 
-    const onDeleteFromWishlist = async (bookID: string) => {
-      bookList.error.value = null;
-      try {
-        await apiService.deleteBookFromWishlist(bookID);
-        await bookList.loadBooks();
-      } catch (e: any) {
-        bookList.error.value = e.message || 'Failed to delete book from wishlist';
-      }
-    };
-
+    // Column configuration for BaseBookList
     const columns = [
       { label: 'Cover', field: 'coverURLSmall', slot: 'cover' },
       { label: 'Title', field: 'title', slot: 'title' },

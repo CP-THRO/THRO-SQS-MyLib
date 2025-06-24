@@ -1,40 +1,61 @@
-import {apiService} from "../api/ApiService.ts";
+import { apiService } from '../api/ApiService';
+import type { Ref } from 'vue';
 
-type LoadBooksFn = () => Promise<void>;
-type LoadBooksWithKeywordFn = (keywords: string) => Promise<void>;
+type ErrorRef = { error: Ref<string | null> };
+type ReloadFn = (...args: any[]) => Promise<void>;
 
+/**
+ * Composable providing book-related actions with unified error handling.
+ *
+ * Automatically resets errors, reloads data after each action,
+ * and supports optional keyword-aware reloads (search).
+ */
 export function useBookActions(
-    bookList: any,
-    loadBooks: LoadBooksFn | LoadBooksWithKeywordFn,
-    keywords?: () => string
+    target: ErrorRef,              // Object containing a reactive error reference
+    reload: ReloadFn,             // Function to reload the book list
+    keywords?: () => string       // Optional keyword provider for contextual reload
 ) {
-    const onAddToLibrary = async (bookID: string) => {
-        bookList.error.value = null;
+    /**
+     * Executes an action with error handling and triggers a reload.
+     */
+    const withErrorHandling = async (fn: () => Promise<void>) => {
+        target.error.value = null;
         try {
-            await apiService.addBookToLibrary(bookID);
-            if (keywords) {
-                await (loadBooks as LoadBooksWithKeywordFn)(keywords());
-            } else {
-                await (loadBooks as LoadBooksFn)();
-            }
+            await fn();
+            await reload(keywords?.());
         } catch (e: any) {
-            bookList.error.value = e.message ?? 'Failed to add book to library';
+            target.error.value = e.message || 'An error occurred';
         }
     };
 
-    const onAddToWishlist = async (bookID: string) => {
-        bookList.error.value = null;
-        try {
-            await apiService.addBookToWishlist(bookID);
-            if (keywords) {
-                await (loadBooks as LoadBooksWithKeywordFn)(keywords());
-            } else {
-                await (loadBooks as LoadBooksFn)();
-            }
-        } catch (e: any) {
-            bookList.error.value = e.message ?? 'Failed to add book to wishlist';
-        }
-    };
+    /**
+     * Adds a book to the library.
+     */
+    const onAddToLibrary = async (bookID: string) =>
+        withErrorHandling(() => apiService.addBookToLibrary(bookID));
 
-    return { onAddToLibrary, onAddToWishlist };
+    /**
+     * Adds a book to the wishlist.
+     */
+    const onAddToWishlist = async (bookID: string) =>
+        withErrorHandling(() => apiService.addBookToWishlist(bookID));
+
+    /**
+     * Removes a book from the library.
+     */
+    const onDeleteFromLibrary = async (bookID: string) =>
+        withErrorHandling(() => apiService.deleteBookFromLibrary(bookID));
+
+    /**
+     * Removes a book from the wishlist.
+     */
+    const onDeleteFromWishlist = async (bookID: string) =>
+        withErrorHandling(() => apiService.deleteBookFromWishlist(bookID));
+
+    return {
+        onAddToLibrary,
+        onAddToWishlist,
+        onDeleteFromLibrary,
+        onDeleteFromWishlist,
+    };
 }

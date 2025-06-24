@@ -1,31 +1,36 @@
 <script setup lang="ts">
 import { onBeforeMount, ref, watch } from 'vue';
-import {useRoute, useRouter} from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { apiService } from '../api/ApiService';
-import {syncAuthState} from "../wrapper/AuthInfoWrapper.ts";
+import { syncAuthState } from "../wrapper/AuthInfoWrapper.ts";
 
+// Route & navigation state
 let route = useRoute();
-let signup : string = route.params.signup as string;
+let signup: string = route.params.signup as string;
+const router = useRouter();
 
+// Form fields
 const username = ref<string>("");
 const password = ref<string>("");
 const error = ref<string | null>(null);
 
-let loginInProgress : boolean = false;
+// UI state
+let loginInProgress: boolean = false;
 
-const router = useRouter()
+// Watch for route changes to update signup mode dynamically
 watch(
     () => router.currentRoute.value,
-    currentRoute=> {
+    currentRoute => {
       signup = currentRoute.params.signup as string;
     },
     { immediate: true }
-)
+);
 
-// Track previous route (if coming from a protected page)
+// If already logged in, redirect immediately
+// Also store previous page for post-login redirection
 onBeforeMount(() => {
-  if(localStorage.getItem("is_authenticated")){
-    router.push("/")
+  if (localStorage.getItem("is_authenticated")) {
+    router.push("/");
   }
 
   const fromPath = router.options.history.state.back;
@@ -34,36 +39,38 @@ onBeforeMount(() => {
   }
 });
 
+/**
+ * Main button handler for login or sign-up mode.
+ */
 const buttonAction = async () => {
   error.value = null;
   loginInProgress = true;
 
-  if(signup){
-
-    try{
-      let responseCode = await apiService.signUp(username.value, password.value);
-      if(responseCode === 409){
+  if (signup) {
+    // Handle user sign-up
+    try {
+      const responseCode = await apiService.signUp(username.value, password.value);
+      if (responseCode === 409) {
         error.value = "Error: Username already exists!";
-      }else{ // automatic login after signup
-        signup = ""
-        await buttonAction()
+      } else {
+        // Auto-login after successful sign-up
+        signup = "";
+        await buttonAction();
       }
-
-    }catch (e: any) {
+    } catch (e: any) {
       error.value = e.message || 'An error occurred';
     } finally {
       loginInProgress = false;
     }
 
-  }else{
-
+  } else {
+    // Handle login
     try {
-
-      let responseCode = await apiService.authenticate(username.value, password.value);
-      if(responseCode === 403){
-        error.value = "Error: Username or password incorrect"
-      }else{
-        // Redirect to previous path or fallback to home
+      const responseCode = await apiService.authenticate(username.value, password.value);
+      if (responseCode === 403) {
+        error.value = "Error: Username or password incorrect";
+      } else {
+        // Sync app-wide auth state and redirect
         syncAuthState();
         const redirectPath = sessionStorage.getItem('loginRedirect') || '/';
         sessionStorage.removeItem('loginRedirect');
@@ -75,30 +82,43 @@ const buttonAction = async () => {
       loginInProgress = false;
     }
   }
-
 };
-
-
 </script>
 
 <template>
-<div class="w-50">
-  <div v-if="error" class="text-danger">{{error}}</div>
-  <form>
-    <div v-if="!loginInProgress" class="mb-3">
-      <label for="usernameInput" class="form-label">Username</label>
-      <input v-model="username" type="text" class="form-control" id="usernameInput">
-    </div>
-    <div class="mb-3">
-      <label for="passwordInput" class="form-label">Password</label>
-      <input v-model="password" type="password" class="form-control" id="passwordInput">
-    </div>
+  <div class="w-50">
+    <!-- Error message -->
+    <div v-if="error" class="text-danger">{{ error }}</div>
 
-    <button @click="buttonAction" type="button" class="btn btn-primary me-3">{{signup ? "Sign Up" : "Login"}}</button>
-    <router-link :to="`${signup ? '/login' : '/login/signup'}`" class="btn btn-outline-secondary">{{signup ? "Login" : "Sign Up"}}</router-link>
+    <form v-if="!loginInProgress">
+      <!-- Username input (disabled while login is in progress) -->
+      <div  class="mb-3">
+        <label for="usernameInput" class="form-label">Username</label>
+        <input v-model="username" type="text" class="form-control" id="usernameInput" />
+      </div>
 
-  </form>
+      <!-- Password input -->
+      <div class="mb-3">
+        <label for="passwordInput" class="form-label">Password</label>
+        <input v-model="password" type="password" class="form-control" id="passwordInput" />
+      </div>
 
+      <!-- Action buttons -->
+      <button
+          @click="buttonAction"
+          type="button"
+          class="btn btn-primary me-3"
+      >
+        {{ signup ? "Sign Up" : "Login" }}
+      </button>
 
-</div>
+      <!-- Switch between login/signup routes -->
+      <router-link
+          :to="`${signup ? '/login' : '/login/signup'}`"
+          class="btn btn-outline-secondary"
+      >
+        {{ signup ? "Login" : "Sign Up" }}
+      </router-link>
+    </form>
+  </div>
 </template>

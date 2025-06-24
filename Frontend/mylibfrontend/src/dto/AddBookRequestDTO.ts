@@ -2,7 +2,7 @@
  * Data Transfer Object (DTO) used for requests to add a book to a user's library or wishlist.
  *
  * This object contains the unique OpenLibrary book identifier needed to perform the operation.
- * Validation ensures that the book ID is not null, blank, or empty.
+ * Validation on the backend ensures that the book ID is not null, blank, or empty.
  */
 export interface AddBookRequestDTO {
     /**

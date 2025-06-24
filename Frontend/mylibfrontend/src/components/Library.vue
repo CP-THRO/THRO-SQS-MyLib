@@ -1,4 +1,5 @@
 <template>
+  <!-- Reusable book list component for displaying the user's library -->
   <BaseBookList
       title="Your Library"
       :books="bookList.books.value"
@@ -13,14 +14,17 @@
       @prev-page="bookList.prevPage"
       @page-size-change="bookList.updatePageSize"
   >
+    <!-- Slot: user-specific rating -->
     <template #individualRating="{ book }">
       {{ book.individualRating ? `${book.individualRating} / 5` : 'Not rated yet' }}
     </template>
 
+    <!-- Slot: average rating -->
     <template #averageRating="{ book }">
       {{ book.averageRating ? `${book.averageRating} / 5` : 'Not rated yet' }}
     </template>
 
+    <!-- Slot: action buttons -->
     <template #actions="{ book }">
       <div class="d-grid gap-2">
         <router-link class="btn btn-primary" :to="`/book/${book.bookID}`">Details</router-link>
@@ -35,6 +39,7 @@ import { defineComponent, computed, onBeforeMount } from 'vue';
 import { useRouter } from 'vue-router';
 import { useBookList } from '../composables/useBookList';
 import { usePaginationState } from '../composables/usePaginationState';
+import { useBookActions } from '../composables/useBookActions';
 import { apiService } from '../api/ApiService';
 import BaseBookList from './BaseBookList.vue';
 import { isAuthenticated } from '../wrapper/AuthInfoWrapper';
@@ -42,29 +47,27 @@ import { isAuthenticated } from '../wrapper/AuthInfoWrapper';
 export default defineComponent({
   name: 'LibraryBooks',
   components: { BaseBookList },
+
   setup() {
     const router = useRouter();
+
+    // Reactive pagination-enabled list for library books
     const bookList = useBookList((start, size) => apiService.getLibrary(start, size));
 
-    // Redirect to login if unauthenticated
+    // Redirect unauthenticated users to login
     onBeforeMount(() => {
       if (!localStorage.getItem('is_authenticated')) {
         router.push('/login');
       }
     });
 
+    // Restore and persist pagination state in sessionStorage
     usePaginationState(bookList, 'libraryPage', bookList.loadBooks);
 
-    const onDeleteFromLibrary = async (bookID: string) => {
-      bookList.error.value = null;
-      try {
-        await apiService.deleteBookFromLibrary(bookID);
-        await bookList.loadBooks();
-      } catch (e: any) {
-        bookList.error.value = e.message || 'Failed to delete book from library';
-      }
-    };
+    // Book action handlers (delete only, since library-only view)
+    const { onDeleteFromLibrary } = useBookActions(bookList, bookList.loadBooks);
 
+    // Column definitions for the table
     const columns = [
       { label: 'Cover', field: 'coverURLSmall', slot: 'cover' },
       { label: 'Title', field: 'title', slot: 'title' },
