@@ -11,7 +11,6 @@ export function usePaginationState(
     bookList: any,
     storageKey: string,
     loadBooksCallback: () => void,
-    additionalRestoreFn?: () => void,
     cleanupKeys: string[] = []
 ) {
     // Restore pagination state from sessionStorage on mount
@@ -20,7 +19,6 @@ export function usePaginationState(
         if (saved) {
             try {
                 const { page, size } = JSON.parse(saved);
-                additionalRestoreFn?.();
                 bookList.setPagination(page ?? 1, size ?? bookList.pageSize.value);
             } catch {
                 console.warn(`Invalid pagination data in sessionStorage for ${storageKey}`);

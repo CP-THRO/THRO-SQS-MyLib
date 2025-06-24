@@ -141,7 +141,7 @@ onMounted(loadBook);
               {{ book.authors?.length ? book.authors.join(', ') : 'No author found' }}
             </p>
             <p><strong>Published:</strong> {{ book.publishDate }}</p>
-            <p v-if="book.isbns?.length"><strong>ISBN:</strong> {{ book.isbns.join(',') }}</p>
+            <p v-if="book.isbns?.length"><strong>ISBN:</strong> {{ book.isbns.join(', ') }}</p>
             <p><strong>Average Rating:</strong> {{ book.averageRating || 'Not rated yet' }}</p>
           </div>
 

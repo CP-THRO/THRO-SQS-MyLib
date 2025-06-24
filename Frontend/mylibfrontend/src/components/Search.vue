@@ -89,12 +89,16 @@ export default defineComponent({
     usePaginationState(
         bookList,
         'searchPage',
-        () => bookList.loadBooks(keywords),
         () => {
           const savedKeywords = sessionStorage.getItem('searchKeywords');
           if (savedKeywords) {
             keywords = savedKeywords;
             keywordsFieldValue.value = savedKeywords;
+            return bookList.loadBooks(keywords);
+          } else {
+            // Do not load anything
+            bookList.emptyInitBooks()
+            return Promise.resolve();
           }
         },
         ['searchPage', 'searchKeywords']
