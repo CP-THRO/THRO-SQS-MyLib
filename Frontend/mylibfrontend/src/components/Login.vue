@@ -104,7 +104,3 @@ const buttonAction = async () => {
 
 </div>
 </template>
-
-<style scoped>
-
-</style>
