@@ -10,7 +10,7 @@ import type {ChangeBookReadingStatusRequestDTO} from "../dto/ChangeBookReadingSt
 
 class ApiService {
     private static instance: ApiService;
-    private http: AxiosInstance;
+    private readonly http: AxiosInstance;
 
     private constructor() {
         this.http = axios.create({
@@ -20,8 +20,6 @@ class ApiService {
             },
         });
 
-        /*
-        // Optional: Add interceptors
         this.http.interceptors.response.use(
             (response) => response,
             (error) => {
@@ -29,8 +27,6 @@ class ApiService {
                 return Promise.reject(error);
             }
         );
-
-        */
 
         /**
          * Add bearer token to request if the user is logged in.

@@ -25,7 +25,7 @@ export function useBookList(fetchFn: (startIndex: number, pageSize: number, ...a
         try {
             books.value = await fetchFn(startIndex, pageSize.value, ...extraArgs.value);
         } catch (e: any) {
-            error.value = e.message || 'An error occurred';
+            error.value = e.message ?? 'An error occurred';
         } finally {
             loading.value = false;
         }

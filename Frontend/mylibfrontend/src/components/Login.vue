@@ -1,8 +1,6 @@
 <script setup lang="ts">
-import { onBeforeMount, ref } from 'vue';
-import {watch} from "vue";
-import {useRoute } from 'vue-router';
-import {useRouter} from "vue-router";
+import { onBeforeMount, ref, watch } from 'vue';
+import {useRoute, useRouter} from 'vue-router';
 import { apiService } from '../api/ApiService';
 import {syncAuthState} from "../wrapper/AuthInfoWrapper.ts";
 
