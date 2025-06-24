@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
 @SecurityScheme(
@@ -19,6 +20,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 @OpenAPIDefinition(info = @Info(title = "MyLib Backend API", version = "v1.0"), security = @SecurityRequirement(name = "Bearer Authentication"))
 
 @EnableAsync
+@EnableScheduling
 public class MyLibBackendApplication {
 
     public static void main(String[] args) {

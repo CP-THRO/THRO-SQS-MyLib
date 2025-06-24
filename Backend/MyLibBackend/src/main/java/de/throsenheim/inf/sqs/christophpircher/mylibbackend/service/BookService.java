@@ -8,6 +8,7 @@ import de.throsenheim.inf.sqs.christophpircher.mylibbackend.model.*;
 import de.throsenheim.inf.sqs.christophpircher.mylibbackend.model.repository.BookRepository;
 import de.throsenheim.inf.sqs.christophpircher.mylibbackend.model.repository.LibraryBookRepository;
 import de.throsenheim.inf.sqs.christophpircher.mylibbackend.model.repository.UserRepository;
+import de.throsenheim.inf.sqs.christophpircher.mylibbackend.service.flyweights.ExternalBookFlyweightFactory;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -43,8 +44,8 @@ import java.util.UUID;
 public class BookService {
     private BookRepository bookRepository;
     private LibraryBookRepository libraryBookRepository;
-    private OpenLibraryAPI openLibraryAPI;
     private UserRepository userRepository;
+    private ExternalBookFlyweightFactory externalBookFlyweightFactory;
 
     /**
      * Retrieves a book by its OpenLibrary ID.
@@ -60,7 +61,7 @@ public class BookService {
     public Optional<Book> getBookById(String bookID) throws UnexpectedStatusException, IOException {
         Optional<Book> book = bookRepository.getBookByBookID(bookID);
         if(book.isEmpty()) {
-            return openLibraryAPI.getBookByBookID(bookID);
+            return externalBookFlyweightFactory.getBookByID(bookID);
         }
         return book;
     }
@@ -348,7 +349,7 @@ public class BookService {
         Book book = null;
         boolean bookExistsInDatabase = bookOptional.isPresent();
         if(!bookExistsInDatabase) {
-            bookOptional = openLibraryAPI.getBookByBookID(bookID);
+            bookOptional = externalBookFlyweightFactory.getBookByID(bookID);
             if(bookOptional.isEmpty()) {
                 throw new BookNotFoundException(String.format("Book with ID \"%s\" not found", bookID));
             }
