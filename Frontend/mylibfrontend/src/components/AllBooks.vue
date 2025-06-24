@@ -20,32 +20,43 @@
     <template #actions="{ book }">
       <div class="d-grid gap-2">
         <router-link class="btn btn-primary" :to="`/book/${book.bookID}`">Details</router-link>
-        <button @click="onAddToLibrary(book.bookID)" v-if="isAuthenticated.value && !book.bookIsInLibrary" class="btn btn-primary">Add to Library</button>
-        <button @click="onAddToWishlist(book.bookID)" v-if="isAuthenticated.value && !book.bookIsInLibrary && !book.bookIsOnWishlist" class="btn btn-primary">Add to Wishlist</button>
+        <button
+            @click="onAddToLibrary(book.bookID)"
+            v-if="isAuthenticated.value && !book.bookIsInLibrary"
+            class="btn btn-primary"
+        >
+          Add to Library
+        </button>
+        <button
+            @click="onAddToWishlist(book.bookID)"
+            v-if="isAuthenticated.value && !book.bookIsInLibrary && !book.bookIsOnWishlist"
+            class="btn btn-primary"
+        >
+          Add to Wishlist
+        </button>
       </div>
     </template>
   </BaseBookList>
 </template>
 
 <script lang="ts">
-import {defineComponent, onMounted, watch} from 'vue';
-import { useBookList } from '../composables/useBookList';
-import { apiService } from '../api/ApiService';
+import { defineComponent, computed } from 'vue';
 import BaseBookList from './BaseBookList.vue';
-import {isAuthenticated} from "../wrapper/AuthInfoWrapper.ts";
-import { onBeforeRouteLeave } from 'vue-router';
-
+import { useBookList } from '../composables/useBookList';
+import { usePaginationState } from '../composables/usePaginationState';
+import { useBookActions } from '../composables/useBookActions';
+import { apiService } from '../api/ApiService';
+import { isAuthenticated } from '../wrapper/AuthInfoWrapper';
 
 export default defineComponent({
   name: 'AllBooks',
-  computed: {
-    isAuthenticated() {
-      return isAuthenticated
-    }
-  },
   components: { BaseBookList },
   setup() {
     const bookList = useBookList((start, size) => apiService.getAllBooks(start, size));
+
+    const { onAddToLibrary, onAddToWishlist } = useBookActions(bookList, bookList.loadBooks);
+    usePaginationState(bookList, 'allBooksPage', bookList.loadBooks);
+
     const columns = [
       { label: 'Cover', field: 'coverURLSmall', slot: 'cover' },
       { label: 'Title', field: 'title', slot: 'title' },
@@ -55,56 +66,12 @@ export default defineComponent({
       { label: 'Actions', field: 'actions', slot: 'actions' },
     ];
 
-    onMounted(() => {
-      const saved = sessionStorage.getItem('allBooksPage');
-
-      if (saved) {
-        try {
-          const { page, size } = JSON.parse(saved);
-          bookList.setPagination(page || 1, size || bookList.pageSize.value);
-        } catch (e) {
-          console.warn('Invalid pagination data in sessionStorage');
-        }
-      }
-      bookList.loadBooks();
-    });
-
-    const onAddToLibrary = async (bookID : string) =>{
-      bookList.error.value = null
-      try{
-        await apiService.addBookToLibrary(bookID as string);
-        await bookList.loadBooks()
-      } catch (e: any){
-        bookList.error.value = e.message || 'Failed to add book to library';
-      }
-    }
-
-    const onAddToWishlist = async (bookID : string) =>{
-      bookList.error.value = null
-      try{
-        await apiService.addBookToWishlist(bookID as string);
-        await bookList.loadBooks()
-      } catch (e: any){
-        bookList.error.value = e.message || 'Failed to add book to wishlist';
-      }
-    }
-
-    watch(() => [bookList.currentPage.value, bookList.pageSize.value], ([page, size]) => {
-      sessionStorage.setItem('allBooksPage', JSON.stringify({ page, size }));
-    });
-
-    onBeforeRouteLeave((to) => {
-      const isLeavingToBooks = to.name === 'Book';
-      if (!isLeavingToBooks) {
-        sessionStorage.removeItem('allBooksPage');
-      }
-    });
-
     return {
       bookList,
       columns,
       onAddToLibrary,
       onAddToWishlist,
+      isAuthenticated: computed(() => isAuthenticated),
     };
   },
 });
