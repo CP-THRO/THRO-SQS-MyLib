@@ -52,7 +52,7 @@ jobs:
         working-directory: ./Frontend/mylibfrontend/
       
       - name: Build frontend
-        run: vite build
+        run: npm run build
         working-directory: ./Frontend/mylibfrontend/
           #- run: npm test
 
