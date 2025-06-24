@@ -23,8 +23,11 @@ jobs:
     - name: Build JAR
       working-directory: ./Backend/MyLibBackend
       run: ./gradlew bootJar --info
-    
-
+    - name: Upload artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: backend-build
+        path: /Backend/MyLibBackend/build
 
   test-backend:
     runs-on: ubuntu-latest
@@ -52,6 +55,11 @@ jobs:
         path: ~/.gradle/caches
         key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
         restore-keys: ${{ runner.os }}-gradle
+
+    - name: Download artifact
+      uses: actions/download-artifact@v3
+      with:
+        name: backend-build
     - name: Sonar
       working-directory: ./Backend/MyLibBackend
       env:
