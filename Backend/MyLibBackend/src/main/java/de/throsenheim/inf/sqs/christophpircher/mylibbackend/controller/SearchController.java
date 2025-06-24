@@ -8,6 +8,7 @@ import de.throsenheim.inf.sqs.christophpircher.mylibbackend.model.Book;
 import de.throsenheim.inf.sqs.christophpircher.mylibbackend.model.BookList;
 import de.throsenheim.inf.sqs.christophpircher.mylibbackend.service.BookService;
 import de.throsenheim.inf.sqs.christophpircher.mylibbackend.service.SearchService;
+import de.throsenheim.inf.sqs.christophpircher.mylibbackend.service.UserPrincipal;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -71,11 +72,17 @@ public class SearchController {
             @ApiResponse(responseCode = "502", description = "Something went wrong while accessing the OpenLibrary API (e.g. the server is not responding etc.)", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiError.class)))
     })
     @GetMapping(value = "/external/keyword", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<BookListDTO> searchExternalKeyword(@RequestParam(value = "keywords", required = true) String keywords, @RequestParam(value = "startIndex", defaultValue = "0") int startIndex, @RequestParam(value="numResultsToGet", defaultValue = "100")  int numResultsToGet) throws UnexpectedStatusException, IOException {
-        log.info("Incoming request to search OpenLibrary with keywords \"{}\"", keywords);
+    public ResponseEntity<BookListDTO> searchExternalKeyword(@RequestParam(value = "keywords") String keywords, @RequestParam(value = "startIndex", defaultValue = "0") int startIndex, @RequestParam(value = "numResultsToGet", defaultValue = "100") int numResultsToGet) throws UnexpectedStatusException, IOException {
+
+        log.info("GET /search/external/keyword - keywords='{}', startIndex={}, numResultsToGet={}", keywords, startIndex, numResultsToGet);
         BookList searchResult = searchService.searchKeywordsExternal(keywords, startIndex, numResultsToGet);
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return new ResponseEntity<>(Util.convertBookListToDTOWithUserSpecificInfoIfAuthenticated(searchResult, bookService, authentication), HttpStatus.OK);
+        if (authentication != null && authentication.isAuthenticated()) {
+            log.debug("Authenticated search request by user: {}", ((UserPrincipal) authentication.getPrincipal()).getUsername());
+        }
+
+        BookListDTO resultDTO = Util.convertBookListToDTOWithUserSpecificInfoIfAuthenticated(searchResult, bookService, authentication);
+        return ResponseEntity.ok(resultDTO);
     }
 }

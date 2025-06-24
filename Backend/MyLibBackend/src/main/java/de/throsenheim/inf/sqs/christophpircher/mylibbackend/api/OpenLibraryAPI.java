@@ -106,14 +106,14 @@ public class OpenLibraryAPI {
      * @throws IOException if a connection or parsing error occurs.
      */
     public BookList searchBooks(String searchString, int startingIndex, int numResultsToGet) throws UnexpectedStatusException, IOException {
-        log.info("Searching for keywords \"{}\"", searchString);
-        searchString = searchString.trim().replaceAll("\\s", "+"); // replace whitespaces with "+", because the API requires it.
+        log.info("Searching OpenLibrary for keywords: '{}'", searchString);
+        searchString = searchString.trim().replaceAll("\\s", "+");
 
         Call<OpenLibraryAPISearchResponse> apiSearchCall = api.search(searchString, startingIndex, numResultsToGet);
 
         try {
             Response<OpenLibraryAPISearchResponse> apiSearchResponse = apiSearchCall.execute();
-            if(apiSearchResponse.isSuccessful()  && apiSearchResponse.body() != null) {
+            if(apiSearchResponse.isSuccessful() && apiSearchResponse.body() != null) {
                 OpenLibraryAPISearchResponse response = apiSearchResponse.body();
                 BookList.BookListBuilder builder = BookList.builder();
                 builder.numResults(response.getNumFound());
@@ -126,13 +126,15 @@ public class OpenLibraryAPI {
 
                 for (OpenLibraryAPISearchWork work : searchWorks) {
                     String coverEditionKey = work.getCoverEditionKey();
-                    if(coverEditionKey == null) { // basically: If there is a book without a cover, I have to get an edition to get a book ID.
+                    if (coverEditionKey == null) {
                         OpenLibraryAPIEditions editions = getWorkEditionsByID(work.getWorkKeyWithoutURL());
-                        if(!editions.getEditions().isEmpty()){ // this can actually happen... The API is so scuffed. Skip
-                            coverEditionKey = editions.getEditions().getFirst().getBookKeyWithoutURL(); //an edition must have its own key. I am taking the first, since it does not really matter.
-                        }else{
+                        if (!editions.getEditions().isEmpty()) {
+                            coverEditionKey = editions.getEditions().getFirst().getBookKeyWithoutURL();
+                            log.debug("Fallback edition used for work ID '{}': {}", work.getWorkKeyWithoutURL(), coverEditionKey);
+                        } else {
                             ++skippedBooks;
-                            continue; // skip it.
+                            log.warn("Skipping work ID '{}': no coverEditionKey or fallback edition found", work.getWorkKeyWithoutURL());
+                            continue;
                         }
                     }
 
@@ -153,13 +155,15 @@ public class OpenLibraryAPI {
 
                 builder.books(books);
                 builder.skippedBooks(skippedBooks);
+                log.debug("Search returned {} books ({} skipped)", books.size(), skippedBooks);
                 return builder.build();
-            }else{
-                log.error("OpenLibraryAPI: Could not search OpenLibraryAPI: {} {}", apiSearchResponse.code(), apiSearchResponse.message());
+            } else {
+                log.error("Search failed: {} {}", apiSearchResponse.code(), apiSearchResponse.message());
                 throw new UnexpectedStatusException(UNEXPECTED_STATUS_MESSAGE + apiSearchResponse.code());
             }
 
-        }catch (IOException e) {
+        } catch (IOException e) {
+            log.error("IOException during search: {}", e.getMessage());
             throw alterIOException(e);
         }
     }
@@ -173,10 +177,11 @@ public class OpenLibraryAPI {
      * @throws UnexpectedStatusException if the API response is invalid or unexpected.
      */
     public Optional<Book> getBookByBookID(String bookID) throws IOException, UnexpectedStatusException {
+        log.info("Fetching book by ID: {}", bookID);
         Call<OpenLibraryAPIBook> call = api.getBookById(bookID);
-        try{
+        try {
             Response<OpenLibraryAPIBook> bookResponse = call.execute();
-            if(bookResponse.isSuccessful() && bookResponse.body() != null) {
+            if (bookResponse.isSuccessful() && bookResponse.body() != null) {
                 OpenLibraryAPIBook bookDTO = bookResponse.body();
                 Book.BookBuilder bookBuilder = Book.builder();
                 bookBuilder.title(bookDTO.getTitle());
@@ -184,7 +189,7 @@ public class OpenLibraryAPI {
                 bookBuilder.publishDate(bookDTO.getPublishDate());
                 bookBuilder.bookID(bookDTO.getBookIDWithoutURL());
 
-                if(!bookDTO.getCoverIDs().isEmpty()){
+                if (!bookDTO.getCoverIDs().isEmpty()) {
                     String[] coverURLs = getCoverURLs(bookDTO.getCoverIDs().getFirst());
                     bookBuilder.coverURLSmall(coverURLs[0]);
                     bookBuilder.coverURLMedium(coverURLs[1]);
@@ -195,33 +200,26 @@ public class OpenLibraryAPI {
                 bookBuilder.description(work.getDescription().getValue());
 
                 List<String> authors = new ArrayList<>(work.getAuthors().size());
-
-                List<OpenLibraryAPIWork.Author> dtoAuthorList = work.getAuthors();
-
-                if(!dtoAuthorList.isEmpty()) {
-                    for(OpenLibraryAPIWork.Author author : dtoAuthorList){
-                        authors.add(getAuthorByAuthorID(author.getAuthorKey().getKeyWithoutURL()).getName());
-                    }
-                }else{
-                    authors.add("No author found"); //the only author info is in the search api... but I cannot do that outside of the search endpoint
+                for (OpenLibraryAPIWork.Author author : work.getAuthors()) {
+                    authors.add(getAuthorByAuthorID(author.getAuthorKey().getKeyWithoutURL()).getName());
                 }
-
                 bookBuilder.authors(authors);
 
                 List<String> isbns = new ArrayList<>(bookDTO.getIsbn10s().size() + bookDTO.getIsbn13s().size());
                 isbns.addAll(bookDTO.getIsbn10s());
                 isbns.addAll(bookDTO.getIsbn13s());
                 bookBuilder.isbns(isbns);
+
                 return Optional.of(bookBuilder.build());
-            }else{
-                if(bookResponse.code() == 404){
-                    return Optional.empty();
-                }else{
-                    log.error("OpenLibraryAPI: Could not get book with ID {}: {} {}", bookID, bookResponse.code(), bookResponse.message());
-                    throw new UnexpectedStatusException(UNEXPECTED_STATUS_MESSAGE + bookResponse.code());
-                }
+            } else if (bookResponse.code() == 404) {
+                log.warn("Book not found for ID: {}", bookID);
+                return Optional.empty();
+            } else {
+                log.error("Failed to fetch book {}: {} {}", bookID, bookResponse.code(), bookResponse.message());
+                throw new UnexpectedStatusException(UNEXPECTED_STATUS_MESSAGE + bookResponse.code());
             }
         } catch (IOException e) {
+            log.error("IOException while fetching book {}: {}", bookID, e.getMessage());
             throw alterIOException(e);
         }
     }
@@ -235,16 +233,18 @@ public class OpenLibraryAPI {
      * @throws UnexpectedStatusException if the response status is not successful.
      */
     private OpenLibraryAPIWork getWorkByWorkID(String workID) throws IOException, UnexpectedStatusException {
+        log.info("Fetching work by ID: {}", workID);
         Call<OpenLibraryAPIWork> call = api.getWorkById(workID);
-        try{
+        try {
             Response<OpenLibraryAPIWork> workResponse = call.execute();
-            if(workResponse.isSuccessful() && workResponse.body() != null) {
+            if (workResponse.isSuccessful() && workResponse.body() != null) {
                 return workResponse.body();
-            }else{
-                log.error("OpenLibraryAPI: Could not get work with ID {}: {} {}", workID, workResponse.code(), workResponse.message());
+            } else {
+                log.error("Failed to fetch work {}: {} {}", workID, workResponse.code(), workResponse.message());
                 throw new UnexpectedStatusException(UNEXPECTED_STATUS_MESSAGE + workResponse.code());
             }
-        } catch (IOException e){
+        } catch (IOException e) {
+            log.error("IOException while fetching work {}: {}", workID, e.getMessage());
             throw alterIOException(e);
         }
     }
@@ -259,19 +259,22 @@ public class OpenLibraryAPI {
      * @throws IOException on network failure.
      */
     private OpenLibraryAPIAuthor getAuthorByAuthorID(String authorID) throws UnexpectedStatusException, IOException {
+        log.info("Fetching author by ID: {}", authorID);
         Call<OpenLibraryAPIAuthor> call = api.getAuthorById(authorID);
         try {
             Response<OpenLibraryAPIAuthor> response = call.execute();
-            if(response.isSuccessful() && response.body() != null) {
+            if (response.isSuccessful() && response.body() != null) {
                 return response.body();
-            }else{
-                log.error("OpenLibraryAPI: Could not get author with ID {}: {} {}", authorID, response.code(), response.message());
+            } else {
+                log.error("Failed to fetch author {}: {} {}", authorID, response.code(), response.message());
                 throw new UnexpectedStatusException(UNEXPECTED_STATUS_MESSAGE + response.code());
             }
         } catch (IOException e) {
+            log.error("IOException while fetching author {}: {}", authorID, e.getMessage());
             throw alterIOException(e);
         }
     }
+
 
     /**
      * Retrieves all editions of a work to fall back when no direct cover edition is available.
@@ -282,19 +285,20 @@ public class OpenLibraryAPI {
      * @throws IOException on connection failure.
      */
     private OpenLibraryAPIEditions getWorkEditionsByID(String workID) throws UnexpectedStatusException, IOException {
+        log.info("Fetching editions for work ID: {}", workID);
         Call<OpenLibraryAPIEditions> call = api.getEditionsByWorkId(workID);
         try {
             Response<OpenLibraryAPIEditions> response = call.execute();
-            if(response.isSuccessful() && response.body() != null) {
+            if (response.isSuccessful() && response.body() != null) {
                 return response.body();
-            }else{
-                log.info("OpenLibraryAPI: Could not get editions for work ID {}: {} {}", workID, response.code(), response.message());
+            } else {
+                log.warn("No editions found for work ID {}: {} {}", workID, response.code(), response.message());
                 throw new UnexpectedStatusException(UNEXPECTED_STATUS_MESSAGE + response.code());
             }
         } catch (IOException e) {
+            log.error("IOException while fetching editions for work {}: {}", workID, e.getMessage());
             throw alterIOException(e);
         }
-
     }
 
     /**
@@ -305,8 +309,8 @@ public class OpenLibraryAPI {
      */
     @PostConstruct
     private void createNewApi() {
-        log.info("Creating OpenLibraryAPI object");
         String baseurl = environment.getProperty("external.openLibraryAPIBaseURL");
+        log.info("Creating OpenLibraryAPI object with base URL: {}", baseurl);
         assert baseurl != null;
         Retrofit retrofit = new Retrofit.Builder().baseUrl(baseurl).addConverterFactory(JacksonConverterFactory.create()).build();
         api = retrofit.create(OpenLibraryAPIInterface.class);

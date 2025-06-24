@@ -8,12 +8,14 @@ import de.throsenheim.inf.sqs.christophpircher.mylibbackend.model.User;
 import de.throsenheim.inf.sqs.christophpircher.mylibbackend.service.BookService;
 import de.throsenheim.inf.sqs.christophpircher.mylibbackend.service.UserPrincipal;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 class Util {
 
     private Util() {}
@@ -41,17 +43,14 @@ class Util {
      * @see BookService#isBookOnWishlist(String, User)
      */
     static BookListDTO convertBookListToDTOWithUserSpecificInfoIfAuthenticated(BookList bookList, BookService bookService, Authentication authentication) {
-
         if (authentication != null &&
                 authentication.isAuthenticated() &&
                 !(authentication instanceof AnonymousAuthenticationToken)) {
-            Object principal = authentication.getPrincipal();
-            User user = ((UserPrincipal) principal).getUser();
-
-
+            User user = ((UserPrincipal) authentication.getPrincipal()).getUser();
+            log.debug("Authenticated request detected. Personalizing BookListDTO for user '{}'", user.getUsername());
             return convertBookListToDTOWithUserSpecificInfo(bookList, user, bookService);
-
         } else {
+            log.debug("Unauthenticated request. Returning generic BookListDTO");
             return BookListDTO.fromSearchResult(bookList);
         }
     }
@@ -76,13 +75,15 @@ class Util {
      * @return a fully enriched {@link BookListDTO}
      */
     static BookListDTO convertBookListToDTOWithUserSpecificInfo(BookList bookList, User user, BookService bookService) {
+        log.debug("Enriching BookList with user-specific data for user '{}'. Book count: {}", user.getUsername(), bookList.getBooks().size());
 
         BookListDTO.BookListDTOBuilder bookListDTOBuilder = BookListDTO.builder();
         bookListDTOBuilder.startIndex(bookList.getStartIndex());
         bookListDTOBuilder.numResults(bookList.getNumResults());
         bookListDTOBuilder.skippedBooks(bookList.getSkippedBooks());
+
         List<BookDTO> bookDTOs = new ArrayList<>(bookList.getBooks().size());
-        for (Book book : bookList.getBooks()) { //need cannot really use fromBook() method here, since I need to set some additional information
+        for (Book book : bookList.getBooks()) {
             BookDTO bookDTO = BookDTO.fromBook(book);
             bookDTO.setIndividualRating(bookService.getIndividualRating(book.getBookID(), user));
             bookDTO.setReadingStatus(bookService.getReadingStatus(book.getBookID(), user));
@@ -90,6 +91,9 @@ class Util {
             bookDTO.setBookIsOnWishlist(bookService.isBookOnWishlist(book.getBookID(), user));
             bookDTOs.add(bookDTO);
         }
+
+        log.debug("Finished enriching {} books for user '{}'", bookDTOs.size(), user.getUsername());
+
         bookListDTOBuilder.books(bookDTOs);
         return bookListDTOBuilder.build();
     }

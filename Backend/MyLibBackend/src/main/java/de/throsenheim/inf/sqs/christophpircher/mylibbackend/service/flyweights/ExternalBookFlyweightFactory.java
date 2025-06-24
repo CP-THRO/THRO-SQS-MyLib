@@ -4,6 +4,7 @@ import de.throsenheim.inf.sqs.christophpircher.mylibbackend.api.OpenLibraryAPI;
 import de.throsenheim.inf.sqs.christophpircher.mylibbackend.exceptions.UnexpectedStatusException;
 import de.throsenheim.inf.sqs.christophpircher.mylibbackend.model.Book;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -13,13 +14,12 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Caches book details from the OpenLibrary API to avoid redundant network calls.
- *
  * Uses a thread-safe ConcurrentHashMap to store flyweight entries (shared, immutable objects),
  * each wrapped in a CacheEntry with a creation timestamp.
- *
  * Entries are valid for a configurable TTL (default: 60 minutes),
  * after which they are considered expired and reloaded on next access.
  */
+@Slf4j
 @AllArgsConstructor
 @Component // Makes this a singleton Spring-managed bean
 public class ExternalBookFlyweightFactory {
@@ -47,11 +47,25 @@ public class ExternalBookFlyweightFactory {
         CacheEntry<Optional<Book>> cached = bookCache.get(bookID);
 
         if (cached != null && cached.isNotExpired(TTL_MILLIS)) {
+            log.debug("Cache hit for book '{}'", bookID);
             return cached.value;
+        }
+
+        if (cached != null) {
+            log.debug("Cache expired for book '{}', refreshing...", bookID);
+        } else {
+            log.debug("Cache miss for book '{}', fetching from OpenLibrary", bookID);
         }
 
         Optional<Book> book = openLibraryAPI.getBookByBookID(bookID);
         bookCache.put(bookID, new CacheEntry<>(book));
+
+        if (book.isPresent()) {
+            log.info("Fetched and cached book '{}' from OpenLibrary", bookID);
+        } else {
+            log.warn("Book '{}' not found in OpenLibrary; cached empty result", bookID);
+        }
+
         return book;
     }
 
@@ -61,9 +75,18 @@ public class ExternalBookFlyweightFactory {
      * This is scheduled to run every 10 minutes and prevents unbounded memory usage.
      */
     @Scheduled(fixedDelay = 10 * 60 * 1000) // Every 10 minutes
-    public void cleanupCache() {
+    private void cleanupCache() {
         long now = System.currentTimeMillis();
+        int before = bookCache.size();
         bookCache.entrySet().removeIf(entry -> entry.getValue().isExpired(now, TTL_MILLIS));
+        int after = bookCache.size();
+
+        int removed = before - after;
+        if (removed > 0) {
+            log.info("Cache cleanup completed: {} expired entries removed ({} remaining)", removed, after);
+        } else {
+            log.debug("Cache cleanup run: no expired entries removed ({} total)", after);
+        }
     }
 
 }

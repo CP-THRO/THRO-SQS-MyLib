@@ -36,8 +36,20 @@ public class SearchService {
      * @throws UnexpectedStatusException if the OpenLibrary API returns an unexpected status code
      * @throws IOException               if a connection or read error occurs
      */
-    public BookList searchKeywordsExternal(String keywords, int startIndex, int numResultsToGet) throws UnexpectedStatusException, IOException {
-        return searchResultFlyweightFactory.search(keywords, startIndex, numResultsToGet);
+    public BookList searchKeywordsExternal(String keywords, int startIndex, int numResultsToGet)
+            throws UnexpectedStatusException, IOException {
+
+        if (keywords == null || keywords.trim().isEmpty()) {
+            log.warn("Empty or blank keywords provided for search.");
+        } else {
+            log.debug("Executing external keyword search: keywords='{}', startIndex={}, numResultsToGet={}", keywords, startIndex, numResultsToGet);
+        }
+
+        BookList result = searchResultFlyweightFactory.search(keywords, startIndex, numResultsToGet);
+
+        log.info("Keyword search completed for '{}'. Results returned: {}", keywords, result.getBooks().size());
+
+        return result;
     }
 
 }

@@ -6,6 +6,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
@@ -24,6 +25,7 @@ import java.util.UUID;
  */
 @Component
 @AllArgsConstructor
+@Slf4j
 public class JwtService {
 
     private Environment environment;
@@ -36,13 +38,19 @@ public class JwtService {
      * @return signed JWT token string
      */
     public String generateToken(User user) {
-        return Jwts.builder()
-                .claims(new HashMap<>()) // no additional claims
-                .subject(String.valueOf(user.getId()))
+        String userId = String.valueOf(user.getId());
+        log.info("Generating JWT token for user ID {}", userId);
+
+        String token = Jwts.builder()
+                .claims(new HashMap<>())
+                .subject(userId)
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 *30)) // 30 Minutes
+                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 30)) // 30 minutes
                 .signWith(getSignKey())
                 .compact();
+
+        log.debug("JWT token successfully generated for user ID {}", userId);
+        return token;
     }
 
     /**
@@ -62,7 +70,9 @@ public class JwtService {
      * @return UUID extracted from the subject claim
      */
     public UUID extractUserID(String token) {
-        return  UUID.fromString(extractClaim(token, Claims.SUBJECT, String.class)); //Because I cannot use UUID.class as requiredType for claims.get()
+        UUID userId = UUID.fromString(extractClaim(token, Claims.SUBJECT, String.class));
+        log.debug("Extracted user ID {} from token", userId);
+        return userId;
     }
 
     /**
@@ -72,7 +82,9 @@ public class JwtService {
      * @return Expiration date
      */
     public Date extractExpiration(String token) {
-        return extractClaim(token, Claims.EXPIRATION, Date.class);
+        Date expiration = extractClaim(token, Claims.EXPIRATION, Date.class);
+        log.debug("Token expiration date: {}", expiration);
+        return expiration;
     }
 
     /**
@@ -85,7 +97,7 @@ public class JwtService {
      * @return the value of the claim as the specified type
      */
     public <T> T extractClaim(String token, String claim, Class<T> requiredType) {
-        final Claims claims = extractAllClaims(token);
+        Claims claims = extractAllClaims(token);
         return claims.get(claim, requiredType);
     }
 
@@ -96,7 +108,12 @@ public class JwtService {
      * @return claims extracted from the token
      */
     private Claims extractAllClaims(String token) {
-        return Jwts.parser().verifyWith(getSignKey()).build().parseSignedClaims(token).getPayload();
+        log.debug("Parsing claims from token");
+        return Jwts.parser()
+                .verifyWith(getSignKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
     }
 
     /**
@@ -105,8 +122,10 @@ public class JwtService {
      * @param token the token to check
      * @return true if expired, false otherwise
      */
-    private Boolean isTokenExpired(String token) {
-        return extractExpiration(token).before(new Date());
+    private boolean isTokenExpired(String token) {
+        boolean expired = extractExpiration(token).before(new Date());
+        log.debug("Token is expired: {}", expired);
+        return expired;
     }
 
     /**
@@ -116,9 +135,17 @@ public class JwtService {
      * @param userDetails  the authenticated user's details
      * @return true if token is valid, false otherwise
      */
-    public Boolean validateToken(String token, UserPrincipal userDetails) {
-        final UUID userID = extractUserID(token);
-        return (userID.equals(userDetails.getUserID()) && !isTokenExpired(token));
+    public boolean validateToken(String token, UserPrincipal userDetails) {
+        UUID tokenUserId = extractUserID(token);
+        boolean valid = tokenUserId.equals(userDetails.getUserID()) && !isTokenExpired(token);
+
+        if (valid) {
+            log.info("JWT token successfully validated for user ID {}", tokenUserId);
+        } else {
+            log.warn("JWT token validation failed for user ID {}", userDetails.getUserID());
+        }
+
+        return valid;
     }
 
 }

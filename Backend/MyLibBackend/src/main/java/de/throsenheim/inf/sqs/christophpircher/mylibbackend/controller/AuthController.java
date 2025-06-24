@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -40,6 +41,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Authentication")
 @RequestMapping("/api/v1/auth")
 @AllArgsConstructor
+@Slf4j
 public class AuthController {
 
     private AuthService authService;
@@ -61,7 +63,9 @@ public class AuthController {
     })
     @PostMapping("/add-user")
     public ResponseEntity<Void> addUser(@RequestBody AuthRequestDTO newUser) throws UsernameExistsException {
-        authService.createNewUser(newUser.getUsername(),newUser.getPassword());
+        log.info("POST /add-user - Attempting to create user '{}'", newUser.getUsername());
+        authService.createNewUser(newUser.getUsername(), newUser.getPassword());
+        log.info("User '{}' created successfully", newUser.getUsername());
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
@@ -81,7 +85,10 @@ public class AuthController {
     })
     @PostMapping("/authenticate")
     public ResponseEntity<String> authenticate(@RequestBody AuthRequestDTO authRequest) throws UsernameNotFoundException {
-        return new ResponseEntity<>( authService.authenticate(authRequest.getUsername(), authRequest.getPassword()), HttpStatus.OK);
+        log.info("POST /authenticate - Attempting login for user '{}'", authRequest.getUsername());
+        String token = authService.authenticate(authRequest.getUsername(), authRequest.getPassword());
+        log.info("User '{}' authenticated successfully, JWT issued", authRequest.getUsername());
+        return ResponseEntity.ok(token);
     }
 
 }

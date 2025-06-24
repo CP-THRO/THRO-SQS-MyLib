@@ -61,28 +61,27 @@ public class BookController {
     })
     @GetMapping(value = "/get/byID/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<BookDTO> getBookById(@PathVariable("id") String bookID) throws UnexpectedStatusException, IOException {
+        log.debug("Request received: GET /get/byID/{}", bookID);
         Optional<Book> book = bookService.getBookById(bookID);
-        if(book.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+
+        if (book.isEmpty()) {
+            log.info("Book '{}' not found", bookID);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
         BookDTO bookDTO = BookDTO.fromBook(book.get());
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        /* Only add rating and reading status if the user is authenticated */
-        if (authentication != null &&
-                authentication.isAuthenticated() &&
-                !(authentication instanceof AnonymousAuthenticationToken)) {
-            Object principal = authentication.getPrincipal();
-            User user = ((UserPrincipal) principal).getUser();
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.isAuthenticated() && !(auth instanceof AnonymousAuthenticationToken)) {
+            User user = ((UserPrincipal) auth.getPrincipal()).getUser();
+            log.debug("Authenticated user '{}' - enriching bookDTO with user-specific info", user.getUsername());
             bookDTO.setIndividualRating(bookService.getIndividualRating(bookID, user));
             bookDTO.setReadingStatus(bookService.getReadingStatus(bookID, user));
-            bookDTO.setBookIsInLibrary(bookService.isBookInLibrary(bookID,  user));
+            bookDTO.setBookIsInLibrary(bookService.isBookInLibrary(bookID, user));
             bookDTO.setBookIsOnWishlist(bookService.isBookOnWishlist(bookID, user));
         }
 
-        return new ResponseEntity<>(bookDTO, HttpStatus.OK);
+        return ResponseEntity.ok(bookDTO);
     }
 
     /**
@@ -96,11 +95,11 @@ public class BookController {
             @ApiResponse(responseCode = "200", description = "List with all books in the database (paginated)", content = @Content(schema = @Schema(implementation = BookDTO.class))),
     })
     @GetMapping(value = "/get/all", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<BookListDTO> getAllBooks(@RequestParam(value = "startIndex", defaultValue = "0") int startIndex, @RequestParam(value="numResultsToGet", defaultValue = "100") int numResultsToGet){
+    public ResponseEntity<BookListDTO> getAllBooks(@RequestParam(defaultValue = "0") int startIndex,@RequestParam(defaultValue = "100") int numResultsToGet) {
+        log.debug("Request received: GET /get/all?startIndex={}&numResultsToGet={}", startIndex, numResultsToGet);
         BookList bookList = bookService.getAllKnownBooks(startIndex, numResultsToGet);
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return new ResponseEntity<>(Util.convertBookListToDTOWithUserSpecificInfoIfAuthenticated(bookList, bookService, authentication), HttpStatus.OK);
-
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        return ResponseEntity.ok(Util.convertBookListToDTOWithUserSpecificInfoIfAuthenticated(bookList, bookService, auth));
     }
 
     /**
@@ -117,9 +116,10 @@ public class BookController {
             @ApiResponse(responseCode = "403", description = "User is not authenticated")
     })
     @GetMapping(value ="/get/library", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<BookListDTO> getAllBooksInLibrary(@AuthenticationPrincipal UserPrincipal userPrincipal, @RequestParam(value = "startIndex", defaultValue = "0") int startIndex, @RequestParam(value="numResultsToGet", defaultValue = "100") int numResultsToGet) {
-        BookList bookList = bookService.getAllBooksInLibrary(startIndex, numResultsToGet, userPrincipal.getUser());
-        return new ResponseEntity<>(Util.convertBookListToDTOWithUserSpecificInfo(bookList, userPrincipal.getUser(), bookService), HttpStatus.OK);
+    public ResponseEntity<BookListDTO> getAllBooksInLibrary(@AuthenticationPrincipal UserPrincipal userPrincipal, @RequestParam(defaultValue = "0") int startIndex, @RequestParam(defaultValue = "100") int numResultsToGet) {
+        log.debug("GET /get/library - User: {}", userPrincipal.getUsername());
+        BookList list = bookService.getAllBooksInLibrary(startIndex, numResultsToGet, userPrincipal.getUser());
+        return ResponseEntity.ok(Util.convertBookListToDTOWithUserSpecificInfo(list, userPrincipal.getUser(), bookService));
     }
 
     /**
@@ -135,16 +135,17 @@ public class BookController {
             @ApiResponse(responseCode = "403", description = "User is not authenticated")
     })
     @GetMapping(value ="/get/wishlist", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<BookListDTO> getAllBooksOnWishlist(@AuthenticationPrincipal UserPrincipal userPrincipal, @RequestParam(value = "startIndex", defaultValue = "0") int startIndex, @RequestParam(value="numResultsToGet", defaultValue = "100") int numResultsToGet) {
-        BookList bookList = bookService.getAllBooksOnWishlist(startIndex, numResultsToGet, userPrincipal.getUser());
-        return new ResponseEntity<>(BookListDTO.fromSearchResult(bookList), HttpStatus.OK);
+    public ResponseEntity<BookListDTO> getAllBooksOnWishlist(@AuthenticationPrincipal UserPrincipal userPrincipal, @RequestParam(defaultValue = "0") int startIndex, @RequestParam(defaultValue = "100") int numResultsToGet) {
+        log.debug("GET /get/wishlist - User: {}", userPrincipal.getUsername());
+        BookList list = bookService.getAllBooksOnWishlist(startIndex, numResultsToGet, userPrincipal.getUser());
+        return ResponseEntity.ok(BookListDTO.fromSearchResult(list));
     }
 
     /**
      * Adds a book to the authenticated user's library.
      *
      * @param userPrincipal the authenticated user's principal
-     * @param addBookRequestDTO contains the book ID to add
+     * @param dto contains the book ID to add
      * @return {@code 201 Created} if successful
      * @throws UnexpectedStatusException if the OpenLibrary API returned an unexpected HTTP status
      * @throws BookNotFoundException if the book was not found
@@ -157,16 +158,17 @@ public class BookController {
             @ApiResponse(responseCode = "502", description = "Something went wrong while accessing the OpenLibrary API (e.g. the server is not responding etc.", content =  @Content(schema = @Schema(implementation = ApiError.class)))
     })
     @PostMapping(value = "/add/library")
-    public ResponseEntity<Void> addBookToLibrary(@AuthenticationPrincipal UserPrincipal userPrincipal, @RequestBody AddBookRequestDTO addBookRequestDTO) throws UnexpectedStatusException, BookNotFoundException, IOException {
-        bookService.addBookToLibrary(addBookRequestDTO.getBookID(), userPrincipal.getUser());
-        return new ResponseEntity<>(HttpStatus.CREATED);
+    public ResponseEntity<Void> addBookToLibrary(@AuthenticationPrincipal UserPrincipal userPrincipal,  @RequestBody AddBookRequestDTO dto) throws UnexpectedStatusException, BookNotFoundException, IOException {
+        log.info("POST /add/library - User: {} adding book: {}", userPrincipal.getUsername(), dto.getBookID());
+        bookService.addBookToLibrary(dto.getBookID(), userPrincipal.getUser());
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     /**
      * Adds a book to the authenticated user's wishlist.
      *
      * @param userPrincipal the authenticated user's principal
-     * @param addBookRequestDTO contains the book ID to add
+     * @param dto contains the book ID to add
      * @return {@code 201 Created} if successful
      * @throws UnexpectedStatusException if the OpenLibrary API returned an unexpected HTTP status
      * @throws BookNotFoundException if the book was not found
@@ -179,16 +181,17 @@ public class BookController {
             @ApiResponse(responseCode = "502", description = "Something went wrong while accessing the OpenLibrary API (e.g. the server is not responding etc.", content =  @Content(schema = @Schema(implementation = ApiError.class)))
     })
     @PostMapping(value = "/add/wishlist")
-    public ResponseEntity<Void> addBookToWishlist(@AuthenticationPrincipal UserPrincipal userPrincipal, @RequestBody AddBookRequestDTO addBookRequestDTO) throws UnexpectedStatusException, BookNotFoundException, IOException {
-        bookService.addBookToWishList(addBookRequestDTO.getBookID(), userPrincipal.getUser());
-        return new ResponseEntity<>(HttpStatus.CREATED);
+    public ResponseEntity<Void> addBookToWishlist(@AuthenticationPrincipal UserPrincipal userPrincipal, @RequestBody AddBookRequestDTO dto) throws UnexpectedStatusException, BookNotFoundException, IOException {
+        log.info("POST /add/wishlist - User: {} adding book: {}", userPrincipal.getUsername(), dto.getBookID());
+        bookService.addBookToWishList(dto.getBookID(), userPrincipal.getUser());
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     /**
      * Updates the user's rating for a specific book in their library.
      *
      * @param userPrincipal the authenticated user's principal
-     * @param changeBookRatingDTO contains the book ID and the new rating
+     * @param dto contains the book ID and the new rating
      * @return {@code 200 OK} if the rating was updated
      * @throws BookNotInLibraryException if the book is not in the user's library
      * @throws BookNotFoundException if the book does not exist
@@ -200,16 +203,17 @@ public class BookController {
             @ApiResponse(responseCode = "403", description = "User is not authenticated"),
     })
     @PutMapping(value = "/update/rating")
-    public ResponseEntity<Void> updateBookRating(@AuthenticationPrincipal UserPrincipal userPrincipal, @RequestBody ChangeBookRatingDTO changeBookRatingDTO) throws BookNotInLibraryException, BookNotFoundException {
-        bookService.rateBook(changeBookRatingDTO.getBookID(), userPrincipal.getUser(),changeBookRatingDTO.getRating());
-        return new ResponseEntity<>(HttpStatus.OK);
+    public ResponseEntity<Void> updateBookRating(@AuthenticationPrincipal UserPrincipal userPrincipal, @RequestBody ChangeBookRatingDTO dto) throws BookNotFoundException, BookNotInLibraryException {
+        log.debug("PUT /update/rating - User: {} updating book: {} with rating: {}", userPrincipal.getUsername(), dto.getBookID(), dto.getRating());
+        bookService.rateBook(dto.getBookID(), userPrincipal.getUser(), dto.getRating());
+        return ResponseEntity.ok().build();
     }
 
     /**
      * Updates the user's reading status for a specific book in their library.
      *
      * @param userPrincipal the authenticated user's principal
-     * @param changeBookReadingStatusRequestDTO contains the book ID and the new reading status
+     * @param dto contains the book ID and the new reading status
      * @return {@code 200 OK} if the status was updated
      * @throws BookNotInLibraryException if the book is not in the user's library
      * @throws BookNotFoundException if the book does not exist
@@ -221,9 +225,10 @@ public class BookController {
             @ApiResponse(responseCode = "403", description = "User is not authenticated"),
     })
     @PutMapping(value = "/update/status")
-    public ResponseEntity<Void> updateReadingStatus(@AuthenticationPrincipal UserPrincipal userPrincipal, @RequestBody ChangeBookReadingStatusRequestDTO changeBookReadingStatusRequestDTO) throws BookNotInLibraryException, BookNotFoundException {
-        bookService.updateReadingStatus(changeBookReadingStatusRequestDTO.getBookID(), userPrincipal.getUser(), changeBookReadingStatusRequestDTO.getStatus());
-        return new ResponseEntity<>(HttpStatus.OK);
+    public ResponseEntity<Void> updateReadingStatus(@AuthenticationPrincipal UserPrincipal userPrincipal, @RequestBody ChangeBookReadingStatusRequestDTO dto) throws BookNotFoundException, BookNotInLibraryException {
+        log.debug("PUT /update/status - User: {} updating book: {} with status: {}", userPrincipal.getUsername(), dto.getBookID(), dto.getStatus());
+        bookService.updateReadingStatus(dto.getBookID(), userPrincipal.getUser(), dto.getStatus());
+        return ResponseEntity.ok().build();
     }
 
     /**
@@ -238,9 +243,11 @@ public class BookController {
             @ApiResponse(responseCode = "403", description = "User is not authenticated")
     })
     @DeleteMapping("/delete/wishlist/{bookID}")
-    public ResponseEntity<Void> deleteBookFromWishlist(@AuthenticationPrincipal UserPrincipal userPrincipal, @PathVariable("bookID") String bookID){
+    public ResponseEntity<Void> deleteBookFromWishlist(@AuthenticationPrincipal UserPrincipal userPrincipal,
+                                                       @PathVariable String bookID) {
+        log.info("DELETE /delete/wishlist/{} - User: {}", bookID, userPrincipal.getUsername());
         bookService.removeBookFromWishlist(bookID, userPrincipal.getUser());
-        return new ResponseEntity<>(HttpStatus.OK);
+        return ResponseEntity.ok().build();
     }
 
     /**
@@ -255,9 +262,10 @@ public class BookController {
             @ApiResponse(responseCode = "403", description = "User is not authenticated")
     })
     @DeleteMapping("/delete/library/{bookID}")
-    public ResponseEntity<Void> deleteBookFromLibrary(@AuthenticationPrincipal UserPrincipal userPrincipal, @PathVariable("bookID") String bookID){
+    public ResponseEntity<Void> deleteBookFromLibrary(@AuthenticationPrincipal UserPrincipal userPrincipal, @PathVariable String bookID) {
+        log.info("DELETE /delete/library/{} - User: {}", bookID, userPrincipal.getUsername());
         bookService.removeBookFromLibrary(bookID, userPrincipal.getUser());
-        return new ResponseEntity<>(HttpStatus.OK);
+        return ResponseEntity.ok().build();
     }
 
 

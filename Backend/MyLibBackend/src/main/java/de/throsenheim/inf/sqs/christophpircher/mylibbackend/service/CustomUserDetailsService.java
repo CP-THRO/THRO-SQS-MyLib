@@ -40,10 +40,15 @@ public class CustomUserDetailsService implements UserDetailsService {
      */
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        log.debug("Attempting to load user by username: '{}'", username);
         User user = userRepository.getUserByUsername(username);
+
         if (user == null) {
+            log.warn("Username '{}' not found in database", username);
             throw new UsernameNotFoundException(username);
         }
+
+        log.debug("User '{}' successfully loaded", username);
         return new UserPrincipal(user);
     }
 
@@ -57,8 +62,15 @@ public class CustomUserDetailsService implements UserDetailsService {
      * @return a {@link UserDetails} instance for the user
      * @throws UserIDNotFoundException if no user with the given ID exists
      */
-    public UserDetails loadByUserID(UUID id){
-        User user = userRepository.findById(id).orElseThrow(() -> new UserIDNotFoundException(String.valueOf(id)));
+    public UserDetails loadByUserID(UUID id) {
+        log.debug("Attempting to load user by ID: {}", id);
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> {
+                    log.warn("User ID '{}' not found in database", id);
+                    return new UserIDNotFoundException(String.valueOf(id));
+                });
+
+        log.debug("User with ID '{}' successfully loaded (username: '{}')", id, user.getUsername());
         return new UserPrincipal(user);
     }
 
@@ -73,17 +85,21 @@ public class CustomUserDetailsService implements UserDetailsService {
      * @throws UsernameExistsException if the username already exists in the system
      */
     public void addUser(String username, String password) throws UsernameExistsException {
+        log.info("Registering new user: '{}'", username);
+
         User existingUser = userRepository.getUserByUsername(username);
-        if (existingUser == null) {
-            User.UserBuilder userBuilder = User.builder();
-            userBuilder.id(UUID.randomUUID());
-            userBuilder.username(username);
-            userBuilder.passwordHash(passwordEncoder.encode(password));
-            userRepository.save(userBuilder.build());
-            log.info("User {} has been created", username);
-        }else{
-            log.info("User {} already exists", username);
+        if (existingUser != null) {
+            log.warn("Registration failed: user '{}' already exists", username);
             throw new UsernameExistsException(String.format("User %s already exists!", username));
         }
+
+        User user = User.builder()
+                .id(UUID.randomUUID())
+                .username(username)
+                .passwordHash(passwordEncoder.encode(password))
+                .build();
+
+        userRepository.save(user);
+        log.info("User '{}' successfully created with ID '{}'", username, user.getId());
     }
 }

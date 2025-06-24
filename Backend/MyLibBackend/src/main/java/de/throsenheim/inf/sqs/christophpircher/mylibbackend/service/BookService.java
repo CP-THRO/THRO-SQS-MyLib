@@ -59,8 +59,10 @@ public class BookService {
      * @throws IOException if the external API call fails due to network issues
      */
     public Optional<Book> getBookById(String bookID) throws UnexpectedStatusException, IOException {
+        log.debug("Looking up book '{}' in local repository", bookID);
         Optional<Book> book = bookRepository.getBookByBookID(bookID);
-        if(book.isEmpty()) {
+        if (book.isEmpty()) {
+            log.info("Book '{}' not found locally, querying OpenLibrary", bookID);
             return externalBookFlyweightFactory.getBookByID(bookID);
         }
         return book;
@@ -76,14 +78,17 @@ public class BookService {
      * @param numResultsToGet  the number of results to return
      * @return A {@link BookList} instance with books from the internal database
      */
-    public BookList getAllKnownBooks(int startIndex, int numResultsToGet){
-        List<Book> books = bookRepository.findAll(PageRequest.of(startIndex/numResultsToGet, numResultsToGet)).toList();
-        BookList.BookListBuilder builder = BookList.builder();
-        builder.books(books);
-        builder.numResults((int)bookRepository.count());
-        builder.startIndex(startIndex);
-        builder.skippedBooks(0);
-        return builder.build();
+    public BookList getAllKnownBooks(int startIndex, int numResultsToGet) {
+        log.debug("Fetching all known books with pagination: start={}, count={}", startIndex, numResultsToGet);
+        List<Book> books = bookRepository.findAll(PageRequest.of(startIndex / numResultsToGet, numResultsToGet)).toList();
+        int total = (int) bookRepository.count();
+        log.info("Retrieved {} books (total available: {})", books.size(), total);
+        return BookList.builder()
+                .books(books)
+                .numResults(total)
+                .startIndex(startIndex)
+                .skippedBooks(0)
+                .build();
     }
 
     /**
@@ -94,22 +99,18 @@ public class BookService {
      * @param user the user whose library to query
      * @return BookList of books in the user's library
      */
-    public BookList getAllBooksInLibrary(int startIndex, int numResultsToGet, User user){
-        List<LibraryBook> libraryBooks =  libraryBookRepository.getLibraryBooksByUser(user, PageRequest.of(startIndex/numResultsToGet, numResultsToGet));
-        List<Book> books = new ArrayList<>(libraryBooks.size());
-        for(LibraryBook libraryBook : libraryBooks) {
-            books.add(libraryBook.getBook());
-        }
-
+    public BookList getAllBooksInLibrary(int startIndex, int numResultsToGet, User user) {
+        log.debug("Fetching library books for user '{}' with pagination", user.getUsername());
+        List<LibraryBook> libraryBooks = libraryBookRepository.getLibraryBooksByUser(user, PageRequest.of(startIndex / numResultsToGet, numResultsToGet));
+        List<Book> books = libraryBooks.stream().map(LibraryBook::getBook).toList();
         long totalCount = libraryBookRepository.countByUser(user);
-
-        BookList.BookListBuilder bookListBuilder = BookList.builder();
-        bookListBuilder.books(books);
-        bookListBuilder.skippedBooks(0);
-        bookListBuilder.numResults((int)totalCount);
-        bookListBuilder.startIndex(startIndex);
-
-        return bookListBuilder.build();
+        log.info("User '{}' has {} books in library", user.getUsername(), totalCount);
+        return BookList.builder()
+                .books(books)
+                .numResults((int) totalCount)
+                .startIndex(startIndex)
+                .skippedBooks(0)
+                .build();
     }
 
     /**
@@ -120,21 +121,24 @@ public class BookService {
      * @param user the user whose wishlist to query
      * @return BookList of books currently on the wishlist
      */
-    public BookList getAllBooksOnWishlist(int startIndex, int numResultsToGet, User user){
-        User newestUser = userRepository.getUserById(user.getId());
-        List<Book> books = newestUser.getWishlistBooks().stream().sorted((b1,b2) -> (b1.getTitle().compareTo(b2.getTitle()))).toList();
-        BookList.BookListBuilder builder = BookList.builder();
-        builder.books(books);
-        builder.numResults(books.size());
-        builder.startIndex(startIndex);
-        builder.skippedBooks(0);
+    public BookList getAllBooksOnWishlist(int startIndex, int numResultsToGet, User user) {
+        log.debug("Fetching wishlist books for user '{}'", user.getUsername());
+        User refreshedUser = userRepository.getUserById(user.getId());
+        List<Book> wishlist = refreshedUser.getWishlistBooks().stream()
+                .sorted((b1, b2) -> b1.getTitle().compareTo(b2.getTitle()))
+                .toList();
 
-        if(books.isEmpty()) {
-            builder.books(books);
+        if (wishlist.isEmpty()) {
+            log.info("User '{}' has an empty wishlist", user.getUsername());
         }
-        int toIndex = Math.min(startIndex + numResultsToGet, books.size());
-        builder.books(books.subList(startIndex, toIndex));
-        return  builder.build();
+
+        int toIndex = Math.min(startIndex + numResultsToGet, wishlist.size());
+        return BookList.builder()
+                .books(wishlist.subList(startIndex, toIndex))
+                .numResults(wishlist.size())
+                .startIndex(startIndex)
+                .skippedBooks(0)
+                .build();
     }
 
     /**
@@ -144,15 +148,14 @@ public class BookService {
      * @param user the user
      * @return the rating, or 0 if not rated
      */
-    public int getIndividualRating(String bookID, User user){
+    public int getIndividualRating(String bookID, User user) {
         Optional<Book> book = bookRepository.getBookByBookID(bookID);
-        if(book.isEmpty()) {
+        if (book.isEmpty()) {
+            log.debug("Rating lookup failed: book '{}' not found", bookID);
             return 0;
-        } else {
-            LibraryBookKey libraryBookKey = new LibraryBookKey(book.get().getId(), user.getId());
-            Optional<LibraryBook> libraryBooks = libraryBookRepository.getLibraryBooksById(libraryBookKey);
-            return libraryBooks.map(LibraryBook::getRating).orElse(0);
         }
+        LibraryBookKey key = new LibraryBookKey(book.get().getId(), user.getId());
+        return libraryBookRepository.getLibraryBooksById(key).map(LibraryBook::getRating).orElse(0);
     }
 
     /**
@@ -162,15 +165,14 @@ public class BookService {
      * @param user the user
      * @return the reading status, or {@code UNREAD} if none found
      */
-    public ReadingStatus getReadingStatus(String bookID, User user){
+    public ReadingStatus getReadingStatus(String bookID, User user) {
         Optional<Book> book = bookRepository.getBookByBookID(bookID);
-        if(book.isEmpty()) {
+        if (book.isEmpty()) {
+            log.debug("Reading status defaulted to UNREAD for non-existing book '{}'", bookID);
             return ReadingStatus.UNREAD;
-        } else {
-            LibraryBookKey libraryBookKey = new LibraryBookKey(book.get().getId(), user.getId());
-            Optional<LibraryBook> libraryBooks = libraryBookRepository.getLibraryBooksById(libraryBookKey);
-            return libraryBooks.map(LibraryBook::getReadingStatus).orElse(ReadingStatus.UNREAD);
         }
+        LibraryBookKey key = new LibraryBookKey(book.get().getId(), user.getId());
+        return libraryBookRepository.getLibraryBooksById(key).map(LibraryBook::getReadingStatus).orElse(ReadingStatus.UNREAD);
     }
 
     /**
@@ -184,16 +186,24 @@ public class BookService {
      * @throws BookNotFoundException if the book cannot be found
      */
     public void addBookToLibrary(String bookID, User user) throws UnexpectedStatusException, IOException, BookNotFoundException {
+        log.info("User '{}' adding book '{}' to library", user.getUsername(), bookID);
         Book book = getOrCreateBook(bookID);
-
-        LibraryBookKey libraryBookKey = new LibraryBookKey(book.getId(), user.getId());
-        Optional<LibraryBook> libraryBookOptional = libraryBookRepository.getLibraryBooksById(libraryBookKey);
-        if(libraryBookOptional.isEmpty()) {
-            LibraryBook.LibraryBookBuilder  libraryBookBuilder = LibraryBook.builder();
-            libraryBookBuilder.id(libraryBookKey).book(book).user(user).rating(0).readingStatus(ReadingStatus.UNREAD);
-            libraryBookRepository.save(libraryBookBuilder.build());
+        LibraryBookKey key = new LibraryBookKey(book.getId(), user.getId());
+        if (libraryBookRepository.getLibraryBooksById(key).isEmpty()) {
+            LibraryBook libraryBook = LibraryBook.builder()
+                    .id(key)
+                    .book(book)
+                    .user(user)
+                    .rating(0)
+                    .readingStatus(ReadingStatus.UNREAD)
+                    .build();
+            libraryBookRepository.save(libraryBook);
+            log.info("Library entry created for user '{}' and book '{}'", user.getUsername(), bookID);
+        } else {
+            log.debug("Book '{}' already exists in user '{}' library", bookID, user.getUsername());
         }
-        removeBookFromWishlist(bookID, user); //Automatically remove the book from the wishlist after putting it in the library, since it does not make sense to have it on both.
+
+        removeBookFromWishlist(bookID, user);
     }
 
     /**
@@ -206,11 +216,15 @@ public class BookService {
      * @throws BookNotFoundException if the book cannot be found
      */
     public void addBookToWishList(String bookID, User user) throws UnexpectedStatusException, IOException, BookNotFoundException {
+        log.info("User '{}' adding book '{}' to wishlist", user.getUsername(), bookID);
         Book book = getOrCreateBook(bookID);
-        User newestUser = userRepository.getUserById(user.getId()); //get latest object
-        if(!newestUser.getWishlistBooks().contains(book)) {
-            newestUser.getWishlistBooks().add(book);
-            userRepository.save(newestUser);
+        User refreshedUser = userRepository.getUserById(user.getId());
+        if (!refreshedUser.getWishlistBooks().contains(book)) {
+            refreshedUser.getWishlistBooks().add(book);
+            userRepository.save(refreshedUser);
+            log.info("Book '{}' added to wishlist for user '{}'", bookID, user.getUsername());
+        } else {
+            log.debug("Book '{}' already on wishlist for user '{}'", bookID, user.getUsername());
         }
     }
 
@@ -224,9 +238,10 @@ public class BookService {
      * @throws BookNotInLibraryException if the book isn't in the user's library
      */
     public void rateBook(String bookID, User user, int rating) throws BookNotFoundException, BookNotInLibraryException {
-        LibraryBook libraryBook = getBookFromLibrary(bookID, user);
-        libraryBook.setRating(rating);
-        libraryBookRepository.save(libraryBook);
+        log.info("User '{}' rating book '{}' with {}", user.getUsername(), bookID, rating);
+        LibraryBook lb = getBookFromLibrary(bookID, user);
+        lb.setRating(rating);
+        libraryBookRepository.save(lb);
     }
 
     /**
@@ -238,11 +253,11 @@ public class BookService {
      * @throws BookNotFoundException if the book doesn't exist
      * @throws BookNotInLibraryException if the book isn't in the user's library
      */
-    public void updateReadingStatus(String bookID, User user, ReadingStatus readingStatus) throws BookNotFoundException, BookNotInLibraryException {
-        LibraryBook libraryBook = getBookFromLibrary(bookID, user);
-        libraryBook.setReadingStatus(readingStatus);
-        libraryBookRepository.save(libraryBook);
-
+    public void updateReadingStatus(String bookID, User user, ReadingStatus status) throws BookNotFoundException, BookNotInLibraryException {
+        log.info("User '{}' updating reading status for book '{}' to {}", user.getUsername(), bookID, status);
+        LibraryBook lb = getBookFromLibrary(bookID, user);
+        lb.setReadingStatus(status);
+        libraryBookRepository.save(lb);
     }
 
     /**
@@ -251,14 +266,14 @@ public class BookService {
      * @param bookID the book's OpenLibrary ID
      * @param user the user
      */
-    public void removeBookFromLibrary(String bookID, User user){
-        LibraryBook libraryBook;
+    public void removeBookFromLibrary(String bookID, User user) {
         try {
-            libraryBook = getBookFromLibrary(bookID, user);
+            LibraryBook lb = getBookFromLibrary(bookID, user);
+            libraryBookRepository.delete(lb);
+            log.info("Book '{}' removed from user '{}' library", bookID, user.getUsername());
         } catch (BookNotFoundException | BookNotInLibraryException e) {
-            return; // Do nothing, book does not exist, so it does not concern me
+            log.debug("Attempted to remove book '{}' from library, but it wasn't there for user '{}'", bookID, user.getUsername());
         }
-        libraryBookRepository.delete(libraryBook);
     }
 
 
@@ -268,14 +283,15 @@ public class BookService {
      * @param bookID the book's OpenLibrary ID
      * @param user the user
      */
-    public void removeBookFromWishlist(String bookID, User user){
+    public void removeBookFromWishlist(String bookID, User user) {
         Optional<Book> bookOptional = bookRepository.getBookByBookID(bookID);
-        if(bookOptional.isPresent()) {
-            Book book = bookOptional.get();
-            User newestUser = userRepository.getUserById(user.getId()); //get latest object
-            if(newestUser.getWishlistBooks().contains(book)) {
-                newestUser.getWishlistBooks().remove(book);
-                userRepository.save(newestUser);
+        if (bookOptional.isPresent()) {
+            User refreshedUser = userRepository.getUserById(user.getId());
+            if (refreshedUser.getWishlistBooks().remove(bookOptional.get())) {
+                userRepository.save(refreshedUser);
+                log.info("Book '{}' removed from wishlist for user '{}'", bookID, user.getUsername());
+            } else {
+                log.debug("Book '{}' not found in wishlist for user '{}'", bookID, user.getUsername());
             }
         }
     }
@@ -288,12 +304,12 @@ public class BookService {
      * @return {@code true} if the book is in the library, {@code false} otherwise
      */
     public boolean isBookInLibrary(String bookID, User user) {
-        try{
+        try {
             getBookFromLibrary(bookID, user);
+            return true;
         } catch (BookNotInLibraryException | BookNotFoundException e) {
-            return  false;
+            return false;
         }
-        return true;
     }
 
     /**
@@ -305,9 +321,9 @@ public class BookService {
      */
     public boolean isBookOnWishlist(String bookID, User user) {
         Optional<Book> book = bookRepository.getBookByBookID(bookID);
-        if(book.isPresent()) {
-            User newestUser = userRepository.getUserById(user.getId()); //get latest object
-            return newestUser.getWishlistBooks().contains(book.get());
+        if (book.isPresent()) {
+            User refreshedUser = userRepository.getUserById(user.getId());
+            return refreshedUser.getWishlistBooks().contains(book.get());
         }
         return false;
     }
@@ -321,17 +337,14 @@ public class BookService {
      * @throws BookNotFoundException if the book doesn't exist
      * @throws BookNotInLibraryException if the user does not own this book
      */
-    private LibraryBook getBookFromLibrary(String bookID, User user) throws BookNotFoundException, BookNotInLibraryException {
+    rivate LibraryBook getBookFromLibrary(String bookID, User user) throws BookNotFoundException, BookNotInLibraryException {
         Optional<Book> book = bookRepository.getBookByBookID(bookID);
-        if(book.isEmpty()) {
-            throw new BookNotFoundException(String.format("Book with id %s not found in database", bookID));
+        if (book.isEmpty()) {
+            throw new BookNotFoundException("Book not found: " + bookID);
         }
-        LibraryBookKey libraryBookKey = new LibraryBookKey(book.get().getId(), user.getId());
-        Optional<LibraryBook> libraryBookOptional = libraryBookRepository.getLibraryBooksById(libraryBookKey);
-        if(libraryBookOptional.isEmpty()) {
-            throw new BookNotInLibraryException(String.format("Book with id %s not found in library of user %s", bookID, user.getUsername()));
-        }
-        return libraryBookOptional.get();
+        LibraryBookKey key = new LibraryBookKey(book.get().getId(), user.getId());
+        return libraryBookRepository.getLibraryBooksById(key)
+                .orElseThrow(() -> new BookNotInLibraryException("Book not in library: " + bookID));
     }
 
     /**
@@ -344,21 +357,22 @@ public class BookService {
      * @throws BookNotFoundException if the book does not exist in either source
      */
     private Book getOrCreateBook(String bookID) throws UnexpectedStatusException, IOException, BookNotFoundException {
-
-        Optional<Book> bookOptional = bookRepository.getBookByBookID(bookID);
-        Book book = null;
-        boolean bookExistsInDatabase = bookOptional.isPresent();
-        if(!bookExistsInDatabase) {
-            bookOptional = externalBookFlyweightFactory.getBookByID(bookID);
-            if(bookOptional.isEmpty()) {
-                throw new BookNotFoundException(String.format("Book with ID \"%s\" not found", bookID));
-            }
-            book = bookOptional.get();
-            book.setId(UUID.randomUUID());
-            bookRepository.save(book);
-        }else  {
-            book = bookOptional.get();
+        Optional<Book> bookOpt = bookRepository.getBookByBookID(bookID);
+        if (bookOpt.isPresent()) {
+            return bookOpt.get();
         }
+
+        log.info("Fetching book '{}' from external API", bookID);
+        Optional<Book> external = externalBookFlyweightFactory.getBookByID(bookID);
+        if (external.isEmpty()) {
+            log.warn("Book '{}' not found externally", bookID);
+            throw new BookNotFoundException("Book not found: " + bookID);
+        }
+
+        Book book = external.get();
+        book.setId(UUID.randomUUID());
+        bookRepository.save(book);
+        log.info("Book '{}' saved to database from external source", bookID);
         return book;
     }
 

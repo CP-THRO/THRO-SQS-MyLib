@@ -4,6 +4,7 @@ import de.throsenheim.inf.sqs.christophpircher.mylibbackend.api.OpenLibraryAPI;
 import de.throsenheim.inf.sqs.christophpircher.mylibbackend.exceptions.UnexpectedStatusException;
 import de.throsenheim.inf.sqs.christophpircher.mylibbackend.model.BookList;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -12,13 +13,12 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Caches paginated keyword-based search results from the OpenLibrary API to improve performance.
- *
  * Uses a ConcurrentHashMap to ensure thread-safe caching.
  * Each entry is wrapped in a {@link CacheEntry} to support time-based expiration (TTL).
- *
  * The cache helps avoid redundant API calls for repeated or paginated searches,
  * while keeping memory usage in check via scheduled cleanup.
  */
+@Slf4j
 @AllArgsConstructor
 @Component // Makes this class a singleton in the Spring context
 public class SearchResultFlyweightFactory {
@@ -48,14 +48,22 @@ public class SearchResultFlyweightFactory {
         SearchResultFlyweightKey key = new SearchResultFlyweightKey(keywords, startIndex, numToGet);
         CacheEntry<BookList> cachedEntry = bookListCache.get(key);
 
-        // Sonar prefers computeIfAbsent, but it's not suitable here because we need exception handling and TTL checks
         if (cachedEntry != null && cachedEntry.isNotExpired(TTL_MILLIS)) {
+            log.debug("Cache hit for search [keywords='{}', start={}, count={}]", keywords, startIndex, numToGet);
             return cachedEntry.value;
         }
 
-        // Load from API and update cache
+        if (cachedEntry != null) {
+            log.debug("Cache expired for search [keywords='{}', start={}, count={}], fetching new data", keywords, startIndex, numToGet);
+        } else {
+            log.debug("Cache miss for search [keywords='{}', start={}, count={}], fetching from OpenLibrary", keywords, startIndex, numToGet);
+        }
+
         BookList bookList = openLibraryAPI.searchBooks(keywords, startIndex, numToGet);
         bookListCache.put(key, new CacheEntry<>(bookList));
+
+        log.info("Search result fetched and cached: [keywords='{}'] - {} books returned", keywords, bookList.getBooks().size());
+
         return bookList;
     }
 
@@ -64,10 +72,20 @@ public class SearchResultFlyweightFactory {
      * Runs every 10 minutes.
      */
     @Scheduled(fixedDelay = 10 * 60 * 1000) // Every 10 minutes
-    public void cleanupCache() {
+    private void cleanupCache() {
         long now = System.currentTimeMillis();
+        int before = bookListCache.size();
         bookListCache.entrySet().removeIf(entry -> entry.getValue().isExpired(now, TTL_MILLIS));
+        int after = bookListCache.size();
+        int removed = before - after;
+
+        if (removed > 0) {
+            log.info("Search cache cleanup: {} expired entries removed ({} remaining)", removed, after);
+        } else {
+            log.debug("Search cache cleanup: no expired entries ({} total)", after);
+        }
     }
+
 
     /**
      * Composite key representing a unique search query, based on keywords, start index, and result count.
