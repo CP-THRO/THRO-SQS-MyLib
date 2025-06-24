@@ -1,7 +1,7 @@
 <template>
   <!-- Book list display using the shared BaseBookList component -->
   <BaseBookList
-      title="Saved bgirtooks"
+      title="Saved books"
       :books="bookList.books.value"
       :loading="bookList.loading.value"
       :error="bookList.error.value as string"
