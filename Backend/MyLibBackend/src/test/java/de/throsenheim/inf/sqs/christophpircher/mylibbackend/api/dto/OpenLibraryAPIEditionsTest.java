@@ -6,26 +6,29 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class OpenLibraryAPIEditionsTest {
 
+    private static final String GENERIC_BOOK_ID = "OL123456M";
+    private static final String GENERIC_BOOK_ID_UNPARSED = "/books/OL123456M";
+
     @Test
-    void testGetBookKeyWithoutURL_withPrefix() {
+    void testGetBookKeyWithoutURLWithPrefix() {
         OpenLibraryAPIEditions.Edition edition = new OpenLibraryAPIEditions.Edition();
-        edition.setBookKey("/books/OL99999M");
+        edition.setBookKey(GENERIC_BOOK_ID_UNPARSED);
 
         String result = edition.getBookKeyWithoutURL();
-        assertEquals("OL99999M", result);
+        assertEquals(GENERIC_BOOK_ID, result);
     }
 
     @Test
-    void testGetBookKeyWithoutURL_withoutPrefix() {
+    void testGetBookKeyWithoutURLWithoutPrefix() {
         OpenLibraryAPIEditions.Edition edition = new OpenLibraryAPIEditions.Edition();
-        edition.setBookKey("OL99999M");
+        edition.setBookKey(GENERIC_BOOK_ID);
 
         String result = edition.getBookKeyWithoutURL();
-        assertEquals("OL99999M", result); // No change expected
+        assertEquals(GENERIC_BOOK_ID, result); // No change expected
     }
 
     @Test
-    void testGetBookKeyWithoutURL_nullKey_shouldThrowNPE() {
+    void testGetBookKeyWithoutURLNullKeyShouldThrowNPE() {
         OpenLibraryAPIEditions.Edition edition = new OpenLibraryAPIEditions.Edition();
         edition.setBookKey(null);
 

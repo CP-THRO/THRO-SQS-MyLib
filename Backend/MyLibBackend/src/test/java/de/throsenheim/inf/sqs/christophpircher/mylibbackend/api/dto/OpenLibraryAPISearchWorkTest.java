@@ -5,25 +5,27 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class OpenLibraryAPISearchWorkTest {
+    private static final String GENERIC_WORK_ID = "OL123456W";
+    private static final String GENERIC_WORK_ID_UNPARSED = "/works/OL123456W";
 
     @Test
-    void testGetWorkKeyWithoutURL_withPrefix() {
+    void testGetWorkKeyWithoutURLWithPrefix() {
         OpenLibraryAPISearchWork work = new OpenLibraryAPISearchWork();
-        work.setWorkKey("/works/OL12345W");
+        work.setWorkKey("GENERIC_WORK_ID_UNPARSED");
 
-        assertEquals("OL12345W", work.getWorkKeyWithoutURL());
+        assertEquals(GENERIC_WORK_ID, work.getWorkKeyWithoutURL());
     }
 
     @Test
-    void testGetWorkKeyWithoutURL_withoutPrefix() {
+    void testGetWorkKeyWithoutURLWithoutPrefix() {
         OpenLibraryAPISearchWork work = new OpenLibraryAPISearchWork();
-        work.setWorkKey("OL12345W");
+        work.setWorkKey(GENERIC_WORK_ID);
 
-        assertEquals("OL12345W", work.getWorkKeyWithoutURL());
+        assertEquals(GENERIC_WORK_ID_UNPARSED, work.getWorkKeyWithoutURL());
     }
 
     @Test
-    void testGetWorkKeyWithoutURL_nullWorkKey() {
+    void testGetWorkKeyWithoutURLNullWorkKey() {
         OpenLibraryAPISearchWork work = new OpenLibraryAPISearchWork();
         work.setWorkKey(null);
 

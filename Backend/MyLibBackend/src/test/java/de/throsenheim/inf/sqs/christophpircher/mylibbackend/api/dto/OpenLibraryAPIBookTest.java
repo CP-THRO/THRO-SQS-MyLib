@@ -8,36 +8,42 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class OpenLibraryAPIBookTest {
 
+    private static final String GENERIC_BOOK_ID = "OL123456M";
+    private static final String GENERIC_BOOK_ID_UNPARSED = "/books/OL123456W";
+    private static final String GENERIC_WORK_ID = "OL123456W";
+    private static final String GENERIC_WORK_ID_UNPARSED = "/works/OL123456W";
+
+
     @Test
     void testGetBookIDWithoutURL() {
         OpenLibraryAPIBook book = new OpenLibraryAPIBook();
-        book.setBookID("/books/OL12345M");
+        book.setBookID(GENERIC_BOOK_ID_UNPARSED);
 
-        assertEquals("OL12345M", book.getBookIDWithoutURL());
+        assertEquals(GENERIC_BOOK_ID, book.getBookIDWithoutURL());
     }
 
     @Test
-    void testGetBookIDWithoutURL_whenNoPrefix_shouldReturnOriginal() {
+    void testGetBookIDWithoutURLWhenNoPrefixShouldReturnOriginal() {
         OpenLibraryAPIBook book = new OpenLibraryAPIBook();
-        book.setBookID("OL12345M");
+        book.setBookID(GENERIC_BOOK_ID);
 
-        assertEquals("OL12345M", book.getBookIDWithoutURL());
+        assertEquals(GENERIC_BOOK_ID_UNPARSED, book.getBookIDWithoutURL());
     }
 
     @Test
     void testGetKeyWithoutURL() {
         OpenLibraryAPIBook.WorkKey workKey = new OpenLibraryAPIBook.WorkKey();
-        workKey.setKey("/works/OL54321W");
+        workKey.setKey(GENERIC_WORK_ID_UNPARSED);
 
-        assertEquals("OL54321W", workKey.getKeyWithoutURL());
+        assertEquals(GENERIC_WORK_ID, workKey.getKeyWithoutURL());
     }
 
     @Test
-    void testGetKeyWithoutURL_whenNoPrefix_shouldReturnOriginal() {
+    void testGetKeyWithoutURLWhenNoPrefixShouldReturnOriginal() {
         OpenLibraryAPIBook.WorkKey workKey = new OpenLibraryAPIBook.WorkKey();
-        workKey.setKey("OL54321W");
+        workKey.setKey(GENERIC_WORK_ID);
 
-        assertEquals("OL54321W", workKey.getKeyWithoutURL());
+        assertEquals(GENERIC_BOOK_ID, workKey.getKeyWithoutURL());
     }
 
 }
