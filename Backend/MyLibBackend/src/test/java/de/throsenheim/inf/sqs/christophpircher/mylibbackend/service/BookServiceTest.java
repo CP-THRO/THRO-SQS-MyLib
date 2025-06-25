@@ -327,9 +327,7 @@ class BookServiceTest {
         when(bookRepository.getBookByBookID(BOOK_ID)).thenReturn(Optional.empty());
         when(externalBookFlyweightFactory.getBookByID(BOOK_ID)).thenReturn(Optional.empty());
 
-        assertThrows(BookNotFoundException.class, () -> {
-            bookService.addBookToLibrary(BOOK_ID, user);
-        });
+        assertThrows(BookNotFoundException.class, () -> bookService.addBookToLibrary(BOOK_ID, user));
 
         verify(libraryBookRepository, never()).save(any());
     }
@@ -338,9 +336,7 @@ class BookServiceTest {
         when(bookRepository.getBookByBookID(BOOK_ID)).thenReturn(Optional.empty());
         when(externalBookFlyweightFactory.getBookByID(BOOK_ID)).thenReturn(Optional.empty());
 
-        assertThrows(BookNotFoundException.class, () -> {
-            bookService.addBookToWishList(BOOK_ID, user);
-        });
+        assertThrows(BookNotFoundException.class, () -> bookService.addBookToWishList(BOOK_ID, user));
 
         verify(userRepository, never()).save(any());
     }

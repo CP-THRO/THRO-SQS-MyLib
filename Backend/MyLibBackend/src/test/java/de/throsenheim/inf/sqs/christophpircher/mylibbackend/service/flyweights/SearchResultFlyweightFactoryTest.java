@@ -13,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -63,7 +64,7 @@ class SearchResultFlyweightFactoryTest {
     }
 
     @Test
-    void searchShouldFetchFromAPIWhenCacheEntryExpired() throws Exception {
+    void searchShouldFetchFromAPIWhenCacheEntryExpired() throws NoSuchFieldException, IllegalAccessException, UnexpectedStatusException, IOException {
         SearchResultFlyweightFactory.SearchResultFlyweightKey key =
                 new SearchResultFlyweightFactory.SearchResultFlyweightKey(KEYWORDS, START, COUNT);
 
@@ -117,7 +118,7 @@ class SearchResultFlyweightFactoryTest {
         assertFalse(getCache().containsKey(keyDrop));
     }
 
-    private void invokeCleanupCache() throws Exception {
+    private void invokeCleanupCache() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         java.lang.reflect.Method method = SearchResultFlyweightFactory.class.getDeclaredMethod("cleanupCache");
         method.setAccessible(true);
         method.invoke(flyweightFactory);

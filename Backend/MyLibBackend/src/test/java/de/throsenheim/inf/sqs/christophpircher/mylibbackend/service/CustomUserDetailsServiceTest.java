@@ -53,9 +53,7 @@ class CustomUserDetailsServiceTest {
     void loadUserByUsernameShouldThrowWhenUserNotFound() {
         when(userRepository.getUserByUsername(USERNAME)).thenReturn(null);
 
-        assertThrows(UsernameNotFoundException.class, () -> {
-            userDetailsService.loadUserByUsername(USERNAME);
-        });
+        assertThrows(UsernameNotFoundException.class, () -> userDetailsService.loadUserByUsername(USERNAME));
     }
 
     @Test
@@ -72,13 +70,11 @@ class CustomUserDetailsServiceTest {
     void loadByUserIDShouldThrowWhenUserNotFound() {
         when(userRepository.findById(USER_ID)).thenReturn(Optional.empty());
 
-        assertThrows(UserIDNotFoundException.class, () -> {
-            userDetailsService.loadByUserID(USER_ID);
-        });
+        assertThrows(UserIDNotFoundException.class, () -> userDetailsService.loadByUserID(USER_ID));
     }
 
     @Test
-    void addUserShouldSaveUser_whenUsernameIsFree() throws UsernameExistsException {
+    void addUserShouldSaveUserWhenUsernameIsFree() throws UsernameExistsException {
         String rawPassword = "secure123";
         String encodedPassword = "encodedPassword";
 
@@ -100,9 +96,7 @@ class CustomUserDetailsServiceTest {
     void addUserShouldThrowWhenUsernameExists() {
         when(userRepository.getUserByUsername(USERNAME)).thenReturn(user);
 
-        assertThrows(UsernameExistsException.class, () -> {
-            userDetailsService.addUser(USERNAME, "any");
-        });
+        assertThrows(UsernameExistsException.class, () -> userDetailsService.addUser(USERNAME, "any"));
 
         verify(userRepository, never()).save(any());
     }

@@ -48,7 +48,7 @@ class SearchServiceTest {
     }
 
     @Test
-    void searchKeywordsExternal_shouldReturnResults_whenKeywordsAreValid() throws UnexpectedStatusException, IOException {
+    void searchKeywordsExternalShouldReturnResultsWhenKeywordsAreValid() throws UnexpectedStatusException, IOException {
         when(flyweightFactory.search(VALID_KEYWORDS, START_INDEX, NUM_RESULTS)).thenReturn(mockBookList);
 
         BookList result = searchService.searchKeywordsExternal(VALID_KEYWORDS, START_INDEX, NUM_RESULTS);
@@ -58,7 +58,7 @@ class SearchServiceTest {
     }
 
     @Test
-    void searchKeywordsExternal_shouldLogWarning_whenKeywordsAreBlank() throws UnexpectedStatusException, IOException {
+    void searchKeywordsExternalShouldLogWarningWhenKeywordsAreBlank() throws UnexpectedStatusException, IOException {
         when(flyweightFactory.search(EMPTY_KEYWORDS, START_INDEX, NUM_RESULTS)).thenReturn(mockBookList);
 
         BookList result = searchService.searchKeywordsExternal(EMPTY_KEYWORDS, START_INDEX, NUM_RESULTS);
@@ -68,7 +68,7 @@ class SearchServiceTest {
     }
 
     @Test
-    void searchKeywordsExternal_shouldLogWarning_whenKeywordsAreNull() throws UnexpectedStatusException, IOException {
+    void searchKeywordsExternalShouldLogWarningWhenKeywordsAreNull() throws UnexpectedStatusException, IOException {
         when(flyweightFactory.search(null, START_INDEX, NUM_RESULTS)).thenReturn(mockBookList);
 
         BookList result = searchService.searchKeywordsExternal(null, START_INDEX, NUM_RESULTS);
@@ -78,7 +78,7 @@ class SearchServiceTest {
     }
 
     @Test
-    void searchKeywordsExternal_shouldThrowException_whenFactoryThrowsIOException() throws UnexpectedStatusException, IOException {
+    void searchKeywordsExternalShouldThrowExceptionWhenFactoryThrowsIOException() throws UnexpectedStatusException, IOException {
         when(flyweightFactory.search(VALID_KEYWORDS, START_INDEX, NUM_RESULTS))
                 .thenThrow(new IOException("Connection failed"));
 
@@ -87,7 +87,7 @@ class SearchServiceTest {
     }
 
     @Test
-    void searchKeywordsExternal_shouldThrowException_whenFactoryThrowsUnexpectedStatusException() throws UnexpectedStatusException, IOException {
+    void searchKeywordsExternalShouldThrowExceptionWhenFactoryThrowsUnexpectedStatusException() throws UnexpectedStatusException, IOException {
         when(flyweightFactory.search(VALID_KEYWORDS, START_INDEX, NUM_RESULTS))
                 .thenThrow(new UnexpectedStatusException("Unexpected response"));
 
