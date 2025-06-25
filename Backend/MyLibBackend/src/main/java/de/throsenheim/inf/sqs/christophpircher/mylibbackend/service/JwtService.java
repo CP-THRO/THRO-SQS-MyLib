@@ -112,7 +112,8 @@ public class JwtService {
         return Jwts.parser()
                 .verifyWith(getSignKey())
                 .build()
-                .parseSignedClaims(token)
+                .
+                parseSignedClaims(token)
                 .getPayload();
     }
 
@@ -123,9 +124,12 @@ public class JwtService {
      * @return true if expired, false otherwise
      */
     private boolean isTokenExpired(String token) {
-        boolean expired = extractExpiration(token).before(new Date());
-        log.debug("Token is expired: {}", expired);
-        return expired;
+        try{
+           return extractExpiration(token).before(new Date()); //Try to parse. If expired, an error is thrown
+        } catch (io.jsonwebtoken.ExpiredJwtException e) {
+            log.warn("Token expired: {}", e.getMessage());
+            return true; // Return claims even if expired
+        }
     }
 
     /**
@@ -136,16 +140,34 @@ public class JwtService {
      * @return true if token is valid, false otherwise
      */
     public boolean validateToken(String token, UserPrincipal userDetails) {
-        UUID tokenUserId = extractUserID(token);
-        boolean valid = tokenUserId.equals(userDetails.getUserID()) && !isTokenExpired(token);
 
-        if (valid) {
-            log.info("JWT token successfully validated for user ID {}", tokenUserId);
-        } else {
-            log.warn("JWT token validation failed for user ID {}", userDetails.getUserID());
+        boolean notExpired = !isTokenExpired(token);
+        if (notExpired) {
+            UUID tokenUserId = extractUserID(token);
+            boolean valid =  tokenUserId.equals(userDetails.getUserID()) ;
+
+            if (valid) {
+                log.info("JWT token successfully validated for user ID {}", tokenUserId);
+            } else {
+                log.warn("JWT token validation failed for user ID {}", userDetails.getUserID());
+            }
+
+            return valid;
         }
+        return false;
+    }
 
-        return valid;
+    /**
+     * For testing: allow injecting custom expiration
+     */
+    String generateTokenWithCustomExpiration(User user, Date expiration) {
+        return Jwts.builder()
+                .claims(new HashMap<>())
+                .subject(String.valueOf(user.getId()))
+                .issuedAt(new Date())
+                .expiration(expiration)
+                .signWith(getSignKey())
+                .compact();
     }
 
 }

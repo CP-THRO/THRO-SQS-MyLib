@@ -1,6 +1,7 @@
 package de.throsenheim.inf.sqs.christophpircher.mylibbackend.service.flyweights;
 
 import de.throsenheim.inf.sqs.christophpircher.mylibbackend.api.OpenLibraryAPI;
+import de.throsenheim.inf.sqs.christophpircher.mylibbackend.exceptions.UnexpectedStatusException;
 import de.throsenheim.inf.sqs.christophpircher.mylibbackend.model.Book;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -9,7 +10,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Optional;
@@ -38,14 +41,14 @@ class ExternalBookFlyweightFactoryTest {
     private Field cacheField;
 
     @BeforeEach
-    void setUp() throws Exception {
+    void setUp() throws NoSuchFieldException, IllegalAccessException {
         cacheField = ExternalBookFlyweightFactory.class.getDeclaredField("bookCache");
         cacheField.setAccessible(true);
         getCache().clear();
     }
 
     @Test
-    void getBookByIDShouldReturnCachedValueWhenNotExpired() throws Exception {
+    void getBookByIDShouldReturnCachedValueWhenNotExpired() throws UnexpectedStatusException, IOException, IllegalAccessException {
         CacheEntry<Optional<Book>> freshEntry = new CacheEntry<>(Optional.of(DUMMY_BOOK));
 
         getCache().put(BOOK_ID, freshEntry);
@@ -58,7 +61,7 @@ class ExternalBookFlyweightFactoryTest {
     }
 
     @Test
-    void getBookByIDShouldFetchAndCacheWhenNotCached() throws Exception {
+    void getBookByIDShouldFetchAndCacheWhenNotCached() throws UnexpectedStatusException, IOException {
         when(openLibraryAPI.getBookByBookID(BOOK_ID)).thenReturn(Optional.of(DUMMY_BOOK));
 
         Optional<Book> result = flyweightFactory.getBookByID(BOOK_ID);
@@ -68,7 +71,7 @@ class ExternalBookFlyweightFactoryTest {
     }
 
     @Test
-    void getBookByIDShouldFetchAndCacheWhenExpired() throws Exception {
+    void getBookByIDShouldFetchAndCacheWhenExpired() throws NoSuchFieldException, UnexpectedStatusException, IOException, IllegalAccessException {
         CacheEntry<Optional<Book>> expiredEntry = new CacheEntry<>(Optional.of(DUMMY_BOOK));
 
         // Force expiration by manipulating the timestamp
@@ -86,7 +89,7 @@ class ExternalBookFlyweightFactoryTest {
     }
 
     @Test
-    void getBookByIDShouldReturnEmptyOptionalAndCacheItWhenBookNotFound() throws Exception {
+    void getBookByIDShouldReturnEmptyOptionalAndCacheItWhenBookNotFound() throws UnexpectedStatusException, IOException {
         when(openLibraryAPI.getBookByBookID(BOOK_ID)).thenReturn(Optional.empty());
 
         Optional<Book> result = flyweightFactory.getBookByID(BOOK_ID);
@@ -95,7 +98,7 @@ class ExternalBookFlyweightFactoryTest {
     }
 
     @Test
-    void cleanupCacheShouldRemoveOnlyExpiredEntries() throws Exception {
+    void cleanupCacheShouldRemoveOnlyExpiredEntries() throws NoSuchFieldException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
         long now = System.currentTimeMillis();
 
         CacheEntry<Optional<Book>> validEntry = new CacheEntry<>(Optional.of(DUMMY_BOOK));

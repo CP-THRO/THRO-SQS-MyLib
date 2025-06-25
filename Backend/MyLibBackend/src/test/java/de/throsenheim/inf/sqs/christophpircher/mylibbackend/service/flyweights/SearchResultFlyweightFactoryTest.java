@@ -1,6 +1,7 @@
 package de.throsenheim.inf.sqs.christophpircher.mylibbackend.service.flyweights;
 
 import de.throsenheim.inf.sqs.christophpircher.mylibbackend.api.OpenLibraryAPI;
+import de.throsenheim.inf.sqs.christophpircher.mylibbackend.exceptions.UnexpectedStatusException;
 import de.throsenheim.inf.sqs.christophpircher.mylibbackend.model.Book;
 import de.throsenheim.inf.sqs.christophpircher.mylibbackend.model.BookList;
 import org.junit.jupiter.api.BeforeEach;
@@ -10,6 +11,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -47,7 +49,7 @@ class SearchResultFlyweightFactoryTest {
     }
 
     @Test
-    void searchShouldReturnCachedResultWhenCacheIsValid() throws Exception {
+    void searchShouldReturnCachedResultWhenCacheIsValid() throws IllegalAccessException, UnexpectedStatusException, IOException {
         SearchResultFlyweightFactory.SearchResultFlyweightKey key =
                 new SearchResultFlyweightFactory.SearchResultFlyweightKey(KEYWORDS, START, COUNT);
         CacheEntry<BookList> entry = new CacheEntry<>(MOCK_BOOKLIST);
