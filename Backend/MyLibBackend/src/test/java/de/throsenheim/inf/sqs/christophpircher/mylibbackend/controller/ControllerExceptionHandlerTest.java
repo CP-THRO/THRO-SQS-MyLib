@@ -1,0 +1,79 @@
+package de.throsenheim.inf.sqs.christophpircher.mylibbackend.controller;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import de.throsenheim.inf.sqs.christophpircher.mylibbackend.controller.DummyController.DummyRequest;
+import jakarta.validation.constraints.AssertTrue;
+import jakarta.validation.constraints.NotBlank;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+@WebMvcTest(controllers = DummyController.class)
+@Import(ControllerExceptionHandler.class)
+@AutoConfigureMockMvc(addFilters = false)
+class ControllerExceptionHandlerTest {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @Test
+    void handleIOExceptionShouldReturn502() throws Exception {
+        mockMvc.perform(get("/dummy/io"))
+                .andExpect(status().isBadGateway())
+                .andExpect(jsonPath("$.message").value("Could not connect to external API: Downstream API error"));
+    }
+
+    @Test
+    void handleUnexpectedStatusExceptionShouldReturn502() throws Exception {
+        mockMvc.perform(get("/dummy/unexpected"))
+                .andExpect(status().isBadGateway())
+                .andExpect(jsonPath("$.message").value("Unexpected status"));
+    }
+
+    @Test
+    void handleUsernameExistsExceptionShouldReturn409() throws Exception {
+        mockMvc.perform(get("/dummy/conflict"))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.message").value("Username already exists"));
+    }
+
+    @Test
+    void handleBookNotFoundExceptionShouldReturn404() throws Exception {
+        mockMvc.perform(get("/dummy/notfound"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("Book not found"));
+    }
+
+    @Test
+    void handleBookNotInLibraryExceptionShouldReturn404() throws Exception {
+        mockMvc.perform(get("/dummy/notinlibrary"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("Not in library"));
+    }
+
+    @Test
+    void handleMethodArgumentNotValidShouldReturn400() throws Exception {
+        DummyRequest invalidRequest = new DummyRequest();
+        invalidRequest.setName("");
+
+        mockMvc.perform(post("/dummy/validation")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(invalidRequest)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value("BAD_REQUEST"))
+                .andExpect(jsonPath("$.errors[0]").exists());
+    }
+
+
+}
+

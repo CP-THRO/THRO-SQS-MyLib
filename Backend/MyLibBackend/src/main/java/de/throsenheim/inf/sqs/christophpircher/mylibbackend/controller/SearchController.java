@@ -4,7 +4,6 @@ import de.throsenheim.inf.sqs.christophpircher.mylibbackend.dto.ApiError;
 import de.throsenheim.inf.sqs.christophpircher.mylibbackend.dto.BookDTO;
 import de.throsenheim.inf.sqs.christophpircher.mylibbackend.dto.BookListDTO;
 import de.throsenheim.inf.sqs.christophpircher.mylibbackend.exceptions.UnexpectedStatusException;
-import de.throsenheim.inf.sqs.christophpircher.mylibbackend.model.Book;
 import de.throsenheim.inf.sqs.christophpircher.mylibbackend.model.BookList;
 import de.throsenheim.inf.sqs.christophpircher.mylibbackend.service.BookService;
 import de.throsenheim.inf.sqs.christophpircher.mylibbackend.service.SearchService;
@@ -16,9 +15,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,7 +26,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
-import java.util.Optional;
 
 /**
  * REST controller responsible for exposing search functionality to the OpenLibrary API.
@@ -78,7 +76,7 @@ public class SearchController {
         BookList searchResult = searchService.searchKeywordsExternal(keywords, startIndex, numResultsToGet);
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.isAuthenticated()) {
+        if (authentication != null && authentication.isAuthenticated() && !(authentication instanceof AnonymousAuthenticationToken)) {
             log.debug("Authenticated search request by user: {}", ((UserPrincipal) authentication.getPrincipal()).getUsername());
         }
 
