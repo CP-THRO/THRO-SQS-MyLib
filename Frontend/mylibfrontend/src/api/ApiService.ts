@@ -28,22 +28,11 @@ class ApiService {
         // Global response interceptor for error handling
         this.http.interceptors.response.use(
             (response) => response,
-            (error) => {
-                console.error('API Error:', error);
-                return Promise.reject(error);
-            }
+            handleApiError
         );
 
         // Request interceptor to attach bearer token if user is authenticated
-        this.http.interceptors.request.use(config => {
-            if (localStorage.getItem("is_authenticated")) {
-                const token = localStorage.getItem('auth_token');
-                if (token) {
-                    config.headers.Authorization = `Bearer ${token}`;
-                }
-            }
-            return config;
-        });
+        this.http.interceptors.request.use(attachAuthToken);
     }
 
     /**
@@ -190,3 +179,20 @@ class ApiService {
 }
 
 export const apiService = ApiService.getInstance();
+
+export function handleApiError(error: any) { //for unit testing
+    console.error('API Error:', error);
+    return Promise.reject(error);
+}
+
+// In ApiService.ts
+export function attachAuthToken(config: any) { // for unit testing
+    if (localStorage.getItem("is_authenticated")) {
+        const token = localStorage.getItem("auth_token");
+        if (token) {
+            config.headers = config.headers ?? {};
+            config.headers.Authorization = `Bearer ${token}`;
+        }
+    }
+    return config;
+}

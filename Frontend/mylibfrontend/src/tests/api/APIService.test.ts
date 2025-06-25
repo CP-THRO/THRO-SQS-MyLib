@@ -2,6 +2,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import axios from 'axios';
 import type { AxiosInstance } from 'axios';
+import { createBookDTO } from '../factories/book'; // adjust path if needed
+
 
 vi.mock('axios');
 
@@ -142,4 +144,61 @@ describe('ApiService', () => {
         expect(mockHttp.get).toHaveBeenCalledWith('/api/v1/search/external/keyword?keywords=harry+potter&startIndex=0&numResultsToGet=10');
         expect(result).toBe('searchResults');
     });
+
+
+    it('logs and rethrows API errors', async () => {
+        const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+        const err = new Error('boom');
+
+        const { handleApiError } = await import('../../api/ApiService');
+
+        await expect(handleApiError(err)).rejects.toThrow('boom');
+        expect(spy).toHaveBeenCalledWith('API Error:', err);
+
+        spy.mockRestore();
+    });
+
+    it('adds Authorization header if user is authenticated', async () => {
+        localStorage.setItem('is_authenticated', 'true');
+        localStorage.setItem('auth_token', 'abc123');
+
+        const { attachAuthToken } = await import('../../api/ApiService');
+
+        const result = attachAuthToken({ headers: {} });
+
+        expect(result.headers.Authorization).toBe('Bearer abc123');
+
+        localStorage.clear();
+    });
+
+    it('does not add Authorization header if not authenticated', async () => {
+        localStorage.removeItem('is_authenticated');
+        localStorage.removeItem('auth_token');
+
+        const { attachAuthToken } = await import('../../api/ApiService');
+
+        const result = attachAuthToken({ headers: {} });
+
+        expect(result.headers.Authorization).toBeUndefined();
+    });
+
+
+    it('fetches a book by ID', async () => {
+        const fakeBook = createBookDTO();
+        mockHttp.get.mockResolvedValueOnce({ data: fakeBook });
+
+        const result = await apiService.getBookByID(fakeBook.bookID);
+
+        expect(mockHttp.get).toHaveBeenCalledWith(`/api/v1/books/get/byID/${fakeBook.bookID}`);
+        expect(result).toEqual(fakeBook);
+    });
+
+    it('throws non-Axios errors during sign up', async () => {
+        const error = new Error('unexpected error');
+        mockHttp.post.mockRejectedValueOnce(error);
+
+        await expect(apiService.signUp('any', 'thing')).rejects.toThrow('unexpected error');
+    });
+
+
 });
