@@ -353,13 +353,13 @@ class OpenLibraryAPIWireMockTest {
                 """)));
 
         // Act
-        Optional<Book> result = api.getBookByBookID("OL125M");
+        Optional<Book> result = api.getBookByBookID(GENERIC_BOOK_ID);
 
         // Assert
         assertTrue(result.isPresent());
         Book book = result.get();
 
-        assertEquals("OL125M", book.getBookID());
+        assertEquals(GENERIC_BOOK_ID, book.getBookID());
         assertEquals("Book Without ISBNs", book.getTitle());
         assertTrue(book.getIsbns().isEmpty(), "ISBN list should be empty");
     }
