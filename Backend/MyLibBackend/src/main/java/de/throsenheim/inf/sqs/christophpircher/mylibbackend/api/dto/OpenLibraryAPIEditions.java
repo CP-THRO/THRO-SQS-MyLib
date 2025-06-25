@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -35,7 +36,7 @@ public class OpenLibraryAPIEditions {
      * <p>Typically, only the first entry with a valid key is used.</p>
      */
     @JsonProperty("entries")
-    List<Edition> editions;
+    List<Edition> editions = new ArrayList<>();
 
     /**
      * Inner class representing a single book edition entry.

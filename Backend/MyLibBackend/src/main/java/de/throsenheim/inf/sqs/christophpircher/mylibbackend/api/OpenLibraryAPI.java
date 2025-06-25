@@ -308,7 +308,7 @@ public class OpenLibraryAPI {
      * </p>
      */
     @PostConstruct
-    private void createNewApi() {
+    void createNewApi() {
         String baseurl = environment.getProperty("external.openLibraryAPIBaseURL");
         log.info("Creating OpenLibraryAPI object with base URL: {}", baseurl);
         assert baseurl != null;
