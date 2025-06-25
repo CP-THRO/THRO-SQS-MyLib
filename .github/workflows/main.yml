@@ -81,8 +81,15 @@ jobs:
         path: ~/.gradle/caches
         key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
         restore-keys: ${{ runner.os }}-gradle
-
-
+    - name: Gradle Test
+      working-directory: ./Backend/MyLibBackend
+      run: ./gradlew test --info
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: backend--buildtest
+        path: ./Backend/MyLibBackend/build
+    
   test-frontend:
     runs-on: ubuntu-latest
     needs:
@@ -103,11 +110,11 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
-      - name: Download Backend Build
+      - name: Download Backend Test Build
         uses: actions/download-artifact@v4
         with:  
           path: ./Backend/MyLibBackend/build
-          name: backend-build
+          name: backend-test-build
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v5
         env:
