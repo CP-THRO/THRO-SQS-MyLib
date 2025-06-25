@@ -11,7 +11,7 @@ class OpenLibraryAPISearchWorkTest {
     @Test
     void testGetWorkKeyWithoutURLWithPrefix() {
         OpenLibraryAPISearchWork work = new OpenLibraryAPISearchWork();
-        work.setWorkKey("GENERIC_WORK_ID_UNPARSED");
+        work.setWorkKey(GENERIC_WORK_ID_UNPARSED);
 
         assertEquals(GENERIC_WORK_ID, work.getWorkKeyWithoutURL());
     }
@@ -21,7 +21,7 @@ class OpenLibraryAPISearchWorkTest {
         OpenLibraryAPISearchWork work = new OpenLibraryAPISearchWork();
         work.setWorkKey(GENERIC_WORK_ID);
 
-        assertEquals(GENERIC_WORK_ID_UNPARSED, work.getWorkKeyWithoutURL());
+        assertEquals(GENERIC_WORK_ID, work.getWorkKeyWithoutURL());
     }
 
     @Test
