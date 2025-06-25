@@ -29,7 +29,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestPropertySource(locations = "classpath:application-test.properties")
 class OpenLibraryAPIWireMockTest {
 
-    private static WireMockServer wireMockServer;
+    private WireMockServer wireMockServer;
 
     @Autowired
     private OpenLibraryAPI api;
@@ -42,7 +42,7 @@ class OpenLibraryAPIWireMockTest {
     }
 
     @Test
-    void testSearch_withCoverEditionKey() throws IOException, UnexpectedStatusException {
+    void testSearchWithCoverEditionKey() throws IOException, UnexpectedStatusException {
         // Given
         String query = "space";
         wireMockServer.stubFor(get(urlPathEqualTo("/search.json"))
@@ -81,7 +81,7 @@ class OpenLibraryAPIWireMockTest {
     }
 
     @Test
-    void testSearch_withFallbackEditionKey() throws Exception {
+    void testSearchWithFallbackEditionKey() throws Exception {
         // Stub /search.json (missing cover_edition_key)
         wireMockServer.stubFor(get(urlPathEqualTo("/search.json"))
                 .withQueryParam("q", equalTo("dune"))
@@ -128,7 +128,7 @@ class OpenLibraryAPIWireMockTest {
     }
 
     @Test
-    void testSearch_skippedWhenNoCoverAndNoFallback() throws Exception {
+    void testSearchSkippedWhenNoCoverAndNoFallback() throws Exception {
         // Stub /search.json with work that has no cover_edition_key
         wireMockServer.stubFor(get(urlPathEqualTo("/search.json"))
                 .withQueryParam("q", equalTo("lost"))
@@ -170,7 +170,7 @@ class OpenLibraryAPIWireMockTest {
     }
 
     @Test
-    void searchBooks_shouldThrowUnexpectedStatusException_whenBodyIsNull() {
+    void searchBooksShouldThrowUnexpectedStatusExceptionWhenBodyIsNull() {
         wireMockServer.stubFor(get(urlPathEqualTo("/search.json"))
                 .withQueryParam("q", equalTo("test"))
                 .withQueryParam("offset", equalTo("0"))
@@ -185,7 +185,7 @@ class OpenLibraryAPIWireMockTest {
     }
 
     @Test
-    void testSearch_non200Response_throwsException() {
+    void testSearchNon200ResponseThrowsException() {
         // Stub /search.json to return 500 Internal Server Error
         wireMockServer.stubFor(get(urlPathEqualTo("/search.json"))
                 .withQueryParam("q", equalTo("invalid"))
@@ -203,7 +203,7 @@ class OpenLibraryAPIWireMockTest {
     }
 
     @Test
-    void testSearch_ioException_throwsWrappedIOException() {
+    void testSearchIOExceptionThrowsWrappedIOException() {
         // Simulate network failure by delaying too long (or using a reset)
         wireMockServer.stubFor(get(urlPathEqualTo("/search.json"))
                 .withQueryParam("q", equalTo("timeout"))
@@ -221,7 +221,7 @@ class OpenLibraryAPIWireMockTest {
     }
 
     @Test
-    void testGetBookByBookID_successWithFullMetadata() throws Exception {
+    void testGetBookByBookIDSuccessWithFullMetadata() throws Exception {
         // 1. Stub /books/{bookID}.json
         wireMockServer.stubFor(get(urlPathEqualTo("/books/OL123M.json"))
                 .willReturn(okJson("""
@@ -273,7 +273,7 @@ class OpenLibraryAPIWireMockTest {
     }
 
     @Test
-    void testGetBookByBookID_successWithoutCoverImage() throws Exception {
+    void testGetBookByBookIDSuccessWithoutCoverImage() throws Exception {
         // 1. Stub /books/{bookID}.json — no covers field
         wireMockServer.stubFor(get(urlPathEqualTo("/books/OL124M.json"))
                 .willReturn(okJson("""
@@ -319,7 +319,7 @@ class OpenLibraryAPIWireMockTest {
     }
 
     @Test
-    void testGetBookByBookID_successWithoutIsbns() throws Exception {
+    void testGetBookByBookIDSuccessWithoutIsbns() throws Exception {
         // 1. Stub /books/{bookID}.json — no ISBNs
         wireMockServer.stubFor(get(urlPathEqualTo("/books/OL125M.json"))
                 .willReturn(okJson("""
@@ -363,7 +363,7 @@ class OpenLibraryAPIWireMockTest {
     }
 
     @Test
-    void testGetBookByBookID_notFound() throws Exception {
+    void testGetBookByBookIDNotFound() throws Exception {
         // Stub /books/OL404M.json to return 404
         wireMockServer.stubFor(get(urlPathEqualTo("/books/OL404M.json"))
                 .willReturn(aResponse().withStatus(404)));
@@ -376,7 +376,7 @@ class OpenLibraryAPIWireMockTest {
     }
 
     @Test
-    void getBookByBookID_shouldThrowUnexpectedStatusException_whenBodyIsNull() {
+    void getBookByBookIDShouldThrowUnexpectedStatusExceptionWhenBodyIsNull() {
         wireMockServer.stubFor(get(urlPathEqualTo("/books/OL12345M.json"))
                 .willReturn(aResponse()
                         .withStatus(200)
@@ -387,7 +387,7 @@ class OpenLibraryAPIWireMockTest {
     }
 
     @Test
-    void testGetBookByBookID_serverError() {
+    void testGetBookByBookIDServerError() {
         // Stub /books/OL500M.json to return HTTP 500
         wireMockServer.stubFor(get(urlPathEqualTo("/books/OL500M.json"))
                 .willReturn(aResponse()
@@ -403,7 +403,7 @@ class OpenLibraryAPIWireMockTest {
     }
 
     @Test
-    void getBookByBookID_shouldThrowIOException_whenConnectionFails() {
+    void getBookByBookIDShouldThrowIOExceptionWhenConnectionFails() {
         // Arrange: stub that simulates a network failure (e.g. connection reset)
         String bookID = "OL12345M";
         wireMockServer.stubFor(get(urlEqualTo("/books/" + bookID + ".json"))
@@ -420,7 +420,7 @@ class OpenLibraryAPIWireMockTest {
 
 
     @Test
-    void getBookByBookID_shouldThrowUnexpectedStatusException_whenWorkFetchIs500() {
+    void getBookByBookIDShouldThrowUnexpectedStatusExceptionWhenWorkFetchIs500() {
         wireMockServer.stubFor(get(urlEqualTo("/books/OL12345M.json"))
                 .willReturn(okJson("""
                     {
@@ -442,7 +442,7 @@ class OpenLibraryAPIWireMockTest {
     }
 
     @Test
-    void getBookByBookID_shouldThrowIOException_whenGetWorkByWorkIDFails() {
+    void getBookByBookIDShouldThrowIOExceptionWhenGetWorkByWorkIDFails() {
         wireMockServer.stubFor(get(urlEqualTo("/books/OL12345M.json"))
                 .willReturn(okJson("""
                     {
@@ -464,7 +464,7 @@ class OpenLibraryAPIWireMockTest {
     }
 
     @Test
-    void getWorkByWorkID_shouldReturnWork_whenResponseIsSuccessful() throws Exception {
+    void getWorkByWorkIDShouldReturnWorkWhenResponseIsSuccessful() throws Exception {
         wireMockServer.stubFor(get(urlEqualTo("/works/OL123456W.json"))
                 .willReturn(okJson("""
                 {
@@ -479,7 +479,7 @@ class OpenLibraryAPIWireMockTest {
     }
 
     @Test
-    void getWorkByWorkID_shouldThrowUnexpectedStatusException_whenBodyIsNull() {
+    void getWorkByWorkIDShouldThrowUnexpectedStatusExceptionWhenBodyIsNull() {
         wireMockServer.stubFor(get(urlEqualTo("/works/OL123456W.json"))
                 .willReturn(aResponse().withStatus(500))); // Simulate server error
 
@@ -491,7 +491,7 @@ class OpenLibraryAPIWireMockTest {
     }
 
     @Test
-    void getWorkByWorkID_shouldThrowUnexpectedStatusException_whenStatusIsNot200() {
+    void getWorkByWorkIDShouldThrowUnexpectedStatusExceptionWhenStatusIsNot200() {
         wireMockServer.stubFor(get(urlEqualTo("/works/OL123458W.json"))
                 .willReturn(aResponse().withStatus(500).withBody("Internal Server Error")));
 
@@ -503,7 +503,7 @@ class OpenLibraryAPIWireMockTest {
     }
 
     @Test
-    void getWorkByWorkID_shouldThrowIOException_whenIOExceptionOccurs() {
+    void getWorkByWorkIDShouldThrowIOExceptionWhenIOExceptionOccurs() {
         wireMockServer.stop(); // force IOException by shutting down WireMock
 
         InvocationTargetException exception = assertThrows(InvocationTargetException.class, () ->
@@ -514,7 +514,7 @@ class OpenLibraryAPIWireMockTest {
     }
 
     @Test
-    void getAuthorByAuthorID_shouldReturnAuthor_whenSuccessful() throws Exception {
+    void getAuthorByAuthorIDShouldReturnAuthorWhenSuccessful() throws Exception {
         wireMockServer.stubFor(get(urlEqualTo("/authors/OL12345A.json"))
                 .willReturn(aResponse()
                         .withStatus(200)
@@ -532,7 +532,7 @@ class OpenLibraryAPIWireMockTest {
     }
 
     @Test
-    void getAuthorByAuthorID_shouldThrowUnexpectedStatusException_whenStatusIsNotSuccessful() {
+    void getAuthorByAuthorIDShouldThrowUnexpectedStatusExceptionWhenStatusIsNotSuccessful() {
         wireMockServer.stubFor(get(urlEqualTo("/authors/OL12345A.json"))
                 .willReturn(aResponse().withStatus(500)));
 
@@ -543,7 +543,7 @@ class OpenLibraryAPIWireMockTest {
     }
 
     @Test
-    void getAuthorByAuthorID_shouldThrowUnexpectedStatusException_whenBodyIsNull() {
+    void getAuthorByAuthorIDShouldThrowUnexpectedStatusExceptionWhenBodyIsNull() {
         wireMockServer.stubFor(get(urlEqualTo("/authors/OL12345A.json"))
                 .willReturn(aResponse()
                         .withStatus(200)
@@ -559,7 +559,7 @@ class OpenLibraryAPIWireMockTest {
 
 
     @Test
-    void getAuthorByAuthorID_shouldThrowIOException_whenNetworkFails() {
+    void getAuthorByAuthorIDShouldThrowIOExceptionWhenNetworkFails() {
         wireMockServer.stop(); // simulate connection failure
 
         InvocationTargetException ex = assertThrows(InvocationTargetException.class, () ->
@@ -571,7 +571,7 @@ class OpenLibraryAPIWireMockTest {
     }
 
     @Test
-    void getWorkEditionsByID_shouldReturnEditions_whenSuccessful() throws Exception {
+    void getWorkEditionsByIDShouldReturnEditionsWhenSuccessful() throws Exception {
         wireMockServer.stubFor(get(urlEqualTo("/works/OL123456W/editions.json"))
                 .willReturn(aResponse()
                         .withStatus(200)
@@ -593,7 +593,7 @@ class OpenLibraryAPIWireMockTest {
     }
 
     @Test
-    void getWorkEditionsByID_shouldThrowUnexpectedStatusException_whenStatusIsNotSuccessful() {
+    void getWorkEditionsByIDShouldThrowUnexpectedStatusExceptionWhenStatusIsNotSuccessful() {
         wireMockServer.stubFor(get(urlEqualTo("/works/OL123456W/editions.json"))
                 .willReturn(aResponse().withStatus(500)));
 
@@ -603,7 +603,7 @@ class OpenLibraryAPIWireMockTest {
         assertInstanceOf(UnexpectedStatusException.class, ex.getTargetException());
     }
     @Test
-    void getWorkEditionsByID_shouldThrowUnexpectedStatusException_whenBodyIsNull() {
+    void getWorkEditionsByIDShouldThrowUnexpectedStatusExceptionWhenBodyIsNull() {
         wireMockServer.stubFor(get(urlEqualTo("/works/OL654321W/editions.json"))
                 .willReturn(aResponse()
                         .withStatus(200)
@@ -619,7 +619,7 @@ class OpenLibraryAPIWireMockTest {
 
 
     @Test
-    void getWorkEditionsByID_shouldThrowIOException_whenNetworkFails() {
+    void getWorkEditionsByIDShouldThrowIOExceptionWhenNetworkFails() {
         wireMockServer.stop(); // simulate unreachable OpenLibrary API
 
         InvocationTargetException ex = assertThrows(InvocationTargetException.class, () ->
@@ -631,7 +631,7 @@ class OpenLibraryAPIWireMockTest {
     }
 
     @Test
-    void alterIOException_shouldReturnPrefixedIOException_withSameStacktrace() throws Exception {
+    void alterIOExceptionShouldReturnPrefixedIOExceptionWithSameStacktrace() throws Exception {
         IOException original = new IOException("original message");
 
         IOException altered = invokePrivateAlterIOException(api, original);
@@ -642,7 +642,7 @@ class OpenLibraryAPIWireMockTest {
     }
 
     @Test
-    void getCoverURLs_shouldReturnCorrectFormattedURLs() throws Exception {
+    void getCoverURLsShouldReturnCorrectFormattedURLs() throws Exception {
         int coverID = 12345;
         String[] urls = invokePrivateGetCoverURLs(api, coverID);
 
