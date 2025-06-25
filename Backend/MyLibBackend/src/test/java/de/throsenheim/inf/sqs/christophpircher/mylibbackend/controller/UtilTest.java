@@ -24,6 +24,7 @@ import static org.mockito.Mockito.when;
 class UtilTest {
 
     private static final String BOOK_ID = "OL123456";
+    private static final String BOOK_TITLE = "Test Book";
 
     @Mock
     private BookService bookService;
@@ -43,7 +44,7 @@ class UtilTest {
     void setUp() {
         Book book = Book.builder()
                 .bookID(BOOK_ID)
-                .title("Test Book")
+                .title(BOOK_TITLE)
                 .build();
 
         bookList = BookList.builder()
@@ -66,7 +67,7 @@ class UtilTest {
         BookListDTO dto = Util.convertBookListToDTOWithUserSpecificInfoIfAuthenticated(bookList, bookService, anonymousAuth);
 
         assertEquals(1, dto.getBooks().size());
-        assertEquals("Test Book", dto.getBooks().getFirst().getTitle());
+        assertEquals(BOOK_TITLE, dto.getBooks().getFirst().getTitle());
         assertEquals(0, dto.getBooks().getFirst().getIndividualRating());
     }
 
@@ -75,7 +76,7 @@ class UtilTest {
         BookListDTO dto = Util.convertBookListToDTOWithUserSpecificInfoIfAuthenticated(bookList, bookService, null);
 
         assertEquals(1, dto.getBooks().size());
-        assertEquals("Test Book", dto.getBooks().getFirst().getTitle());
+        assertEquals(BOOK_TITLE, dto.getBooks().getFirst().getTitle());
         assertEquals(0, dto.getBooks().getFirst().getIndividualRating());
     }
 
@@ -93,7 +94,7 @@ class UtilTest {
         BookListDTO dto = Util.convertBookListToDTOWithUserSpecificInfoIfAuthenticated(bookList, bookService, authentication);
 
         assertEquals(1, dto.getBooks().size());
-        assertEquals("Test Book", dto.getBooks().getFirst().getTitle());
+        assertEquals(BOOK_TITLE, dto.getBooks().getFirst().getTitle());
         assertEquals(4, dto.getBooks().getFirst().getIndividualRating());
         assertEquals(ReadingStatus.READING, dto.getBooks().getFirst().getReadingStatus());
         assertTrue(dto.getBooks().getFirst().isBookIsInLibrary());
@@ -107,6 +108,6 @@ class UtilTest {
         BookListDTO dto = Util.convertBookListToDTOWithUserSpecificInfoIfAuthenticated(bookList, bookService, authentication);
 
         assertEquals(1, dto.getBooks().size());
-        assertEquals("Test Book", dto.getBooks().getFirst().getTitle());
+        assertEquals(BOOK_TITLE, dto.getBooks().getFirst().getTitle());
     }
 }

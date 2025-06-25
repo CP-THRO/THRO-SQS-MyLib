@@ -28,18 +28,20 @@ class AuthControllerTest {
     private static final String TEST_PASSWORD = "testpass";
     private static final String TOKEN = "jwt-token";
 
+    private static final String AUTH_REQUEST = """
+            {
+               "username": "testuser",
+               "password": "testpass"
+            }
+            """;
+
     @Test
     void addUserShouldReturn201() throws Exception {
         doNothing().when(authService).createNewUser(anyString(), anyString());
 
         mockMvc.perform(post("/api/v1/auth/add-user")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {
-                                  \"username\": \"testuser\",
-                                  \"password\": \"testpass\"
-                                }
-                                """))
+                        .content(AUTH_REQUEST))
                 .andExpect(status().isCreated());
     }
 
@@ -50,12 +52,7 @@ class AuthControllerTest {
 
         mockMvc.perform(post("/api/v1/auth/add-user")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {
-                                  \"username\": \"testuser\",
-                                  \"password\": \"testpass\"
-                                }
-                                """))
+                .content(AUTH_REQUEST))
                 .andExpect(status().isConflict());
     }
 
@@ -65,12 +62,7 @@ class AuthControllerTest {
 
         mockMvc.perform(post("/api/v1/auth/authenticate")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {
-                                  \"username\": \"testuser\",
-                                  \"password\": \"testpass\"
-                                }
-                                """))
+                        .content(AUTH_REQUEST))
                 .andExpect(status().isOk())
                 .andExpect(content().string(TOKEN));
     }
@@ -81,12 +73,7 @@ class AuthControllerTest {
 
         mockMvc.perform(post("/api/v1/auth/authenticate")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {
-                                  \"username\": \"wrong\",
-                                  \"password\": \"wrong\"
-                                }
-                                """))
+                        .content(AUTH_REQUEST))
                 .andExpect(status().isForbidden());
     }
 }

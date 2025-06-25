@@ -6,6 +6,7 @@ import de.throsenheim.inf.sqs.christophpircher.mylibbackend.model.BookList;
 import de.throsenheim.inf.sqs.christophpircher.mylibbackend.service.BookService;
 import de.throsenheim.inf.sqs.christophpircher.mylibbackend.service.SearchService;
 
+import de.throsenheim.inf.sqs.christophpircher.mylibbackend.service.flyweights.SearchResultFlyweightFactory;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -25,6 +26,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 class SearchControllerTest {
+
+    private static final String SEARCH_URL = "/api/v1/search/external/keyword";
+    private static final String KEYWORDS = "keywords";
+    private static final String START_INDEX = "startIndex";
+    private static final String NUM_TO_GET = "numResultsToGet";
 
     @Autowired
     private MockMvc mockMvc;
@@ -46,10 +52,10 @@ class SearchControllerTest {
         when(searchService.searchKeywordsExternal("java", 0, 100)).thenReturn(bookList);
 
         // Act & Assert
-        mockMvc.perform(get("/api/v1/search/external/keyword")
-                        .param("keywords", "java")
-                        .param("startIndex", "0")
-                        .param("numResultsToGet", "100")
+        mockMvc.perform(get(SEARCH_URL)
+                        .param(KEYWORDS, "java")
+                        .param(START_INDEX, "0")
+                        .param(NUM_TO_GET, "100")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
     }
@@ -59,10 +65,10 @@ class SearchControllerTest {
     void searchExternalKeywordShouldHandleIOException() throws Exception {
         when(searchService.searchKeywordsExternal("java", 0, 100)).thenThrow(new IOException("Downstream error"));
 
-        mockMvc.perform(get("/api/v1/search/external/keyword")
-                        .param("keywords", "java")
-                        .param("startIndex", "0")
-                        .param("numResultsToGet", "100")
+        mockMvc.perform(get(SEARCH_URL)
+                        .param(KEYWORDS, "java")
+                        .param(START_INDEX, "0")
+                        .param(NUM_TO_GET, "100")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadGateway());
     }
@@ -71,10 +77,10 @@ class SearchControllerTest {
     void searchExternalKeywordShouldHandleUnexpectedStatus() throws Exception {
         when(searchService.searchKeywordsExternal("java", 0, 100)).thenThrow(new UnexpectedStatusException("Unexpected status"));
 
-        mockMvc.perform(get("/api/v1/search/external/keyword")
-                        .param("keywords", "java")
-                        .param("startIndex", "0")
-                        .param("numResultsToGet", "100")
+        mockMvc.perform(get(SEARCH_URL)
+                        .param(KEYWORDS, "java")
+                        .param(START_INDEX, "0")
+                        .param(NUM_TO_GET, "100")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadGateway());
     }
