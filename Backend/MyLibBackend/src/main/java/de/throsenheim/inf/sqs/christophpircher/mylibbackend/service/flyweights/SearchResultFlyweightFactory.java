@@ -91,5 +91,5 @@ public class SearchResultFlyweightFactory {
      * Composite key representing a unique search query, based on keywords, start index, and result count.
      * Used for deduplication and lookup in the cache.
      */
-    private record SearchResultFlyweightKey(String keywords, int startIndex, int numToGet) { }
+    record SearchResultFlyweightKey(String keywords, int startIndex, int numToGet) { }
 }

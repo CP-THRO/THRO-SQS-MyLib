@@ -1,5 +1,7 @@
 package de.throsenheim.inf.sqs.christophpircher.mylibbackend.service.flyweights;
 
+import java.time.Clock;
+
 /**
  * A simple wrapper for cached values that includes a timestamp
  * to support time-based expiration logic (TTL - Time To Live).
@@ -19,6 +21,11 @@ class CacheEntry<T> {
     final long timestamp;
 
     /**
+     * Clock for generating timestamp. Using clock because it is mockable
+     */
+    private final Clock clock;
+
+    /**
      * Creates a new CacheEntry and records the current timestamp.
      *
      * @param value The object to cache.
@@ -26,6 +33,16 @@ class CacheEntry<T> {
     CacheEntry(T value) {
         this.value = value;
         this.timestamp = System.currentTimeMillis();
+        this.clock = Clock.systemDefaultZone();
+    }
+
+    /**
+     * Constructor for testing (injectable Clock)
+      */
+    CacheEntry(T value, Clock clock) {
+        this.value = value;
+        this.clock = clock;
+        this.timestamp = clock.millis();
     }
 
     /**
@@ -35,7 +52,7 @@ class CacheEntry<T> {
      * @return true if not expired, false otherwise.
      */
     boolean isNotExpired(long ttlMillis) {
-        return System.currentTimeMillis() - timestamp <= ttlMillis;
+        return clock.millis() - timestamp <= ttlMillis;
     }
 
     /**
