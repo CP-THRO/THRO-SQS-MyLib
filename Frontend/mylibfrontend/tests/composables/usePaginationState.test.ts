@@ -2,7 +2,7 @@
 import { describe, it, vi, expect, beforeEach, afterEach } from 'vitest';
 import { defineComponent, ref, nextTick } from 'vue';
 import { mount } from '@vue/test-utils';
-import { usePaginationState } from '../../composables/usePaginationState';
+import { usePaginationState } from '../../src/composables/usePaginationState';
 import { onBeforeRouteLeave } from 'vue-router';
 
 vi.mock('vue-router', () => ({

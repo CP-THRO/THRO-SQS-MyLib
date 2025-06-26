@@ -1,5 +1,5 @@
 // tests/factories/auth.ts
-import type { AuthRequestDTO } from '../../dto/AuthRequestDTO';
+import type { AuthRequestDTO } from '../../src/dto/AuthRequestDTO.ts';
 
 export function createAuthRequestDTO(overrides: Partial<AuthRequestDTO> = {}): AuthRequestDTO {
     return {

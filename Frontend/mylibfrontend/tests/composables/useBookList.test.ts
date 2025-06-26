@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { nextTick } from 'vue';
-import { useBookList } from '../../composables/useBookList';
-import type { BookListDTO } from '../../dto/BookListDTO';
+import { useBookList } from '../../src/composables/useBookList.ts';
+import type { BookListDTO } from '../../src/dto/BookListDTO.ts';
 
 describe('useBookList', () => {
     let fetchFn: ReturnType<typeof vi.fn>;

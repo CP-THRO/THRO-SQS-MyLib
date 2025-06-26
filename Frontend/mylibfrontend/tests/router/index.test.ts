@@ -2,7 +2,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { defineComponent, nextTick } from 'vue';
-import router from '../../router/index';
+import router from '../../src/router';
 
 const DummyComponent = defineComponent({
     template: '<router-view />',

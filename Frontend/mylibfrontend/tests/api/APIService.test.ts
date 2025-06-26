@@ -2,7 +2,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import axios from 'axios';
 import type { AxiosInstance } from 'axios';
-import { createBookDTO } from '../factories/book'; // adjust path if needed
+import { createBookDTO } from '../factories/book.ts'; // adjust path if needed
 
 
 vi.mock('axios');
@@ -26,7 +26,7 @@ beforeEach(async () => {
     (axios.isAxiosError as any) = vi.fn((err) => !!err?.isAxiosError); // Because I need this to handle the check on error in auth and sign-up
     mockUse.mockClear();
 
-    const module = await import('../../api/ApiService');
+    const module = await import('../../src/api/ApiService.ts');
     apiService = module.apiService;
 });
 
@@ -39,7 +39,7 @@ afterEach(() => {
     mockUse.mockReset();
 });
 
-import type { BookListDTO } from '../../dto/BookListDTO';
+import type { BookListDTO } from '../../src/dto/BookListDTO.ts';
 
 
 describe('ApiService', () => {
@@ -150,7 +150,7 @@ describe('ApiService', () => {
         const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
         const err = new Error('boom');
 
-        const { handleApiError } = await import('../../api/ApiService');
+        const { handleApiError } = await import('../../src/api/ApiService.ts');
 
         await expect(handleApiError(err)).rejects.toThrow('boom');
         expect(spy).toHaveBeenCalledWith('API Error:', err);
@@ -162,7 +162,7 @@ describe('ApiService', () => {
         localStorage.setItem('is_authenticated', 'true');
         localStorage.setItem('auth_token', 'abc123');
 
-        const { attachAuthToken } = await import('../../api/ApiService');
+        const { attachAuthToken } = await import('../../src/api/ApiService.ts');
 
         const result = attachAuthToken({ headers: {} });
 
@@ -175,7 +175,7 @@ describe('ApiService', () => {
         localStorage.removeItem('is_authenticated');
         localStorage.removeItem('auth_token');
 
-        const { attachAuthToken } = await import('../../api/ApiService');
+        const { attachAuthToken } = await import('../../src/api/ApiService.ts');
 
         const result = attachAuthToken({ headers: {} });
 

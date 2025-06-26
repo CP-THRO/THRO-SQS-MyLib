@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { ref } from 'vue';
-import { useBookActions } from '../../composables/useBookActions';
-import { apiService } from '../../api/ApiService';
+import { useBookActions } from '../../src/composables/useBookActions.ts';
+import { apiService } from '../../src/api/ApiService.ts';
 
 vi.mock('../../api/ApiService');
 

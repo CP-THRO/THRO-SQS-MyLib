@@ -1,5 +1,5 @@
 // tests/factories/reading.ts
-import type { ChangeBookReadingStatusRequestDTO } from '../../dto/ChangeBookReadingStatus.dto.ts';
+import type { ChangeBookReadingStatusRequestDTO } from '../../src/dto/ChangeBookReadingStatus.dto.ts';
 
 export function createChangeBookReadingStatusRequestDTO(
     overrides: Partial<ChangeBookReadingStatusRequestDTO> = {}

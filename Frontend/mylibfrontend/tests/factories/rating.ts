@@ -1,5 +1,5 @@
 // tests/factories/rating.ts
-import type { ChangeBookRatingDTO } from '../../dto/ChangeBookRatingDTO';
+import type { ChangeBookRatingDTO } from '../../src/dto/ChangeBookRatingDTO.ts';
 
 export function createChangeBookRatingDTO(overrides: Partial<ChangeBookRatingDTO> = {}): ChangeBookRatingDTO {
     return {

@@ -1,6 +1,6 @@
 // tests/factories/bookList.ts
-import type { BookListDTO } from '../../dto/BookListDTO';
-import { createBookDTO } from './book';
+import type { BookListDTO } from '../../src/dto/BookListDTO.ts';
+import { createBookDTO } from './book.ts';
 
 export function createBookListDTO(overrides: Partial<BookListDTO> = {}): BookListDTO {
     return {
