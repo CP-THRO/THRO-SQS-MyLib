@@ -9,12 +9,11 @@ const DummyComponent = defineComponent({
 });
 
 describe('Router', () => {
-    let wrapper: ReturnType<typeof mount>;
 
     beforeEach(async () => {
         // Always reset the router to root
-        router.push('/');
-        wrapper = mount(DummyComponent, {
+        await router.push('/');
+        mount(DummyComponent, {
             global: { plugins: [router] },
         });
         await router.isReady();
