@@ -117,7 +117,6 @@ export default defineComponent({
       { label: 'Title', field: 'title', slot: 'title' },
       { label: 'Authors', field: 'authors', slot: 'authors' },
       { label: 'Release Date', field: 'publishDate' },
-      { label: 'Average Rating', field: 'averageRating', slot: 'averageRating' },
       { label: 'Actions', field: 'actions', slot: 'actions' },
     ];
 
