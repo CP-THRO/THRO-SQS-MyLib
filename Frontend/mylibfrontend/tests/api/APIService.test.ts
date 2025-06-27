@@ -26,7 +26,7 @@ beforeEach(async () => {
     (axios.isAxiosError as any) = vi.fn((err) => !!err?.isAxiosError); // Because I need this to handle the check on error in auth and sign-up
     mockUse.mockClear();
 
-    const module = await import('../../src/api/ApiService.ts');
+    const module = await import('../../src/api/ApiService');
     apiService = module.apiService;
 });
 
@@ -39,7 +39,7 @@ afterEach(() => {
     mockUse.mockReset();
 });
 
-import type { BookListDTO } from '../../src/dto/BookListDTO.ts';
+import type { BookListDTO } from '../../src/dto/BookListDTO';
 
 
 describe('ApiService', () => {
@@ -150,7 +150,7 @@ describe('ApiService', () => {
         const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
         const err = new Error('boom');
 
-        const { handleApiError } = await import('../../src/api/ApiService.ts');
+        const { handleApiError } = await import('../../src/api/ApiService');
 
         await expect(handleApiError(err)).rejects.toThrow('boom');
         expect(spy).toHaveBeenCalledWith('API Error:', err);
@@ -162,7 +162,7 @@ describe('ApiService', () => {
         localStorage.setItem('is_authenticated', 'true');
         localStorage.setItem('auth_token', 'abc123');
 
-        const { attachAuthToken } = await import('../../src/api/ApiService.ts');
+        const { attachAuthToken } = await import('../../src/api/ApiService');
 
         const result = attachAuthToken({ headers: {} });
 
@@ -175,7 +175,7 @@ describe('ApiService', () => {
         localStorage.removeItem('is_authenticated');
         localStorage.removeItem('auth_token');
 
-        const { attachAuthToken } = await import('../../src/api/ApiService.ts');
+        const { attachAuthToken } = await import('../../src/api/ApiService');
 
         const result = attachAuthToken({ headers: {} });
 

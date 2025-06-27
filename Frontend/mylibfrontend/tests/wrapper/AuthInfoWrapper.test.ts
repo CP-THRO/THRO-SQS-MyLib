@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { isAuthenticated, loggedInUsername, syncAuthState } from '../../src/wrapper/AuthInfoWrapper.ts';
+import { isAuthenticated, loggedInUsername, syncAuthState } from '../../src/wrapper/AuthInfoWrapper';
 
 describe('authState', () => {
     beforeEach(() => {
