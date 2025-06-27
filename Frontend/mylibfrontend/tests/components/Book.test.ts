@@ -1,4 +1,4 @@
-import { describe, it, vi, expect, beforeEach } from 'vitest';
+import { describe, it, vi, expect} from 'vitest';
 import { flushPromises, mount } from '@vue/test-utils';
 import { createRouter, createMemoryHistory } from 'vue-router';
 import { ref } from 'vue';
@@ -140,7 +140,7 @@ describe('BookDetail.vue', () => {
 
     it('saves edited status', async () => {
         authRef.value = true;
-        const wrapper = await triggerStatusEditFlow();
+        await triggerStatusEditFlow();
         expect(apiService.updateStatus).toHaveBeenCalledWith('123', ReadingStatus.READ);
     });
 
