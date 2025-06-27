@@ -10,7 +10,7 @@ WORKDIR /opt/app
 #make node the owner
 COPY --chown=node:node package*.json ./
 
-RUN npm ci
+RUN npm ci --ignore-scripts
 
 #make node the owner and make scripts executable, otherwise a permission denied error occurs
 COPY --chown=node:node --chmod=755 . .
