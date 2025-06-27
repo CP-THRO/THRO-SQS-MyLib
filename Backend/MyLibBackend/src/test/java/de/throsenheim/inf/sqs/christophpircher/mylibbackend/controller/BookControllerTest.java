@@ -89,11 +89,9 @@ class BookControllerTest {
 
     @Test
     void getBookByIdShouldReturnBookWithoutUserInfoWhenUnauthenticated() throws Exception {
-        // Arrange
         Book book = Book.builder().bookID(BOOK_ID).title(TEST_TITLE).build();
         when(bookService.getBookById(BOOK_ID)).thenReturn(Optional.of(book));
 
-        // Act & Assert
         mockMvc.perform(get(GETBOOK_URL))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.bookID").value(BOOK_ID))

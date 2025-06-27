@@ -12,18 +12,10 @@ class BookDTOTest {
     @Test
     void testFromBookMapsAllFieldsCorrectly() {
 
-        Book book = new Book();
-        book.setBookID("OL1234M");
-        book.setTitle("Test Title");
-        book.setSubtitle("Test Subtitle");
-        book.setAuthors(List.of("Author A", "Author B"));
-        book.setDescription("A great book");
-        book.setIsbns(List.of("9781234567890"));
-        book.setPublishDate("2020-01-01");
-        book.setCoverURLSmall("small.jpg");
-        book.setCoverURLMedium("medium.jpg");
-        book.setCoverURLLarge("large.jpg");
+        Book.BookBuilder builder = Book.builder();
+        builder.bookID("OL1234M").title("Test Title").subtitle("Test Subtitle").authors(List.of("Author A", "Author B")).description("A great book").isbns(List.of("9781234567890")).publishDate("2020-01-01").coverURLSmall("small.jpg").coverURLMedium("medium.jpg").coverURLLarge("large.jpg");
 
+        Book book = builder.build();
         BookDTO dto = BookDTO.fromBook(book);
 
         assertEquals("OL1234M", dto.getBookID());

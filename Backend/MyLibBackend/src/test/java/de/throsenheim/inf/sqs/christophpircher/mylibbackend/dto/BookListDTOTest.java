@@ -12,7 +12,6 @@ class BookListDTOTest {
 
     @Test
     void testFromSearchResultMapsCorrectly() {
-        // Given
         Book book1 = Book.builder()
                 .bookID("OL123")
                 .title("Book One")
@@ -30,10 +29,8 @@ class BookListDTOTest {
                 .books(List.of(book1, book2))
                 .build();
 
-        // When
         BookListDTO dto = BookListDTO.fromSearchResult(bookList);
 
-        // Then
         assertEquals(2, dto.getNumResults());
         assertEquals(0, dto.getStartIndex());
         assertEquals(1, dto.getSkippedBooks());

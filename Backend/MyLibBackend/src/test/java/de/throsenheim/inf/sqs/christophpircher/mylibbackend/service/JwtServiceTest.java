@@ -24,9 +24,6 @@ class JwtServiceTest {
     @Autowired
     private JwtService jwtService;
 
-    @Autowired
-    private Environment environment;
-
     private User user;
 
     @BeforeEach

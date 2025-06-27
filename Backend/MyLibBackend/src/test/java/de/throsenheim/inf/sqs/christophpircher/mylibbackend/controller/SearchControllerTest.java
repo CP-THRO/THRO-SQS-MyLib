@@ -45,9 +45,8 @@ class SearchControllerTest {
     void searchExternalKeywordShouldReturnOk() throws Exception {
         // Arrange
         BookList bookList = new BookList();
-        Book book = new Book(); // assuming a no-args constructor
-        book.setTitle("Effective Java");
-        bookList.setBooks(List.of(book)); // assuming BookList has an add() method
+        Book book = Book.builder().title("java").build();
+        bookList.setBooks(List.of(book));
 
         when(searchService.searchKeywordsExternal("java", 0, 100)).thenReturn(bookList);
 

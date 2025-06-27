@@ -183,15 +183,13 @@ class BookServiceTest {
         User userWithWishlist = User.builder()
                 .id(user.getId())
                 .username(user.getUsername())
-                .wishlistBooks(new HashSet<>(List.of(book))) // book already on wishlist
+                .wishlistBooks(new HashSet<>(List.of(book)))
                 .build();
 
         when(bookRepository.getBookByBookID(BOOK_ID)).thenReturn(Optional.of(book));
         when(userRepository.getUserById(user.getId())).thenReturn(userWithWishlist);
-        // When
         bookService.addBookToWishList(BOOK_ID, user);
-        // Then
-        verify(userRepository, never()).save(any()); // no save should occur
+        verify(userRepository, never()).save(any());
     }
 
     @Test
@@ -205,26 +203,20 @@ class BookServiceTest {
 
     @Test
     void removeBookFromLibraryShouldLogDebugWhenBookNotFound() {
-        // Given
         when(bookRepository.getBookByBookID(BOOK_ID)).thenReturn(Optional.empty());
 
-        // When / Then
         assertDoesNotThrow(() -> bookService.removeBookFromLibrary(BOOK_ID, user));
 
-        // No interaction with delete expected
         verify(libraryBookRepository, never()).delete(any());
     }
 
     @Test
     void removeBookFromLibraryShouldLogDebugWhenBookNotInLibrary() {
-        // Given
         when(bookRepository.getBookByBookID(BOOK_ID)).thenReturn(Optional.of(book));
         when(libraryBookRepository.getLibraryBooksById(any())).thenReturn(Optional.empty());
 
-        // When / Then
         assertDoesNotThrow(() -> bookService.removeBookFromLibrary(BOOK_ID, user));
 
-        // Still, no delete should happen
         verify(libraryBookRepository, never()).delete(any());
     }
 
