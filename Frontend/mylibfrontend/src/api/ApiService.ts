@@ -7,6 +7,7 @@ import type { AddBookRequestDTO } from "../dto/AddBookRequestDTO.ts";
 import type { ChangeBookRatingDTO } from "../dto/ChangeBookRatingDTO.ts";
 import type { ReadingStatusType } from "../dto/ReadingStatus.ts";
 import type { ChangeBookReadingStatusRequestDTO } from "../dto/ChangeBookReadingStatus.dto.ts";
+import {config} from "../wrapper/AppConfig.ts";
 
 /**
  * Singleton service for making HTTP requests to the backend API.
@@ -18,8 +19,9 @@ class ApiService {
     private readonly http: AxiosInstance;
 
     private constructor() {
+
         this.http = axios.create({
-            baseURL: 'http://localhost:8080', // Replace with production endpoint as needed
+            baseURL: `${config.BACKEND_HOST}:${config.BACKEND_PORT}`,
             headers: {
                 'Content-Type': 'application/json',
             },
@@ -180,13 +182,12 @@ class ApiService {
 
 export const apiService = ApiService.getInstance();
 
-export function handleApiError(error: any) { //for unit testing
+export function handleApiError(error: any) { //exported as its own function for unit testing
     console.error('API Error:', error);
     return Promise.reject(error);
 }
 
-// In ApiService.ts
-export function attachAuthToken(config: any) { // for unit testing
+export function attachAuthToken(config: any) { // exported as its own function for unit testing
     if (localStorage.getItem("is_authenticated")) {
         const token = localStorage.getItem("auth_token");
         if (token) {
