@@ -35,7 +35,7 @@
 </template>
 
 <script lang="ts">
-import {defineComponent, computed, onBeforeMount, onMounted} from 'vue';
+import {defineComponent, computed, onBeforeMount} from 'vue';
 import { useRouter } from 'vue-router';
 import { useBookList } from '../composables/useBookList';
 import { usePaginationState } from '../composables/usePaginationState';
