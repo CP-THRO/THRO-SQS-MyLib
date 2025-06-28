@@ -2,7 +2,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import axios from 'axios';
 import type { AxiosInstance } from 'axios';
-import { createBookDTO } from '../factories/book.ts'; // adjust path if needed
+import { createBookDTO } from '../factories/book'; // adjust path if needed
 
 
 vi.mock('axios');
@@ -27,7 +27,8 @@ beforeEach(async () => {
     mockUse.mockClear();
 
     const module = await import('../../src/api/ApiService');
-    apiService = module.apiService;
+    module.ApiService.init();
+    apiService = module.ApiService.getInstance();
 });
 
 afterEach(() => {

@@ -31,12 +31,12 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed, onBeforeMount } from 'vue';
+import {defineComponent, computed, onBeforeMount} from 'vue';
 import { useRouter } from 'vue-router';
 import { useBookList } from '../composables/useBookList';
 import { usePaginationState } from '../composables/usePaginationState';
 import { useBookActions } from '../composables/useBookActions';
-import { apiService } from '../api/ApiService';
+import { ApiService } from '../api/ApiService';
 import BaseBookList from './BaseBookList.vue';
 import { isAuthenticated } from '../wrapper/AuthInfoWrapper';
 
@@ -48,7 +48,7 @@ export default defineComponent({
     const router = useRouter();
 
     // Initialize paginated book list for the user's wishlist
-    const bookList = useBookList((start, size) => apiService.getWishlist(start, size));
+    const bookList = useBookList((start, size) => ApiService.getInstance().getWishlist(start, size));
 
     // Redirect to login if the user is not authenticated
     onBeforeMount(() => {
@@ -56,6 +56,7 @@ export default defineComponent({
         router.push('/login');
       }
     });
+
 
     // Persist and restore pagination state for wishlist
     usePaginationState(bookList, 'wishlistPage', bookList.loadBooks);

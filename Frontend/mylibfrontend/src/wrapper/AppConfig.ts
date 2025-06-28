@@ -17,8 +17,14 @@ export async function loadAppConfig(): Promise<void> {
             throw new Error('Failed to fetch config.json');
         }
         const data = await response.json();
-        config.BACKEND_HOST = data.BACKEND_BASE_URL ?? 'http://localhost';
-        config.BACKEND_PORT = data.BACKEND_PORT ?? "7070"
+        console.log(data)
+        console.log(data.BACKEND_HOST)
+        console.log(data.BACKEND_PORT)
+
+        config.BACKEND_HOST = data.BACKEND_HOST ?? 'http://localhost';
+        config.BACKEND_PORT = data.BACKEND_PORT ?? "8080"
+        console.log(config.BACKEND_HOST)
+        console.log(config.BACKEND_PORT)
     } catch (error) {
         console.error(error);
         config.BACKEND_HOST= 'http://localhost';

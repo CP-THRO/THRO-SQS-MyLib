@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { onBeforeMount, ref, watch } from 'vue';
+import {onBeforeMount, ref, watch} from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { apiService } from '../api/ApiService';
+import { ApiService } from '../api/ApiService';
 import { syncAuthState } from "../wrapper/AuthInfoWrapper.ts";
 
 // Route & navigation state
@@ -39,6 +39,7 @@ onBeforeMount(() => {
   }
 });
 
+
 /**
  * Main button handler for login or sign-up mode.
  */
@@ -49,7 +50,7 @@ const buttonAction = async () => {
   if (signup) {
     // Handle user sign-up
     try {
-      const responseCode = await apiService.signUp(username.value, password.value);
+      const responseCode = await ApiService.getInstance().signUp(username.value, password.value);
       if (responseCode === 409) {
         error.value = "Error: Username already exists!";
       } else {
@@ -66,7 +67,7 @@ const buttonAction = async () => {
   } else {
     // Handle login
     try {
-      const responseCode = await apiService.authenticate(username.value, password.value);
+      const responseCode = await ApiService.getInstance().authenticate(username.value, password.value);
       if (responseCode === 403) {
         error.value = "Error: Username or password incorrect";
       } else {

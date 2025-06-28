@@ -14,11 +14,13 @@ import {config} from "../wrapper/AppConfig.ts";
  *
  * Handles authentication, book management, and user-related operations.
  */
-class ApiService {
+export class ApiService {
     private static instance: ApiService;
     private readonly http: AxiosInstance;
 
     private constructor() {
+        console.log(config.BACKEND_HOST)
+        console.log(config.BACKEND_PORT)
 
         this.http = axios.create({
             baseURL: `${config.BACKEND_HOST}:${config.BACKEND_PORT}`,
@@ -37,12 +39,19 @@ class ApiService {
         this.http.interceptors.request.use(attachAuthToken);
     }
 
+    // To load config dynamically at startup. Must happen AFTER the config is loaded. Therefore I can't use an exported instance
+    public static init() {
+        if (!ApiService.instance) {
+            ApiService.instance = new ApiService();
+        }
+    }
+
     /**
      * Returns the singleton instance of ApiService.
      */
     public static getInstance(): ApiService {
         if (!ApiService.instance) {
-            ApiService.instance = new ApiService();
+            throw new Error("ApiService not initialized!");
         }
         return ApiService.instance;
     }
@@ -179,8 +188,6 @@ class ApiService {
         await this.http.put(`/api/v1/books/update/status`, statusDTO);
     }
 }
-
-export const apiService = ApiService.getInstance();
 
 export function handleApiError(error: any) { //exported as its own function for unit testing
     console.error('API Error:', error);

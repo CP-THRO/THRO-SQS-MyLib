@@ -47,20 +47,21 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed } from 'vue';
+import {defineComponent, computed} from 'vue';
 import BaseBookList from './BaseBookList.vue';
 import { useBookList } from '../composables/useBookList';
 import { usePaginationState } from '../composables/usePaginationState';
 import { useBookActions } from '../composables/useBookActions';
-import { apiService } from '../api/ApiService';
+import { ApiService } from '../api/ApiService';
 import { isAuthenticated } from '../wrapper/AuthInfoWrapper';
 
 export default defineComponent({
   name: 'AllBooks',
   components: { BaseBookList },
   setup() {
+
     // Load all books using the API service with pagination support
-    const bookList = useBookList((start, size) => apiService.getAllBooks(start, size));
+    const bookList = useBookList((start, size) => ApiService.getInstance().getAllBooks(start, size));
 
     // Composable for handling add-to-library/wishlist actions
     const { onAddToLibrary, onAddToWishlist } = useBookActions(bookList, bookList.loadBooks);

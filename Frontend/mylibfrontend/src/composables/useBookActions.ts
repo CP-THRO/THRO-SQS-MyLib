@@ -1,8 +1,9 @@
-import { apiService } from '../api/ApiService';
+import { ApiService } from '../api/ApiService';
 import type { Ref } from 'vue';
 
 type ErrorRef = { error: Ref<string | null> };
 type ReloadFn = (...args: any[]) => Promise<void>;
+
 
 /**
  * Composable providing book-related actions with unified error handling.
@@ -32,25 +33,26 @@ export function useBookActions(
      * Adds a book to the library.
      */
     const onAddToLibrary = async (bookID: string) =>
-        withErrorHandling(() => apiService.addBookToLibrary(bookID));
+        withErrorHandling(() => ApiService.getInstance().addBookToLibrary(bookID));
 
     /**
      * Adds a book to the wishlist.
      */
     const onAddToWishlist = async (bookID: string) =>
-        withErrorHandling(() => apiService.addBookToWishlist(bookID));
+        withErrorHandling(() => ApiService.getInstance().addBookToWishlist(bookID));
 
     /**
      * Removes a book from the library.
      */
     const onDeleteFromLibrary = async (bookID: string) =>
-        withErrorHandling(() => apiService.deleteBookFromLibrary(bookID));
+        withErrorHandling(() => ApiService.getInstance().deleteBookFromLibrary(bookID));
 
     /**
      * Removes a book from the wishlist.
      */
     const onDeleteFromWishlist = async (bookID: string) =>
-        withErrorHandling(() => apiService.deleteBookFromWishlist(bookID));
+        withErrorHandling(() => ApiService.getInstance().deleteBookFromWishlist(bookID));
+
 
     return {
         onAddToLibrary,

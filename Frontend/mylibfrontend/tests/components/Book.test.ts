@@ -9,13 +9,19 @@ const addToWishlistSpy = vi.fn();
 const deleteFromLibrarySpy = vi.fn();
 const deleteFromWishlistSpy = vi.fn();
 
-vi.mock('../../src/api/ApiService', () => ({
-    apiService: {
-        getBookByID: vi.fn(),
-        updateRating: vi.fn(),
-        updateStatus: vi.fn(),
-    },
-}));
+vi.mock('../../src/api/ApiService', () => {
+    return {
+        ApiService: {
+            getInstance: vi.fn().mockReturnValue({
+                getBookByID: vi.fn(),
+                updateRating: vi.fn(),
+                updateStatus: vi.fn(),
+            }),
+        },
+        handleApiError: vi.fn(),
+        attachAuthToken: vi.fn(),
+    };
+});
 
 vi.mock('../../src/composables/useBookActions', () => ({
     useBookActions: () => ({
@@ -34,9 +40,9 @@ vi.mock('../../src/wrapper/AuthInfoWrapper.ts', () => {
     };
 });
 
-import { apiService } from '../../src/api/ApiService';
+import { ApiService } from '../../src/api/ApiService';
 import BookDetail from '../../src/components/Book.vue';
-import { _testAuthRef as authRef } from '../../src/wrapper/AuthInfoWrapper.ts';
+import { _testAuthRef as authRef } from '../../src/wrapper/AuthInfoWrapper';
 
 const mockBook = {
     bookID: '123',
@@ -63,7 +69,7 @@ const createWrapper = async (overrides = {}) => {
     router.push('/book/123');
     await router.isReady();
 
-    (apiService.getBookByID as any).mockResolvedValue({ ...mockBook, ...overrides });
+    (ApiService.getInstance().getBookByID as any).mockResolvedValue({ ...mockBook, ...overrides });
 
     const wrapper = mount(BookDetail, {
         global: {
@@ -77,9 +83,9 @@ const createWrapper = async (overrides = {}) => {
 
 const triggerStatusEditFlow = async (shouldFail = false) => {
     if (shouldFail) {
-        (apiService.updateStatus as any).mockRejectedValueOnce(new Error('Status update failed'));
+        (ApiService.getInstance().updateStatus as any).mockRejectedValueOnce(new Error('Status update failed'));
     } else {
-        (apiService.updateStatus as any).mockResolvedValueOnce();
+        (ApiService.getInstance().updateStatus as any).mockResolvedValueOnce();
     }
 
     const wrapper = await createWrapper();
@@ -127,7 +133,7 @@ describe('BookDetail.vue', () => {
 
     it('saves edited rating', async () => {
         authRef.value = true;
-        (apiService.updateRating as any).mockResolvedValueOnce();
+        (ApiService.getInstance().updateRating as any).mockResolvedValueOnce();
         const wrapper = await createWrapper();
         const editButtons = wrapper.findAll('button');
         const editRatingButton = editButtons.find(btn => btn.text().includes('Edit'));
@@ -135,13 +141,13 @@ describe('BookDetail.vue', () => {
         await wrapper.find('select').setValue('5');
         const saveButton = wrapper.findAll('button').find(btn => btn.text().includes('Save'));
         await saveButton?.trigger('click');
-        expect(apiService.updateRating).toHaveBeenCalledWith('123', '5');
+        expect(ApiService.getInstance().updateRating).toHaveBeenCalledWith('123', '5');
     });
 
     it('saves edited status', async () => {
         authRef.value = true;
         await triggerStatusEditFlow();
-        expect(apiService.updateStatus).toHaveBeenCalledWith('123', ReadingStatus.READ);
+        expect(ApiService.getInstance().updateStatus).toHaveBeenCalledWith('123', ReadingStatus.READ);
     });
 
     it('shows error when status update fails', async () => {
@@ -170,7 +176,7 @@ describe('BookDetail.vue', () => {
 
     it('shows error when rating update fails', async () => {
         authRef.value = true;
-        (apiService.updateRating as any).mockRejectedValueOnce(new Error('Rating update failed'));
+        (ApiService.getInstance().updateRating as any).mockRejectedValueOnce(new Error('Rating update failed'));
 
         const wrapper = await createWrapper();
         const editRatingButton = wrapper.findAll('button').find(btn => btn.text().includes('Edit'));

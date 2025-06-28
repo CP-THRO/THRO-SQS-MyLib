@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
-import { apiService } from '../api/ApiService';
+import { ApiService } from '../api/ApiService';
 import type { BookDTO } from '../dto/BookDTO';
 import { isAuthenticated } from "../wrapper/AuthInfoWrapper.ts";
 import { ReadingStatus } from "../dto/ReadingStatus.ts";
@@ -33,7 +33,7 @@ const loadBook = async () => {
   if (bookID != null) {
     try {
       loading.value = true;
-      book.value = await apiService.getBookByID(bookID);
+      book.value = await ApiService.getInstance().getBookByID(bookID);
 
       if (book.value.individualRating !== 0) {
         ratingSelection.value = book.value.individualRating;
@@ -66,7 +66,7 @@ const onEditRating = () => {
 // Save the edited rating
 const onEditRatingSave = async () => {
   try {
-    await apiService.updateRating(book.value?.bookID as string, ratingSelection.value);
+    await ApiService.getInstance().updateRating(book.value?.bookID as string, ratingSelection.value);
     await loadBook();
     editRating.value = false;
   } catch (e: any) {
@@ -87,7 +87,7 @@ const onEditStatus = () => {
 // Save edited reading status
 const onEditStatusSave = async () => {
   try {
-    await apiService.updateStatus(book.value?.bookID as string, statusSelection.value);
+    await ApiService.getInstance().updateStatus(book.value?.bookID as string, statusSelection.value);
     await loadBook();
     editStatus.value = false;
   } catch (e: any) {
@@ -100,8 +100,8 @@ const onEditStatusCancel = () => {
   editStatus.value = false;
 };
 
-// Initial load
 onMounted(loadBook);
+
 </script>
 
 <template>

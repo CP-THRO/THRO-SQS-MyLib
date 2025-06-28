@@ -52,11 +52,11 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, computed } from 'vue';
+import {defineComponent, ref, computed} from 'vue';
 import { useBookList } from '../composables/useBookList';
 import { usePaginationState } from '../composables/usePaginationState';
 import { useBookActions } from '../composables/useBookActions';
-import { apiService } from '../api/ApiService';
+import { ApiService } from '../api/ApiService';
 import { isAuthenticated } from '../wrapper/AuthInfoWrapper';
 import BaseBookList from './BaseBookList.vue';
 
@@ -71,7 +71,7 @@ export default defineComponent({
 
     // Paginated search-based book loader
     const bookList = useBookList((start, size, keywords) =>
-        apiService.getKeywordSearch(keywords, start, size)
+        ApiService.getInstance().getKeywordSearch(keywords, start, size)
     );
 
     /**

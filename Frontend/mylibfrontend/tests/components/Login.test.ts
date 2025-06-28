@@ -19,12 +19,27 @@ vi.mock('vue-router', () => ({
     }),
 }));
 
-vi.mock('../../src/api/ApiService', () => ({
-    apiService: {
-        signUp: vi.fn().mockResolvedValue(200),
-        authenticate: vi.fn().mockResolvedValue(200),
-    },
-}));
+vi.mock('../../src/api/ApiService', () => {
+    //define mocks INSIDE the factory
+    const signUpMock = vi.fn().mockResolvedValue(200);
+    const authenticateMock = vi.fn().mockResolvedValue(200);
+
+    // attach them so tests can import and manipulate them
+    return {
+        ApiService: {
+            getInstance: vi.fn().mockReturnValue({
+                signUp: signUpMock,
+                authenticate: authenticateMock,
+            }),
+        },
+        __mocks: {
+            signUpMock,
+            authenticateMock,
+        },
+        handleApiError: vi.fn(),
+        attachAuthToken: vi.fn(),
+    };
+});
 
 vi.mock('../../src/wrapper/AuthInfoWrapper.ts', () => ({
     syncAuthState: vi.fn(),
@@ -32,17 +47,27 @@ vi.mock('../../src/wrapper/AuthInfoWrapper.ts', () => ({
 
 import Login from '../../src/components/Login.vue';
 
+//Import mocks from the mock module
+import {
+    __mocks as apiServiceMocks,
+} from '../../src/api/ApiService';
+import { syncAuthState } from '../../src/wrapper/AuthInfoWrapper';
+
 describe('Login.vue', () => {
     beforeEach(() => {
         vi.clearAllMocks();
         localStorage.clear();
-        // Reset to login mode before each test
+
         currentRoute.value = {
             fullPath: '/login',
             path: '/login',
             params: { signup: '' },
         };
+
         pushMock.mockClear();
+
+        apiServiceMocks.signUpMock.mockReset().mockResolvedValue(200);
+        apiServiceMocks.authenticateMock.mockReset().mockResolvedValue(200);
     });
 
     it('redirects immediately if already authenticated', async () => {
@@ -56,11 +81,10 @@ describe('Login.vue', () => {
         currentRoute.value = {
             fullPath: '/login/signup',
             path: '/login/signup',
-            params: { signup: 'signup' }, // signup mode enabled
+            params: { signup: 'signup' },
         };
 
-        const { apiService } = await import('../../src/api/ApiService');
-        apiService.signUp.mockResolvedValueOnce(409);
+        apiServiceMocks.signUpMock.mockResolvedValueOnce(409);
 
         const wrapper = mount(Login);
         await flushPromises();
@@ -77,14 +101,11 @@ describe('Login.vue', () => {
         currentRoute.value = {
             fullPath: '/login/signup',
             path: '/login/signup',
-            params: { signup: 'signup' }, // signup mode enabled
+            params: { signup: 'signup' },
         };
 
-        const { apiService } = await import('../../src/api/ApiService');
-        apiService.signUp.mockResolvedValueOnce(201);
-        apiService.authenticate.mockResolvedValueOnce(200);
-
-        const { syncAuthState } = await import('../../src/wrapper/AuthInfoWrapper.ts');
+        apiServiceMocks.signUpMock.mockResolvedValueOnce(201);
+        apiServiceMocks.authenticateMock.mockResolvedValueOnce(200);
         syncAuthState.mockClear();
 
         const wrapper = mount(Login);
@@ -95,15 +116,14 @@ describe('Login.vue', () => {
         await wrapper.find('button.btn-primary').trigger('click');
         await flushPromises();
 
-        expect(apiService.signUp).toHaveBeenCalledWith('newuser', 'newpass');
-        expect(apiService.authenticate).toHaveBeenCalledWith('newuser', 'newpass');
+        expect(apiServiceMocks.signUpMock).toHaveBeenCalledWith('newuser', 'newpass');
+        expect(apiServiceMocks.authenticateMock).toHaveBeenCalledWith('newuser', 'newpass');
         expect(syncAuthState).toHaveBeenCalled();
         expect(pushMock).toHaveBeenCalled();
     });
 
     it('shows login error for incorrect credentials', async () => {
-        const { apiService } = await import('../../src/api/ApiService');
-        apiService.authenticate.mockResolvedValueOnce(403);
+        apiServiceMocks.authenticateMock.mockResolvedValueOnce(403);
 
         const wrapper = mount(Login);
         await flushPromises();
@@ -117,10 +137,7 @@ describe('Login.vue', () => {
     });
 
     it('logs in successfully and syncs auth state', async () => {
-        const { apiService } = await import('../../src/api/ApiService');
-        apiService.authenticate.mockResolvedValueOnce(200);
-
-        const { syncAuthState } = await import('../../src/wrapper/AuthInfoWrapper.ts');
+        apiServiceMocks.authenticateMock.mockResolvedValueOnce(200);
         syncAuthState.mockClear();
 
         const wrapper = mount(Login);
@@ -136,8 +153,7 @@ describe('Login.vue', () => {
     });
 
     it('displays generic error on API failure', async () => {
-        const { apiService } = await import('../../src/api/ApiService');
-        apiService.authenticate.mockRejectedValueOnce(new Error('Network error'));
+        apiServiceMocks.authenticateMock.mockRejectedValueOnce(new Error('Network error'));
 
         const wrapper = mount(Login);
         await flushPromises();

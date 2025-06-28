@@ -35,24 +35,25 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed, onBeforeMount } from 'vue';
+import {defineComponent, computed, onBeforeMount, onMounted} from 'vue';
 import { useRouter } from 'vue-router';
 import { useBookList } from '../composables/useBookList';
 import { usePaginationState } from '../composables/usePaginationState';
 import { useBookActions } from '../composables/useBookActions';
-import { apiService } from '../api/ApiService';
 import BaseBookList from './BaseBookList.vue';
 import { isAuthenticated } from '../wrapper/AuthInfoWrapper';
+import {ApiService} from "../api/ApiService.ts";
 
 export default defineComponent({
   name: 'LibraryBooks',
   components: { BaseBookList },
 
   setup() {
+
     const router = useRouter();
 
     // Reactive pagination-enabled list for library books
-    const bookList = useBookList((start, size) => apiService.getLibrary(start, size));
+    const bookList = useBookList((start, size) => ApiService.getInstance().getLibrary(start, size));
 
     // Redirect unauthenticated users to login
     onBeforeMount(() => {
@@ -63,6 +64,7 @@ export default defineComponent({
 
     // Restore and persist pagination state in sessionStorage
     usePaginationState(bookList, 'libraryPage', bookList.loadBooks);
+
 
     // Book action handlers (delete only, since library-only view)
     const { onDeleteFromLibrary } = useBookActions(bookList, bookList.loadBooks);

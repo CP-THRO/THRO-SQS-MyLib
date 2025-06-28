@@ -16,33 +16,45 @@ vi.mock('../../src/wrapper/AuthInfoWrapper', () => ({
     },
 }));
 
-vi.mock('../../src/api/ApiService', () => ({
-    apiService: {
-        getKeywordSearch: vi.fn().mockResolvedValue({
-            books: [
-                {
-                    bookID: 'b1',
-                    title: 'Test Book 1',
-                    authors: ['Author One'],
-                    publishDate: '2020',
-                    averageRating: 4.5,
-                    bookIsInLibrary: false,
-                    bookIsOnWishlist: false,
-                },
-                {
-                    bookID: 'b2',
-                    title: 'Test Book 2',
-                    authors: ['Author Two'],
-                    publishDate: '2021',
-                    averageRating: 3.5,
-                    bookIsInLibrary: true,
-                    bookIsOnWishlist: false,
-                },
-            ],
-            numResults: 2,
-        }),
-    },
-}));
+vi.mock('../../src/api/ApiService', () => {
+    const getKeywordSearchMock = vi.fn().mockResolvedValue({
+        books: [
+            {
+                bookID: 'b1',
+                title: 'Test Book 1',
+                authors: ['Author One'],
+                publishDate: '2020',
+                averageRating: 4.5,
+                bookIsInLibrary: false,
+                bookIsOnWishlist: false,
+            },
+            {
+                bookID: 'b2',
+                title: 'Test Book 2',
+                authors: ['Author Two'],
+                publishDate: '2021',
+                averageRating: 3.5,
+                bookIsInLibrary: true,
+                bookIsOnWishlist: false,
+            },
+        ],
+        numResults: 2,
+    });
+
+    return {
+        ApiService: {
+            getInstance: vi.fn().mockReturnValue({
+                getKeywordSearch: getKeywordSearchMock,
+            }),
+        },
+        __mocks: {
+            getKeywordSearchMock,
+        },
+        handleApiError: vi.fn(),
+        attachAuthToken: vi.fn(),
+    };
+});
+
 
 vi.mock('../../src/composables/useBookList', () => {
     const { ref } = require('vue');

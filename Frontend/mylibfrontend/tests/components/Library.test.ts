@@ -17,10 +17,15 @@ vi.mock('../../src/api/ApiService', () => {
         }],
         numResults: 1,
     });
+
     return {
-        apiService: {
-            getLibrary: getLibraryMock,
+        ApiService: {
+            getInstance: vi.fn().mockReturnValue({
+                getLibrary: getLibraryMock,
+            }),
         },
+        handleApiError: vi.fn(),
+        attachAuthToken: vi.fn(),
     };
 });
 

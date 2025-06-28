@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { ref } from 'vue';
-import { useBookActions } from '../../src/composables/useBookActions.ts';
-import { apiService } from '../../src/api/ApiService.ts';
+import { useBookActions } from '../../src/composables/useBookActions';
+import { ApiService } from '../../src/api/ApiService';
 
 vi.mock('../../api/ApiService');
 
@@ -12,6 +12,7 @@ describe('useBookActions', () => {
     let keywords: any;
 
     beforeEach(() => {
+        ApiService.init();
         errorRef.value = null;
         reload = vi.fn().mockResolvedValue(undefined);
         keywords = vi.fn().mockReturnValue('harry potter');
@@ -22,7 +23,7 @@ describe('useBookActions', () => {
     });
 
     it('calls onAddToLibrary and reloads with keywords', async () => {
-        const add = vi.spyOn(apiService, 'addBookToLibrary').mockResolvedValue();
+        const add = vi.spyOn(ApiService.getInstance(), 'addBookToLibrary').mockResolvedValue();
 
         const { onAddToLibrary } = useBookActions(target, reload, keywords);
         await onAddToLibrary('OL1');
@@ -33,7 +34,7 @@ describe('useBookActions', () => {
     });
 
     it('calls onAddToWishlist and reloads without keywords', async () => {
-        const add = vi.spyOn(apiService, 'addBookToWishlist').mockResolvedValue();
+        const add = vi.spyOn(ApiService.getInstance(), 'addBookToWishlist').mockResolvedValue();
 
         const { onAddToWishlist } = useBookActions(target, reload);
         await onAddToWishlist('OL2');
@@ -45,7 +46,7 @@ describe('useBookActions', () => {
 
     it('calls onDeleteFromLibrary and sets error on failure', async () => {
         const err = new Error('fail lib');
-        vi.spyOn(apiService, 'deleteBookFromLibrary').mockRejectedValue(err);
+        vi.spyOn(ApiService.getInstance(), 'deleteBookFromLibrary').mockRejectedValue(err);
 
         const { onDeleteFromLibrary } = useBookActions(target, reload, keywords);
         await onDeleteFromLibrary('OL3');
@@ -55,7 +56,7 @@ describe('useBookActions', () => {
 
     it('calls onDeleteFromWishlist and uses fallback message if no error message', async () => {
         const err = {};
-        vi.spyOn(apiService, 'deleteBookFromWishlist').mockRejectedValue(err);
+        vi.spyOn(ApiService.getInstance(), 'deleteBookFromWishlist').mockRejectedValue(err);
 
         const { onDeleteFromWishlist } = useBookActions(target, reload, keywords);
         await onDeleteFromWishlist('OL4');
