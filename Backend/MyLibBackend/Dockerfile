@@ -19,5 +19,8 @@ COPY --from=build /app/build/libs/*.jar app.jar
 # Expose port 8080
 EXPOSE 8080
 
+#select the application.properties file
+ENV MACHINE=prod
+
 # Run the app
-ENTRYPOINT ["java", "-jar", "/app/app.jar"]
+ENTRYPOINT ["java", "-jar", "-Dspring.profiles.active=${MACHINE}", "/app/app.jar"]
