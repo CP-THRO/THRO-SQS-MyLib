@@ -2,7 +2,11 @@ package de.throsenheim.inf.sqs.christophpircher.mylibbackend.security;
 
 import de.throsenheim.inf.sqs.christophpircher.mylibbackend.service.CustomUserDetailsService;
 import de.throsenheim.inf.sqs.christophpircher.mylibbackend.service.JwtService;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -21,6 +25,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
 
 import java.util.List;
 
@@ -43,12 +48,21 @@ import static org.springframework.boot.autoconfigure.security.servlet.PathReques
  */
 @Configuration
 @EnableWebSecurity
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class SecurityConfig {
 
+    @NonNull
     private final CustomUserDetailsService userDetailsService;
+    @NonNull
     private final JwtService jwtService;
+    @NonNull
     private final PasswordEncoder passwordEncoder;
+
+    @Value("${frontend.url}")
+    private String frontendURL;
+
+    @Value("${backend.url}")
+    private String backendURL;
 
     private static final String[] SWAGGER_WHITELIST = {
             "/v3/api-docs/**",
@@ -80,6 +94,8 @@ public class SecurityConfig {
                         // Permit public access to OpenAPI documentation, h2 console, the auth endpoints, the search endpoints, the get book by ID endpoint and the get all known books endpoint
                         .requestMatchers(SWAGGER_WHITELIST).permitAll().requestMatchers(toH2Console()).permitAll().requestMatchers("/api/v1/auth/**", "/api/v1/search/**", "/api/v1/books/get/byID/**", "/api/v1/books/get/all").permitAll()
 
+                        .requestMatchers("/error").permitAll()
+
                         // All other endpoints require authentication
                         .anyRequest().authenticated()
                 )
@@ -97,6 +113,26 @@ public class SecurityConfig {
                 .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin));
 
         return http.build();
+    }
+
+    /**
+     * Configures the {@link CorsFilter} used to filter for the origin of requests.
+     * It is configured to allow all requests from the frontend and swagger-ui.
+     * The configuration for this is set via environment variables.
+     *
+     * @return The configured CorsFilter bean
+     */
+    @Bean
+    public CorsFilter corsFilter() {
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowCredentials(true);
+        config.setAllowedOrigins(List.of(frontendURL,backendURL));
+        config.setAllowedHeaders(List.of("*"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+        return new CorsFilter(source);
     }
 
 

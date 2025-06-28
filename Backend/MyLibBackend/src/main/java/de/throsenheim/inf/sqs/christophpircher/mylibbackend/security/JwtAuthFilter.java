@@ -83,6 +83,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             log.debug("Authentication context already set for this request");
         }
 
+
         filterChain.doFilter(request, response);
+
     }
 }
