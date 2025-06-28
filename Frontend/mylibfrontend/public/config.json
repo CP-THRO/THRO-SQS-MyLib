@@ -1,4 +1,5 @@
 {
-  "BACKEND_HOST": "http://localhost",
-  "BACKEND_PORT": "8080"
+  "BACKEND_HOST": "localhost",
+  "BACKEND_PORT": "8080",
+  "BACKEND_PROTO": "http"
 }

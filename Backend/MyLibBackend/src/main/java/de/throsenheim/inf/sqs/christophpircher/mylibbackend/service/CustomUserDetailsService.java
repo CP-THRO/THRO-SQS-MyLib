@@ -11,6 +11,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
@@ -84,6 +85,7 @@ public class CustomUserDetailsService implements UserDetailsService {
      * @param password the new user's plain-text password
      * @throws UsernameExistsException if the username already exists in the system
      */
+    @Transactional
     public void addUser(String username, String password) throws UsernameExistsException {
         log.info("Registering new user: '{}'", username);
 

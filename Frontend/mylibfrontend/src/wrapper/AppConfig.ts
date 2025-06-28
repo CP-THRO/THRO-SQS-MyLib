@@ -3,11 +3,13 @@
 export interface Config {
     BACKEND_HOST: string;
     BACKEND_PORT: string;
+    BACKEND_PROTO: string;
 }
 
 export const config: Config = {
-    BACKEND_HOST: 'http://localhost',
-    BACKEND_PORT: "8080"
+    BACKEND_HOST: 'localhost',
+    BACKEND_PORT: "8080",
+    BACKEND_PROTO : "http",
 };
 
 export async function loadAppConfig(): Promise<void> {
@@ -17,17 +19,14 @@ export async function loadAppConfig(): Promise<void> {
             throw new Error('Failed to fetch config.json');
         }
         const data = await response.json();
-        console.log(data)
-        console.log(data.BACKEND_HOST)
-        console.log(data.BACKEND_PORT)
 
-        config.BACKEND_HOST = data.BACKEND_HOST ?? 'http://localhost';
+        config.BACKEND_HOST = data.BACKEND_HOST ?? 'localhost';
         config.BACKEND_PORT = data.BACKEND_PORT ?? "8080"
-        console.log(config.BACKEND_HOST)
-        console.log(config.BACKEND_PORT)
+        config.BACKEND_PROTO = data.BACKEND_PROTO ?? "http"
     } catch (error) {
         console.error(error);
-        config.BACKEND_HOST= 'http://localhost';
+        config.BACKEND_HOST= 'localhost';
         config.BACKEND_PORT= "8080"
+        config.BACKEND_PROTO = "http"
     }
 }

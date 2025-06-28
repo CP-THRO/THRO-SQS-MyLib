@@ -19,11 +19,8 @@ export class ApiService {
     private readonly http: AxiosInstance;
 
     private constructor() {
-        console.log(config.BACKEND_HOST)
-        console.log(config.BACKEND_PORT)
-
         this.http = axios.create({
-            baseURL: `${config.BACKEND_HOST}:${config.BACKEND_PORT}`,
+            baseURL: `${config.BACKEND_PROTO}://${config.BACKEND_HOST}:${config.BACKEND_PORT}`,
             headers: {
                 'Content-Type': 'application/json',
             },

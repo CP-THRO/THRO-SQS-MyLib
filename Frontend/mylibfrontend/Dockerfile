@@ -23,7 +23,8 @@ FROM nginx:stable-alpine
 
 # Default values for environment variables
 ENV BACKEND_HOST="http://test"
-ENV BACKEND_PORT="8081"
+ENV BACKEND_PORT="8080"
+ENV BACKEND_PROTO="http"
 
 # Copy the build files from the previous stage
 COPY --from=builder /opt/app/dist /usr/share/nginx/html
@@ -32,4 +33,4 @@ COPY --from=builder /opt/app/dist /usr/share/nginx/html
 EXPOSE 80
 
 # Create config.json file from environment variables and start nginx
-CMD ["/bin/sh", "-c", "echo \"{\\\"BACKEND_HOST\\\": \\\"${BACKEND_HOST}\\\", \\\"BACKEND_PORT\\\": \\\"${BACKEND_PORT}\\\"}\" > /usr/share/nginx/html/config.json && cat /usr/share/nginx/html/config.json && cat /etc/nginx/conf.d/default.conf && exec nginx -g 'daemon off;'"]
+CMD ["/bin/sh", "-c", "echo \"{\\\"BACKEND_HOST\\\": \\\"${BACKEND_HOST}\\\", \\\"BACKEND_PORT\\\": \\\"${BACKEND_PORT}\\\", \\\"BACKEND_PROTO\\\":\\\"${BACKEND_PROTO}\\\"\"} > /usr/share/nginx/html/config.json && cat /usr/share/nginx/html/config.json && cat /etc/nginx/conf.d/default.conf && exec nginx -g 'daemon off;'"]

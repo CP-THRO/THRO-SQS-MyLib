@@ -13,6 +13,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -185,6 +186,7 @@ public class BookService {
      * @throws IOException if a network error occurs
      * @throws BookNotFoundException if the book cannot be found
      */
+    @Transactional
     public void addBookToLibrary(String bookID, User user) throws UnexpectedStatusException, IOException, BookNotFoundException {
         log.info("User '{}' adding book '{}' to library", user.getUsername(), bookID);
         Book book = getOrCreateBook(bookID);
@@ -215,6 +217,7 @@ public class BookService {
      * @throws IOException if a network error occurs
      * @throws BookNotFoundException if the book cannot be found
      */
+    @Transactional
     public void addBookToWishList(String bookID, User user) throws UnexpectedStatusException, IOException, BookNotFoundException {
         log.info("User '{}' adding book '{}' to wishlist", user.getUsername(), bookID);
         Book book = getOrCreateBook(bookID);
@@ -237,6 +240,7 @@ public class BookService {
      * @throws BookNotFoundException if the book doesn't exist
      * @throws BookNotInLibraryException if the book isn't in the user's library
      */
+    @Transactional
     public void rateBook(String bookID, User user, int rating) throws BookNotFoundException, BookNotInLibraryException {
         log.info("User '{}' rating book '{}' with {}", user.getUsername(), bookID, rating);
         LibraryBook lb = getBookFromLibrary(bookID, user);
@@ -253,6 +257,7 @@ public class BookService {
      * @throws BookNotFoundException if the book doesn't exist
      * @throws BookNotInLibraryException if the book isn't in the user's library
      */
+    @Transactional
     public void updateReadingStatus(String bookID, User user, ReadingStatus status) throws BookNotFoundException, BookNotInLibraryException {
         log.info("User '{}' updating reading status for book '{}' to {}", user.getUsername(), bookID, status);
         LibraryBook lb = getBookFromLibrary(bookID, user);
@@ -283,6 +288,7 @@ public class BookService {
      * @param bookID the book's OpenLibrary ID
      * @param user the user
      */
+    @Transactional
     public void removeBookFromWishlist(String bookID, User user) {
         Optional<Book> bookOptional = bookRepository.getBookByBookID(bookID);
         if (bookOptional.isPresent()) {
@@ -356,6 +362,7 @@ public class BookService {
      * @throws IOException if a communication error occurs
      * @throws BookNotFoundException if the book does not exist in either source
      */
+    @Transactional
     private Book getOrCreateBook(String bookID) throws UnexpectedStatusException, IOException, BookNotFoundException {
         Optional<Book> bookOpt = bookRepository.getBookByBookID(bookID);
         if (bookOpt.isPresent()) {
