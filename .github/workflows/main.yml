@@ -172,6 +172,12 @@ jobs:
       - name: Create version tag
         id: version_backend
         run: echo "VERSION=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
+        
+      - name: Convert repository name to lowercase
+        id: backend_image_lower
+        run: |
+          image_lower=$(echo "${IMAGE_NAME,,}")
+          echo "IMAGE_LOWER=$image_lower" >> $GITHUB_OUTPUT
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
@@ -179,8 +185,8 @@ jobs:
           context: ./Backend/MylibBackend
           push: true
           tags: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version_backend.outputs.version }}
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+            ${{ env.REGISTRY }}/${{ steps.backend_image_lower.outputs.image_lower }}:${{ steps.version_backend.outputs.version }}
+            ${{ env.REGISTRY }}/${{ steps.backend_image_lower.outputs.image_lower }}:latest
 
       - name: Generate artifact attestation
         uses: actions/attest-build-provenance@v2
@@ -215,6 +221,12 @@ jobs:
       - name: Create version 
         id: version_frontend
         run: echo "VERSION=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
+        
+      - name: Convert repository name to lowercase
+        id: frontend_image_lower
+        run: |
+          image_lower=$(echo "${IMAGE_NAME,,}")
+          echo "IMAGE_LOWER=$image_lower" >> $GITHUB_OUTPUT
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
@@ -222,8 +234,8 @@ jobs:
           context: ./Frontend/mylibfrontend
           push: true
           tags: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version_frontend.outputs.version }}
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+            ${{ env.REGISTRY }}/${{ steps.frontend_image_lower.outputs.image_lower }}:${{ steps.version_frontend.outputs.version }}
+            ${{ env.REGISTRY }}/${{ steps.frontend_image_lower.outputs.image_lower }}:latest
 
       - name: Generate artifact attestation
         uses: actions/attest-build-provenance@v2
