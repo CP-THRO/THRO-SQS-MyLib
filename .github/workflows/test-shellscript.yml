@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - 'setup.sh'
+      - '.github/workflows/test-shellscipt.yml'
   workflow_dispatch:
 
 jobs:
@@ -18,9 +19,9 @@ jobs:
         with:
           name: result-linux
           path: |
-            - .env-backend
-            - .env-frontend
-            - .env-db
+            .env-backend
+            .env-frontend
+            .env-db
             
   test-macos:
      runs-on: macos-latest
@@ -33,9 +34,9 @@ jobs:
          with:
            name: result-macos
            path: |
-             - .env-backend
-             - .env-frontend
-             - .env-db
+             .env-backend
+             .env-frontend
+             .env-db
         
 
     
