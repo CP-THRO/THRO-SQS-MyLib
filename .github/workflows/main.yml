@@ -187,6 +187,7 @@ jobs:
           echo "IMAGE_LOWER=$image_lower" >> $GITHUB_OUTPUT
 
       - name: Build and push Docker image
+        id: push_backend
         uses: docker/build-push-action@v5
         with:
           context: ./Backend/MyLibBackend
@@ -199,7 +200,7 @@ jobs:
         uses: actions/attest-build-provenance@v2
         with:
           subject-name: ${{ env.REGISTRY }}/${{ steps.backend_image_lower.outputs.image_lower }}
-          subject-digest: ${{ steps.push.outputs.digest }}
+          subject-digest: ${{ steps.push_backend.outputs.digest }}
           push-to-registry: true
 
   dockerize-frontend:
@@ -243,6 +244,7 @@ jobs:
           echo "IMAGE_LOWER=$image_lower" >> $GITHUB_OUTPUT
 
       - name: Build and push Docker image
+        id: push_frontend
         uses: docker/build-push-action@v5
         with:
           context: ./Frontend/mylibfrontend
@@ -255,7 +257,7 @@ jobs:
         uses: actions/attest-build-provenance@v2
         with:
           subject-name: ${{ env.REGISTRY }}/${{ steps.backend_image_lower.outputs.image_lower }}
-          subject-digest: ${{ steps.push.outputs.digest }}
+          subject-digest: ${{ steps.push_frontend.outputs.digest }}
           push-to-registry: true
           
     
