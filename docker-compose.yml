@@ -1,0 +1,44 @@
+services:
+  backend:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    container_name: backend
+    hostname: backend
+    image: ghcr.io/cp-thro/thro-sqs-mylib/backend:latest
+    env_file:
+      - .env
+    environment:
+      - MACHINE=prod
+      - POSTGRES_USER=orderservice
+    ports:
+      - "9000:9000"
+    expose:
+      - 9000
+    depends_on:
+      - customer-service
+      - postgres-db
+  customer-service:
+    image: vvthromildner/ss23_exercise02_customer_service:latest
+    container_name: ss23_exercise02_customer_service
+    hostname: customer-service
+    restart: always
+    ports:
+      - "9010:8080"
+
+  postgres-db:
+    image: postgres:latest
+    container_name: postgres-db
+    hostname: postgres-db
+    restart: always
+    environment:
+      - POSTGRES_USER=backend
+    env_file:
+      - .env-db
+    ports:
+      - "5432:5432"
+    volumes:
+      - db:/var/lib/postgresql/data
+volumes:
+  db:
+    driver: local
