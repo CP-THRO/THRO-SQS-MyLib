@@ -256,7 +256,7 @@ jobs:
       - name: Generate artifact attestation
         uses: actions/attest-build-provenance@v2
         with:
-          subject-name: ${{ env.REGISTRY }}/${{ steps.backend_image_lower.outputs.image_lower }}
+          subject-name: ${{ env.REGISTRY }}/${{ steps.frontend_image_lower.outputs.image_lower }}
           subject-digest: ${{ steps.push_frontend.outputs.digest }}
           push-to-registry: true
           
