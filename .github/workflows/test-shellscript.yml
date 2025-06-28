@@ -1,0 +1,42 @@
+name: Test Shell Script
+
+on:
+  push:
+    paths:
+      - 'setup.sh'
+  workflow_dispatch:
+
+jobs:
+  test-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: "Run Script"
+        run: chmod +x ./setup.sh && ./setup.sh
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: result-linux
+          path: |
+            - .env-backend
+            - .env-frontend
+            - .env-db
+            
+  test-macos:
+     runs-on: macos-latest
+     steps:
+       - uses: actions/checkout@v4
+       - name: "Run Script"
+         run: chmod +x ./setup.sh && ./setup.sh
+       - name: Upload artifact
+         uses: actions/upload-artifact@v4
+         with:
+           name: result-macos
+           path: |
+             - .env-backend
+             - .env-frontend
+             - .env-db
+        
+
+    
+    
