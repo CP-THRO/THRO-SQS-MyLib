@@ -271,6 +271,7 @@ public class BookService {
      * @param bookID the book's OpenLibrary ID
      * @param user the user
      */
+    @Transactional
     public void removeBookFromLibrary(String bookID, User user) {
         try {
             LibraryBook lb = getBookFromLibrary(bookID, user);
