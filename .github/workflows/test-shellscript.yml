@@ -21,9 +21,9 @@ jobs:
         with:
           name: result-linux
           path: |
-            .env-backend
-            .env-frontend
-            .env-db
+            ./.env-backend
+            ./.env-frontend
+            ./.env-db
             
   test-macos:
      runs-on: macos-latest
