@@ -12,23 +12,30 @@ POSTGRES_PASSWORD=$(head -c 32 /dev/urandom | base64)
 
 
 # Generate .env files
-echo "Creating -env-backend"
+echo "Creating .env-backend"
 cat <<EOF > .env-backend
-JWT_SECRET="$JWT_SECRET"
-POSTGRES_PASSWORD="$POSTGRES_PASSWORD"
-POSTGRES_HOST="postgres-db"
-POSTGRES_PORT="5432"
+JWT_SECRET=$JWT_SECRET
+POSTGRES_PASSWORD=$POSTGRES_PASSWORD
+POSTGRES_HOST=postgres-db
+POSTGRES_PORT=5432
+BACKEND_HOST=localhost
+BACKEND_PORT=8080
+BACKEND_PROTO=http
+FRONTEND_HOST=localhost
+FRONTEND_PORT=5174
+FRONTEND_PROTO=http
 EOF
 
-echo "Creating -env-frontend"
+echo "Creating .env-frontend"
 cat <<EOF > .env-frontend
-BACKEND_HOST="backend"
-BACKEND_PORT="8080"
+BACKEND_HOST=localhost
+BACKEND_PORT=8080
+BACKEND_PROTO=http
 EOF
 
-echo "Creating -env-db"
+echo "Creating .env-db"
 cat <<EOF > .env-db
-POSTGRES_PASSWORD="$POSTGRES_PASSWORD"
+POSTGRES_PASSWORD=$POSTGRES_PASSWORD
 EOF
 
 echo "Done!"
