@@ -53,7 +53,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           include-hidden-files: true
-          name: result-linux
+          name: result-windows
           path: |
             .env-backend
             .env-frontend
