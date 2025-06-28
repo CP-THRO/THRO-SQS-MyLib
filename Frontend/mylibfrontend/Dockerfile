@@ -29,6 +29,9 @@ ENV BACKEND_PROTO="http"
 # Copy the build files from the previous stage
 COPY --from=builder /opt/app/dist /usr/share/nginx/html
 
+# Copy nginx site-config
+COPY nginx-site.conf /etc/nginx/conf.d/default.conf
+
 # Expose port 80
 EXPOSE 80
 
