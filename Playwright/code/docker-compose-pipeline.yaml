@@ -22,6 +22,11 @@ services:
     depends_on:
       - postgres-db
       - wiremock
+    healthcheck:
+      test: curl -f http://backend:8080/api/v1/health || exit 1
+      interval: 5s
+      retries: 10
+
   frontend:
     image: ghcr.io/cp-thro/thro-sqs-mylib/frontend:latest
     container_name: mylib-frontend
@@ -36,6 +41,12 @@ services:
     depends_on:
       - postgres-db
       - backend
+
+    healthcheck:
+      test: curl -f http://frontend:80 || exit 1
+      interval: 5s
+      retries: 10
+
   postgres-db:
     image: postgres:latest
     container_name: mylib-postgres-db
@@ -57,3 +68,22 @@ services:
       - ./wiremock/__files:/home/wiremock/__files
       - ./wiremock/mappings:/home/wiremock/mappings
     entrypoint: ["/docker-entrypoint.sh", "--global-response-templating", "--disable-gzip", "--port", "8090" , "--verbose"]
+
+  playwright:
+    image: mcr.microsoft.com/playwright:v1.53.1
+    container_name: mylib-playwright
+    depends_on:
+      frontend:
+        condition: service_healthy # Only if the healthcheck works I can know that the app has fully started
+      backend:
+        condition: service_healthy
+    hostname: playwright
+    volumes:
+      - ./:/test
+    working_dir: /test
+    environment:
+      - BASE_URL=http://frontend:80
+    entrypoint: ["/bin/sh", "-c", "npm ci && npx playwright test"]
+
+
+
