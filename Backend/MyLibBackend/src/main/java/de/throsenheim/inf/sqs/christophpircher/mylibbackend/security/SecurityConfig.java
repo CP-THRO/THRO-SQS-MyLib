@@ -2,8 +2,6 @@ package de.throsenheim.inf.sqs.christophpircher.mylibbackend.security;
 
 import de.throsenheim.inf.sqs.christophpircher.mylibbackend.service.CustomUserDetailsService;
 import de.throsenheim.inf.sqs.christophpircher.mylibbackend.service.JwtService;
-import jakarta.servlet.http.HttpServletResponse;
-import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,7 +23,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.filter.CorsFilter;
 
 import java.util.List;
 
@@ -157,7 +154,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of(frontendURL, backendURL));
+        config.setAllowedOrigins(List.of(frontendURL, frontendURL.replace(":80", ""), backendURL, backendURL.replace(":80", "")));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
