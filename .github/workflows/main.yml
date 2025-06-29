@@ -275,7 +275,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: frontend-coverage
+          name: e2e-result
           path: |
             ./Playwright/code/playwright-report
             ./Playwright/code/test-result
