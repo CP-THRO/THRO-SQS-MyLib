@@ -56,4 +56,4 @@ services:
     volumes:
       - ./wiremock/__files:/home/wiremock/__files
       - ./wiremock/mappings:/home/wiremock/mappings
-    entrypoint: ["/docker-entrypoint.sh", "--global-response-templating", "--disable-gzip", "--https-port 8090" , "--verbose"]
+    entrypoint: ["/docker-entrypoint.sh", "--global-response-templating", "--disable-gzip", "--port", "8090" , "--verbose"]
