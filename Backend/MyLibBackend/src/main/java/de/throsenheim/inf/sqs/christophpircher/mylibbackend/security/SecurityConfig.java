@@ -116,27 +116,6 @@ public class SecurityConfig {
     }
 
     /**
-     * Configures the {@link CorsFilter} used to filter for the origin of requests.
-     * It is configured to allow all requests from the frontend and swagger-ui.
-     * The configuration for this is set via environment variables.
-     *
-     * @return The configured CorsFilter bean
-     */
-    @Bean
-    public CorsFilter corsFilter() {
-        CorsConfiguration config = new CorsConfiguration();
-        config.setAllowCredentials(true);
-        config.setAllowedOrigins(List.of(frontendURL,backendURL));
-        config.setAllowedHeaders(List.of("*"));
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config);
-        return new CorsFilter(source);
-    }
-
-
-    /**
      * Configures the {@link AuthenticationProvider} used for authenticating users.
      * <p>
      * Uses a {@link DaoAuthenticationProvider} with the application's custom
