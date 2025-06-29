@@ -163,10 +163,6 @@ jobs:
       REGISTRY: ghcr.io
       IMAGE_NAME: ${{ github.repository }}/backend
     steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
-          
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -220,9 +216,6 @@ jobs:
       REGISTRY: ghcr.io
       IMAGE_NAME: ${{ github.repository }}/frontend
     steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
           
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -260,5 +253,30 @@ jobs:
           subject-name: ${{ env.REGISTRY }}/${{ steps.frontend_image_lower.outputs.image_lower }}
           subject-digest: ${{ steps.push_frontend.outputs.digest }}
           push-to-registry: true
-          
-    
+
+  e2e:
+    runs-on: ubuntu-latest
+    needs:
+      - dockerize-frontend
+      - dockerize-backend
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run E2E test
+        working-directory: ./Playwright/code
+        run: docker compose -f docker-compose-pipeline.yaml up --abort-on-container-exit --exit-code-from playwright
+
+      - name: Stop container
+        if: always()
+        working-directory: ./Playwright/code
+        run: docker compose -f docker-compose-pipeline.yaml down
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-result
+          path: |
+            ./Playwright/code/playwright-report
+            ./Playwright/code/test-result
+            
