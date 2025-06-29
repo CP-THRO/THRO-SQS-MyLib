@@ -48,7 +48,7 @@ class OpenLibraryAPIWireMockTest {
 
     @BeforeEach
     void setup() {
-        wireMockServer = new WireMockServer(8089); // or any test port
+        wireMockServer = new WireMockServer(8089);
         wireMockServer.start();
     }
 

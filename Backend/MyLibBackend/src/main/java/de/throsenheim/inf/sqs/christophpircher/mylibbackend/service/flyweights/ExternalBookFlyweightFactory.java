@@ -89,4 +89,11 @@ public class ExternalBookFlyweightFactory {
         }
     }
 
+    /**
+     * Function for integration tests: Clear all entries from the cache
+     */
+    public void clearCache() {
+        bookCache.clear();
+    }
+
 }

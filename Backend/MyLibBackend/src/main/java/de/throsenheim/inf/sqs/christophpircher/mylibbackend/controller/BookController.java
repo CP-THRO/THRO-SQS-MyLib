@@ -138,7 +138,7 @@ public class BookController {
     public ResponseEntity<BookListDTO> getAllBooksOnWishlist(@AuthenticationPrincipal UserPrincipal userPrincipal, @RequestParam(defaultValue = "0") int startIndex, @RequestParam(defaultValue = "100") int numResultsToGet) {
         log.debug("GET /get/wishlist - User: {}", userPrincipal.getUsername());
         BookList list = bookService.getAllBooksOnWishlist(startIndex, numResultsToGet, userPrincipal.getUser());
-        return ResponseEntity.ok(BookListDTO.fromSearchResult(list));
+        return ResponseEntity.ok(Util.convertBookListToDTOWithUserSpecificInfo(list, userPrincipal.getUser(), bookService));
     }
 
     /**
