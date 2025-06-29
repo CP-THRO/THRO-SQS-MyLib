@@ -58,7 +58,7 @@ class AuthControllerIntegrationTest {
 
     @Test
     void addUserShouldReturn409WhenUsernameExists() throws Exception {
-        AddUser();
+        addUser();
         mockMvc.perform(post(ADD_USER_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(AUTH_REQUEST))
@@ -69,7 +69,7 @@ class AuthControllerIntegrationTest {
 
     @Test
     void authenticateShouldReturnToken() throws Exception {
-        AddUser();
+        addUser();
         MvcResult result = mockMvc.perform(post(AUTHENTICATE_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(AUTH_REQUEST))
@@ -89,7 +89,7 @@ class AuthControllerIntegrationTest {
                 .andExpect(status().isForbidden());
     }
 
-    private void AddUser() throws Exception {
+    private void addUser() throws Exception {
         mockMvc.perform(post(ADD_USER_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(AUTH_REQUEST))
