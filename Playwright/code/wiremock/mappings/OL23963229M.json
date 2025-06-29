@@ -1,0 +1,13 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "/books/OL23963229M.json"
+  },
+  "response": {
+    "status": 200,
+    "bodyFileName": "OL23963229M.json",
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "/books/OL25067085M.json"
+  },
+  "response": {
+    "status": 200,
+    "bodyFileName": "OL25067085M.json",
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

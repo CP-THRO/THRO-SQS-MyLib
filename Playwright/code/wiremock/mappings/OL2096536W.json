@@ -1,0 +1,13 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "/works/OL2096536W.json"
+  },
+  "response": {
+    "status": 200,
+    "bodyFileName": "OL2096536W.json",
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

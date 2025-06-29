@@ -1,0 +1,13 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "/search?q=Mass+Effect&offset=0&limit=10"
+  },
+  "response": {
+    "status": 200,
+    "bodyFileName": "search.json",
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

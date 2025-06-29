@@ -1,0 +1,13 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "OL23106658M.json"
+  },
+  "response": {
+    "status": 200,
+    "bodyFileName": "OL23106658M.json",
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

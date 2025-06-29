@@ -1,0 +1,13 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "/works/OL20178497W.json"
+  },
+  "response": {
+    "status": 200,
+    "bodyFileName": "OL20178497W.json",
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}
