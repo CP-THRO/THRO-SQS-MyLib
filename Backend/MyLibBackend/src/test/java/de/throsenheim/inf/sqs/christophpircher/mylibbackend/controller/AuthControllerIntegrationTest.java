@@ -1,5 +1,9 @@
 package de.throsenheim.inf.sqs.christophpircher.mylibbackend.controller;
+import de.throsenheim.inf.sqs.christophpircher.mylibbackend.model.User;
 import de.throsenheim.inf.sqs.christophpircher.mylibbackend.model.repository.UserRepository;
+import de.throsenheim.inf.sqs.christophpircher.mylibbackend.service.JwtService;
+import de.throsenheim.inf.sqs.christophpircher.mylibbackend.service.UserPrincipal;
+import jakarta.validation.constraints.AssertTrue;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,6 +11,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -19,6 +26,9 @@ class AuthControllerIntegrationTest {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private JwtService jwtService;
 
     private static final String ADD_USER_URL = "/api/v1/auth/add-user";
     private static final String AUTHENTICATE_URL = "/api/v1/auth/authenticate";
@@ -59,10 +69,13 @@ class AuthControllerIntegrationTest {
     @Test
     void authenticateShouldReturnToken() throws Exception {
         AddUser();
-        mockMvc.perform(post(AUTHENTICATE_URL)
+        MvcResult result = mockMvc.perform(post(AUTHENTICATE_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(AUTH_REQUEST))
                 .andExpect(status().isOk()).andReturn();
+
+        User user = userRepository.getUserByUsername("testuser");
+        assertTrue(jwtService.validateToken(result.getResponse().getContentAsString(), new UserPrincipal(user)));
     }
 
 
