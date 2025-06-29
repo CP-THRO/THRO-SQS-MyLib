@@ -266,7 +266,7 @@ jobs:
 
       - name: Run E2E test
         working-directory: ./Playwright/code
-        run: docker compose -f docker-compose-pipeline.yaml up --abort-on-container-exit --exit-code-from mylib-playwright
+        run: docker compose -f docker-compose-pipeline.yaml up --abort-on-container-exit --exit-code-from playwright
 
       - name: Stop container
         if: always()
