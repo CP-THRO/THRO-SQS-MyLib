@@ -18,8 +18,6 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import javax.naming.directory.SearchResult;
-import java.io.InputStream;
 import java.util.List;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
@@ -58,7 +56,7 @@ class SearchControllerIntegrationTest {
 
     private WireMockServer wireMockServer;
 
-    private BookDTO bookSearch = BookDTO.builder().bookID(BOOKID).title(BOOK_TITLE).authors(List.of(AUTHOR)).publishDate(RELEASE_DATE).isbns(null).coverURLLarge(COVER_LARGE).coverURLMedium(COVER_MEDIUM).coverURLSmall(COVER_SMALL).bookIsInLibrary(false).bookIsOnWishlist(false).averageRating(0).individualRating(0).build();
+    private final BookDTO bookSearch = BookDTO.builder().bookID(BOOKID).title(BOOK_TITLE).authors(List.of(AUTHOR)).publishDate(RELEASE_DATE).isbns(null).coverURLLarge(COVER_LARGE).coverURLMedium(COVER_MEDIUM).coverURLSmall(COVER_SMALL).bookIsInLibrary(false).bookIsOnWishlist(false).averageRating(0).individualRating(0).build();
 
     @BeforeEach
     void setUp() {
