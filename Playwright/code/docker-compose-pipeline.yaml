@@ -1,0 +1,67 @@
+services:
+  backend:
+    container_name: mylib-backend
+    hostname: backend
+    image: ghcr.io/cp-thro/thro-sqs-mylib/backend:latest
+    environment:
+      - JWT_SECRET=tNp3cASRQw/UJMLX/x5dJ8XmLl+LnFojPGCUPRLIDlI=
+      - MACHINE=mock
+      - POSTGRES_USER=backend
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_HOST=postgres-db
+      - POSTGRES_PORT=5432
+      - BACKEND_HOST=backend
+      - BACKEND_PORT=8080
+      - BACKEND_PROTO=http
+      - FRONTEND_HOST=frontend
+      - FRONTEND_PORT=80
+      - FRONTEND_PROTO=http
+      - OPENLIBRARYURL=http://wiremock:8090
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres-db
+      - wiremock
+  frontend:
+    image: ghcr.io/cp-thro/thro-sqs-mylib/frontend:latest
+    container_name: mylib-frontend
+    hostname: frontend
+    restart: always
+    environment:
+      - BACKEND_HOST=backend
+      - BACKEND_PORT=8080
+      - BACKEND_PROTO=http
+    ports:
+      - "5174:80"
+    depends_on:
+      - postgres-db
+      - backend
+  postgres-db:
+    image: postgres:latest
+    container_name: mylib-postgres-db
+    hostname: postgres-db
+    restart: always
+    environment:
+      - POSTGRES_USER=backend
+      - POSTGRES_PASSWORD=password
+    env_file:
+      - .env-db
+    ports:
+      - "5432:5432"
+    volumes:
+      - db:/var/lib/postgresql/data
+
+  wiremock:
+    image: wiremock/wiremock:3x
+    container_name: openlibrary-wiremock
+    hostname: wiremock
+    ports:
+      - "8090:8090"
+    volumes:
+      - ./__files:./wiremock/__files
+      - ./mappings:./wiremock/mappings
+    entrypoint: ["/docker-entrypoint.sh", "--global-response-templating", "--disable-gzip", "--https-port 8090" , "--verbose"]
+
+volumes:
+  db:
+    driver: local

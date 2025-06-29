@@ -1,0 +1,497 @@
+{
+    "numFound": 1307,
+    "start": 0,
+    "numFoundExact": true,
+    "num_found": 1307,
+    "documentation_url": "https://openlibrary.org/dev/docs/api/search",
+    "q": "mass effect",
+    "offset": 0,
+    "docs": [
+        {
+            "author_key": [
+                "OL1385539A"
+            ],
+            "author_name": [
+                "Drew Karpyshyn"
+            ],
+            "cover_edition_key": "OL23106658M",
+            "cover_i": 12394458,
+            "ebook_access": "printdisabled",
+            "edition_count": 10,
+            "first_publish_year": 2008,
+            "has_fulltext": true,
+            "ia": [
+                "masseffectascens00karp_0"
+            ],
+            "ia_collection_s": "denverpubliclibrary-ol;internetarchivebooks;printdisabled",
+            "key": "/works/OL5684854W",
+            "language": [
+                "eng"
+            ],
+            "public_scan_b": false,
+            "title": "Mass Effect Ascension"
+        },
+        {
+            "author_key": [
+                "OL1385539A"
+            ],
+            "author_name": [
+                "Drew Karpyshyn"
+            ],
+            "cover_edition_key": "OL26064885M",
+            "cover_i": 7659298,
+            "ebook_access": "printdisabled",
+            "edition_count": 4,
+            "first_publish_year": 2010,
+            "has_fulltext": true,
+            "ia": [
+                "masseffectretrib00drew"
+            ],
+            "ia_collection_s": "americana;delawarecountydistrictlibrary;denverpubliclibrary-ol;internetarchivebooks;library_of_atlantis;miltonpubliclibrary-ol;printdisabled",
+            "key": "/works/OL17270345W",
+            "language": [
+                "eng"
+            ],
+            "public_scan_b": false,
+            "title": "Mass Effect Retribution"
+        },
+        {
+            "author_key": [
+                "OL19767A"
+            ],
+            "author_name": [
+                "Aldous Huxley"
+            ],
+            "cover_edition_key": "OL6504102M",
+            "cover_i": 8231823,
+            "ebook_access": "borrowable",
+            "edition_count": 678,
+            "first_publish_year": 1932,
+            "has_fulltext": true,
+            "ia": [
+                "schoneneueweltei0000huxl",
+                "unmonfelic0000huxl",
+                "byaldoushuxleybr0000aldo",
+                "lemeilleurdesmon0000huxl",
+                "lemeilleurdesmon0000aldo",
+                "meilixinshijie0000huxl",
+                "lemeilleurdesmon0000huxl_u0e4",
+                "isbn_9781784043209",
+                "bravenewworldnov0000huxl_v2j4",
+                "isbn_9787510099373",
+                "bravenewworldwit0000unse",
+                "bravenewworldint0000unse",
+                "bravenewworld0000unse_d2a2",
+                "bravenewworldvan0000unse",
+                "bravenewworldper0000unse",
+                "bwb_S0-CBK-171",
+                "bravenewworld0000aldo_q1s1",
+                "bwb_KT-000-116",
+                "bravenewworldwit0000unse_i9k4",
+                "bravenewworld0000huxl_o3w5",
+                "bravenewworldnov0000huxl",
+                "bravenewworld0000aldo_n7f8",
+                "bravenewworld00huxl",
+                "bravenewworld0000unse_p4v4",
+                "bravenewworld0000unse_q9o5",
+                "bravenewworldnov0000aldo",
+                "bravenewworld0000unse_w8k4",
+                "bravenewworldac10000unse",
+                "bravenewworld0000unse_l8l1",
+                "bravenewworldbya0000unse_f3f8",
+                "bravenewworldbya0000unse_g4a9",
+                "bravenewworldbya0000unse",
+                "bravenewworldwri0000aldo",
+                "bravenewworld0000unse_o6k3",
+                "bravenewworld0000unse_m5i3",
+                "bravenewworldnov0000aldo_b7a5",
+                "bwb_KU-734-017",
+                "bwb_KO-275-063",
+                "bravenewworld0000unse_y0z1",
+                "bravenewworldhuxl00huxl",
+                "bravenewworld0000aldo",
+                "bravenewworldhuxl",
+                "bravenewworld0000aldo_x4s1",
+                "bravenewworld0000vari",
+                "bravenewworldacc00huxl",
+                "bravenewworld0000unse_q5e7",
+                "bravenewworld0000unse_j6u8",
+                "bravenewworld0000huxl_t9p6",
+                "bravenewworld0000huxl",
+                "bravenewworld00huxl_0",
+                "bravenewworld0000huxl_j0f2",
+                "bravenewworld00huxl_1",
+                "bravenewworld0000huxl_h4p4",
+                "bwb_P8-ALA-384",
+                "bravenewworld0000huxl_u1i2",
+                "bravenewworld0000huxl_e8e0",
+                "bravenewworld0000unse_v1c9",
+                "bravenewworld0000unse",
+                "lemeilleurdesmon0000aldo_e4g3",
+                "isbn_9788401374586",
+                "lemeilleurdesmon00huxl"
+            ],
+            "ia_collection_s": "California-State-Suggested-Reading;additional_collections;americana;americanuniversity-ol;bannedbooks;binghamton-ol;books;claremont_school_of_theology;cnusd-ol;delawarecountydistrictlibrary;goffstownlibrary-ol;gwulibraries-ol;inlibrary;internetarchivebooks;johnshopkins-ol;library_of_atlantis;marymount-ol;miltonpubliclibrary-ol;openlibrary-d-ol;printdisabled;rochester-ol;spokanepubliclibrary-ol;stmaryscountylibrary;tulsacc-ol;universityofcoloradoboulder-ol;uslprototype;wilsoncollege-ol;worthingtonlibraries-ol",
+            "key": "/works/OL64365W",
+            "language": [
+                "por",
+                "und",
+                "rus",
+                "est",
+                "jpn",
+                "pol",
+                "cze",
+                "ger",
+                "eng",
+                "chi",
+                "fre",
+                "heb",
+                "spa",
+                "ita",
+                "glg",
+                "hrv",
+                "cat",
+                "dut"
+            ],
+            "lending_edition_s": "OL40295210M",
+            "lending_identifier_s": "schoneneueweltei0000huxl",
+            "public_scan_b": false,
+            "title": "Brave New World"
+        },
+        {
+            "author_key": [
+                "OL6767868A"
+            ],
+            "author_name": [
+                "Mac Walters"
+            ],
+            "cover_edition_key": "OL25067085M",
+            "cover_i": 9496852,
+            "ebook_access": "borrowable",
+            "edition_count": 4,
+            "first_publish_year": 2012,
+            "has_fulltext": true,
+            "ia": [
+                "masseffectfounda0000walt",
+                "masseffectfounda0000walt_w6v9"
+            ],
+            "ia_collection_s": "inlibrary;internetarchivebooks;openlibrary-d-ol;printdisabled",
+            "key": "/works/OL16191107W",
+            "language": [
+                "eng"
+            ],
+            "lending_edition_s": "OL27532204M",
+            "lending_identifier_s": "masseffectfounda0000walt",
+            "public_scan_b": false,
+            "title": "Mass effect"
+        },
+        {
+            "author_key": [
+                "OL6767868A",
+                "OL1395171A",
+                "OL7598006A",
+                "OL3123012A"
+            ],
+            "author_name": [
+                "Mac Walters",
+                "John Jackson Miller",
+                "Omar Francia",
+                "Michael Atiyeh"
+            ],
+            "cover_edition_key": "OL23963229M",
+            "cover_i": 6455386,
+            "ebook_access": "borrowable",
+            "edition_count": 3,
+            "first_publish_year": 2010,
+            "has_fulltext": true,
+            "ia": [
+                "masseffectvolume0000walt"
+            ],
+            "ia_collection_s": "inlibrary;internetarchivebooks;printdisabled",
+            "key": "/works/OL16975110W",
+            "language": [
+                "eng"
+            ],
+            "lending_edition_s": "OL28554739M",
+            "lending_identifier_s": "masseffectvolume0000walt",
+            "public_scan_b": false,
+            "title": "Mass effect - redemption"
+        },
+        {
+            "author_key": [
+                "OL22157A"
+            ],
+            "author_name": [
+                "Harriet Beecher Stowe"
+            ],
+            "cover_edition_key": "OL26244385M",
+            "cover_i": 12728198,
+            "ebook_access": "public",
+            "edition_count": 662,
+            "first_publish_year": 1850,
+            "has_fulltext": true,
+            "ia": [
+                "uncletomscabinta0000stow",
+                "uncletomscabinor1879stow",
+                "uncletoms00stow",
+                "uncletomscabin0000stow_c3o4",
+                "uncletomscabinor00stow_6",
+                "uncletomscabin0000unse_h1r0",
+                "uncletomscabin00203gut",
+                "settuomontupa16392gut",
+                "uncletomscabinta00stow",
+                "uncletomscabi00stow",
+                "uncletomscabinor00stow_4",
+                "uncletomscabin00stow",
+                "onkeltomsstugaen00stow",
+                "denegerhut27124gut",
+                "uncletomscabinorne00stow",
+                "cu31924090876792",
+                "lachozadetomse00stowe",
+                "uncletomscabinor00instow",
+                "uncletomscabinor00stowiala",
+                "stoweuncletomscabin00stowrich",
+                "uncletomscabinor00stow",
+                "lacasedeloncle00stowrich",
+                "uncletomscabin00stowrich",
+                "uncletomscabin00stowuoft",
+                "tomscabinlife00stowrich",
+                "nybc208875",
+                "onrkeltomsrkebin00stowrich",
+                "uncletomscabinor00stow_5",
+                "lacaseduperetomo00stow",
+                "lacasedupretom00stow",
+                "uncletomscabinorstow",
+                "cihm_94114",
+                "lacabanadetom00stow",
+                "uncletomscabin0000unse_b3k1",
+                "uncletomscabin0000unse_t9g4",
+                "uncletomscabin0000unse_s0b7",
+                "uncletomscabin0000unse_h7r4",
+                "uncletomscabin0000unse_j4m4",
+                "uncletomscabin0000unse_y5y4",
+                "uncletomscabino121852stow",
+                "uncletomsc00stow",
+                "uncletomsca00stow",
+                "uncletomscab00stow",
+                "uncletomscabino00stow",
+                "uncletomscabin00instow",
+                "lacasedeloncleto00stow",
+                "uncletomscabinor0005stow",
+                "uncletomscabin6994stow",
+                "uncletomscabinor1900stow",
+                "uncletomscabin00stow_2",
+                "uncletomscabinor1852stow",
+                "lacasedelonclet00stow",
+                "lachozadetomsea00stowgoog",
+                "uncletomscabino06stowgoog",
+                "uncletomscabin06stowgoog",
+                "uncletomscabino00tomgoog",
+                "uncletomscabino00writgoog",
+                "uncletomscabino02stowgoog",
+                "uncletomscabina00writgoog",
+                "onkeltomshtteei00stowgoog",
+                "uncletomscabino00stowgoog",
+                "uncletomscabino00bullgoog",
+                "uncletomscabin01bullgoog",
+                "uncletomscabin00bullgoog",
+                "uncletomscabino01stowgoog",
+                "uncletomscabin0000harr_y1s4",
+                "tangmushushudexi0000situ_s5y0",
+                "tangmushushudexi0000situ_j3i9",
+                "uncletomscabin0000beec",
+                "uncletomscabin0000unse_d0t6",
+                "tangmushushudexi0000meis",
+                "lacasedeloncleto0000stow",
+                "tangmushushudexi0000stow_z1i7",
+                "uncletomscabin0000stow_s1k3",
+                "onkeltomshutte0000stow",
+                "uncletomscabin0000stow_j5o8",
+                "uncletomscabin0000unse",
+                "uncletomscabinstow",
+                "dehutvanoomtom0000stow",
+                "uncletomscabin0000stow_t2m4",
+                "dehutvanoomtom0000stow_s7o9",
+                "tangmushushudixi0000stow",
+                "onkeltomshutte0000stow_i1k1",
+                "uncletomscabin0000stow_p4d7",
+                "lacasedeloncleto0000stow_g9e1",
+                "uncletomscabin0000harr_j2y2",
+                "heinuyutianluunc0000stow",
+                "uncletomscabin0000stow_u7q2",
+                "uncletomscabin0000stow_w3z9",
+                "lacasedeloncleto0000harr",
+                "uncletomscabin00harr_lv9",
+                "lacasedeloncleto0000stow_x0v8",
+                "annotateduncleto0000stow_n5i9",
+                "uncletomscabin0000harr",
+                "uncletomscabin0000unse_n8y6",
+                "uncletomscabin0000unse_z2b5",
+                "uncletomscabin0000stow_x3b3",
+                "uncletomscabin0000stow_u6q4",
+                "uncletomscabin0000stow_s2r5",
+                "uncletomscabinwo0000harr",
+                "uncletomscabin0000stow_p0a8",
+                "uncletomscabin0000harr_m6w5",
+                "uncletomscabinor00stow_3",
+                "uncletomscabin100stow",
+                "uncletomscabin00harr_0",
+                "uncletomscabin0000unse_i5w7",
+                "uncletomscabinor0000unse_o3c0",
+                "uncletomscabinor0000unse",
+                "uncletomscabin0000stow_d7e1",
+                "uncletomscabin00stow_0",
+                "uncletomscabinor00stow_2",
+                "uncletomscabin00stow_3",
+                "uncletomscabin00harr_l1m",
+                "uncletomscabinau0000stow",
+                "uncletomscabino000stow",
+                "uncletomscabinau0000stow_q3j7",
+                "isbn_9780060806187",
+                "uncletomscabin0000unse_a6s4",
+                "uncletomscabin0000unse_m0m2",
+                "uncletomscabin000stow",
+                "uncletomscabinor0000stow"
+            ],
+            "ia_collection_s": "Boston_College_Library;Brandeis_University;Princeton;Wellesley_College_Library;additional_collections;americana;americanuniversity-ol;bannedbooks;barryuniversity-ol;binghamton-ol;blc;brigham_young_university;cdl;cnusd-ol;cornell;dartmouthlibrary-ol;delawarecountydistrictlibrary;delawarecountydistrictlibrary-ol;europeanlibraries;gutenberg;gwulibraries-ol;hamiltonpubliclibrary-ol;howard-ol;iacl;inlibrary;internetarchivebooks;ithacacollege-ol;johnshopkins-ol;juvenilehistoricalcollection;kalamazoocollege-ol;library_of_atlantis;library_of_congress;lincolncollection;marymount-ol;microfilm;miltonpubliclibrary-ol;nationalyiddishbookcenter;newyorkpubliclibrary;occidentalcollegelibrary-ol;openlibrary-d-ol;popularchinesebooks;printdisabled;randolph-macon-college-ol;robarts;rochester-ol;salisburyfreelibrary-ol;smithsonian;stmaryscountylibrary;the-claremont-colleges-ol;toronto;trent_university;tulsacc-ol;udc-ol;unb-ol;unclibraries;uni-ol;university_of_alberta_libraries;university_of_alberta_libraries_microfilm;university_of_illinois_urbana-champaign;university_of_toronto;universityofcoloradoboulder-ol;universityofoklahoma-ol;universityofottawa;urbanschool;wilsoncollege-ol;worksintranslation;wrlc-ol;yrlsc",
+            "key": "/works/OL152161W",
+            "language": [
+                "yid",
+                "und",
+                "tur",
+                "rus",
+                "vie",
+                "ger",
+                "fre",
+                "eng",
+                "chi",
+                "ita",
+                "arm",
+                "spa",
+                "swe",
+                "dan",
+                "mon",
+                "wel",
+                "fin",
+                "dut"
+            ],
+            "lending_edition_s": "OL43300099M",
+            "lending_identifier_s": "uncletomscabinta0000stow",
+            "public_scan_b": true,
+            "title": "Uncle Tom's Cabin",
+            "id_project_gutenberg": [
+                "203",
+                "16392"
+            ]
+        },
+        {
+            "author_key": [
+                "OL800926A"
+            ],
+            "author_name": [
+                "Richard Adams"
+            ],
+            "cover_edition_key": "OL17721910M",
+            "cover_i": 6450196,
+            "ebook_access": "borrowable",
+            "edition_count": 97,
+            "first_publish_year": 1972,
+            "has_fulltext": true,
+            "ia": [
+                "bwb_KJ-853-461",
+                "watershipdown0000adam_c0y5",
+                "watershipdownnov00adam",
+                "watershipdown0000adam_z5b7",
+                "watershipdown0000adam_l3h4",
+                "watershipdown0000adam_s5e7",
+                "watershipdown0000adam_f8x3",
+                "watershipdown0000adam_y0o5",
+                "watershipdown0000adam_s1e3",
+                "watershipdown00rich",
+                "watershipdown00adam",
+                "watershipdown0000adam_s8h7",
+                "watershipdown0000adam_w5l8",
+                "watershipdown0000adam"
+            ],
+            "ia_collection_s": "americana;binghamton-ol;brynmawr-ol;cnusd-ol;delawarecountydistrictlibrary;inlibrary;internetarchivebooks;marygrovecollege;openlibrary-d-ol;printdisabled;randolph-macon-college-ol;tulsacc-ol;unb-ol;uni-ol;worthingtonlibraries-ol",
+            "key": "/works/OL2096536W",
+            "language": [
+                "rus",
+                "vie",
+                "ger",
+                "ita",
+                "eng",
+                "chi",
+                "heb",
+                "dan",
+                "fin",
+                "dut"
+            ],
+            "lending_edition_s": "OL24678434M",
+            "lending_identifier_s": "bwb_KJ-853-461",
+            "public_scan_b": false,
+            "title": "Watership Down"
+        },
+        {
+            "author_key": [
+                "OL7851727A"
+            ],
+            "author_name": [
+                "Catherynne M. Valente"
+            ],
+            "ebook_access": "no_ebook",
+            "edition_count": 1,
+            "first_publish_year": 2018,
+            "has_fulltext": false,
+            "key": "/works/OL21158489W",
+            "language": [
+                "eng"
+            ],
+            "public_scan_b": false,
+            "title": "Mass Effect"
+        },
+        {
+            "author_key": [
+                "OL7638332A",
+                "OL1389898A"
+            ],
+            "author_name": [
+                "Bioware",
+                "Jeremy Barlow"
+            ],
+            "cover_edition_key": "OL27362721M",
+            "cover_i": 8825837,
+            "ebook_access": "no_ebook",
+            "edition_count": 1,
+            "first_publish_year": 2018,
+            "has_fulltext": false,
+            "key": "/works/OL20178497W",
+            "public_scan_b": false,
+            "title": "Mass Effect"
+        },
+        {
+            "author_key": [
+                "OL1395171A",
+                "OL6767868A",
+                "OL7598006A"
+            ],
+            "author_name": [
+                "John Jackson Miller",
+                "Mac Walters",
+                "Omar Francia"
+            ],
+            "cover_edition_key": "OL47255832M",
+            "cover_i": 13704505,
+            "ebook_access": "no_ebook",
+            "edition_count": 2,
+            "first_publish_year": 2010,
+            "has_fulltext": false,
+            "key": "/works/OL34899045W",
+            "language": [
+                "eng"
+            ],
+            "public_scan_b": false,
+            "title": "Mass effect"
+        }
+    ]
+}
