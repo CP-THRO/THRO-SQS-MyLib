@@ -1,7 +1,7 @@
 {
   "request": {
     "method": "GET",
-    "url": "OL23106658M.json"
+    "url": "/books/OL23106658M.json"
   },
   "response": {
     "status": 200,

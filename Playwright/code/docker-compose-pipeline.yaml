@@ -46,8 +46,6 @@ services:
       - POSTGRES_PASSWORD=password
     ports:
       - "5432:5432"
-    volumes:
-      - db:/var/lib/postgresql/data
 
   wiremock:
     image: wiremock/wiremock:3x
@@ -56,10 +54,6 @@ services:
     ports:
       - "8090:8090"
     volumes:
-      - ./__files:./wiremock/__files
-      - ./mappings:./wiremock/mappings
+      - ./wiremock/__files:/home/wiremock/__files
+      - ./wiremock/mappings:/home/wiremock/mappings
     entrypoint: ["/docker-entrypoint.sh", "--global-response-templating", "--disable-gzip", "--https-port 8090" , "--verbose"]
-
-volumes:
-  db:
-    driver: local

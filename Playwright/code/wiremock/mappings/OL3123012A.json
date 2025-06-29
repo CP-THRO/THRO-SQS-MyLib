@@ -1,11 +1,11 @@
 {
   "request": {
     "method": "GET",
-    "url": "/books/OL47255832M.json"
+    "url": "/authors/OL3123012A.json"
   },
   "response": {
     "status": 200,
-    "bodyFileName": "OL47255832M.json",
+    "bodyFileName": "OL3123012A.json",
     "headers": {
       "Content-Type": "application/json"
     }
