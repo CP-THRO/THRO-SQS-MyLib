@@ -277,6 +277,6 @@ jobs:
         with:
           name: frontend-coverage
           path: |
-            ./Playwright/test/playwright-report
-            ./Playwright/test/test-result
+            ./Playwright/code/playwright-report
+            ./Playwright/code/test-result
             
