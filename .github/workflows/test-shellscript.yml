@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - 'setup.sh'
+      - 'setup.ps1'
       - '.github/workflows/test-shellscipt.yml'
   workflow_dispatch:
 
@@ -41,6 +42,22 @@ jobs:
              .env-backend
              .env-frontend
              .env-db
+  
+  test-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: "Run Script"
+        run: .\setup.ps1
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          include-hidden-files: true
+          name: result-windows
+          path: |
+            .env-backend
+            .env-frontend
+            .env-db
         
 
     
