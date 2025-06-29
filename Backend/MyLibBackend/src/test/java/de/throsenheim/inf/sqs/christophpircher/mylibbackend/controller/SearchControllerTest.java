@@ -6,7 +6,6 @@ import de.throsenheim.inf.sqs.christophpircher.mylibbackend.model.BookList;
 import de.throsenheim.inf.sqs.christophpircher.mylibbackend.service.BookService;
 import de.throsenheim.inf.sqs.christophpircher.mylibbackend.service.SearchService;
 
-import de.throsenheim.inf.sqs.christophpircher.mylibbackend.service.flyweights.SearchResultFlyweightFactory;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -43,14 +42,12 @@ class SearchControllerTest {
 
     @Test
     void searchExternalKeywordShouldReturnOk() throws Exception {
-        // Arrange
         BookList bookList = new BookList();
         Book book = Book.builder().title("java").build();
         bookList.setBooks(List.of(book));
 
         when(searchService.searchKeywordsExternal("java", 0, 100)).thenReturn(bookList);
 
-        // Act & Assert
         mockMvc.perform(get(SEARCH_URL)
                         .param(KEYWORDS, "java")
                         .param(START_INDEX, "0")

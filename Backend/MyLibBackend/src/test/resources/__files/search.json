@@ -1,0 +1,35 @@
+{
+    "numFound": 1,
+    "start": 0,
+    "numFoundExact": true,
+    "num_found": 1,
+    "documentation_url": "https://openlibrary.org/dev/docs/api/search",
+    "q": "mass effect",
+    "offset": 0,
+    "docs": [
+        {
+            "author_key": [
+                "OL1385539A"
+            ],
+            "author_name": [
+                "Drew Karpyshyn"
+            ],
+            "cover_edition_key": "OL23106658M",
+            "cover_i": 12394458,
+            "ebook_access": "printdisabled",
+            "edition_count": 10,
+            "first_publish_year": 2008,
+            "has_fulltext": true,
+            "ia": [
+                "masseffectascens00karp_0"
+            ],
+            "ia_collection_s": "denverpubliclibrary-ol;internetarchivebooks;printdisabled",
+            "key": "/works/OL5684854W",
+            "language": [
+                "eng"
+            ],
+            "public_scan_b": false,
+            "title": "Mass Effect Ascension"
+        }
+    ]
+}
