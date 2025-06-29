@@ -48,6 +48,7 @@ class SearchControllerIntegrationTest {
     private static final String COVER_MEDIUM = "https://covers.openlibrary.org/b/id/12394458-M.jpg";
     private static final String COVER_SMALL = "https://covers.openlibrary.org/b/id/12394458-S.jpg";
 
+    private static final String KEYWORD_SEARCH = "Mass Effect";
 
     @Autowired
     private MockMvc mockMvc;
@@ -76,13 +77,13 @@ class SearchControllerIntegrationTest {
     void searchExternalKeywordShouldReturnOk() throws Exception {
 
         wireMockServer.stubFor(WireMock.get(SEARCH_URL)
-                .withQueryParam("q", equalTo("Mass Effect"))
+                .withQueryParam("q", equalTo(KEYWORD_SEARCH))
                 .withQueryParam("offset", equalTo("0"))
                 .withQueryParam("limit", equalTo("1"))
                 .willReturn(aResponse().withBodyFile("search.json")));
 
             MvcResult result = mockMvc.perform(get(SEARCH_URL)
-                            .param(KEYWORDS, "Mass Effect")
+                            .param(KEYWORDS, KEYWORD_SEARCH)
                             .param(START_INDEX, "0")
                             .param(NUM_TO_GET, "1")
                             .accept(MediaType.APPLICATION_JSON))
@@ -101,7 +102,7 @@ class SearchControllerIntegrationTest {
 
         wireMockServer.stop();
         mockMvc.perform(get(SEARCH_URL)
-                        .param(KEYWORDS, "Mass Effect")
+                        .param(KEYWORDS, KEYWORD_SEARCH)
                         .param(START_INDEX, "0")
                         .param(NUM_TO_GET, "1")
                         .accept(MediaType.APPLICATION_JSON))
