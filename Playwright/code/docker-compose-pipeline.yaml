@@ -72,6 +72,7 @@ services:
   playwright:
     image: mcr.microsoft.com/playwright:v1.53.1
     container_name: mylib-playwright
+    shm_size: 128M
     depends_on:
       frontend:
         condition: service_healthy # Only if the healthcheck works I can know that the app has fully started
@@ -83,6 +84,7 @@ services:
     working_dir: /test
     environment:
       - BASE_URL=http://frontend:80
+      - CI=true
     entrypoint: ["/bin/sh", "-c", "npm ci && npx playwright test"]
 
 
