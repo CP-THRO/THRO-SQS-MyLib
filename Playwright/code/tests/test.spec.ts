@@ -52,10 +52,6 @@ test.describe.serial("Login Logout", () =>{
   });
 });
 
-test.describe("Search", () =>{
-
-});
-
 test("Search and go to details", async ({page}) =>{
   await page.goto("/search");
   await page.fill('#inputKeywords', 'Mass Effect');
@@ -85,7 +81,46 @@ test("Search and add to wishlist", async ({page}) =>{
   await expect(page.locator('text=Loading...')).toBeHidden();
   await expect(page.locator('tr', { hasText: 'Mass Effect Ascension' }).locator('text=Add to library')).toBeVisible();
   await expect(page.locator('tr', { hasText: 'Mass Effect Ascension' }).locator('text=Add to wishlist')).toBeHidden();
-})
+});
+
+test("Details add to library and change rating + status and delete", async ({page}) =>{
+  await getDetailsLoggedIn(page);
+  await page.click('button:has-text("Add to library")');
+  await expect(page.locator('text=Add to library')).toBeHidden();
+  await expect(page.locator('text=Add to wishlist')).toBeHidden();
+  await expect(page.locator('text=/Your Rating:\\s*Not rated/')).toBeVisible();
+  await expect(page.locator('text=UNREAD')).toBeVisible();
+
+  await page.locator('text=Your Rating:').locator('..').locator('text=Edit').click();
+  await expect(page.locator('text=Save')).toBeVisible();
+  await page.locator('text=Your Rating:').locator('..').locator('select').selectOption('3');
+  await page.locator('text=Save').click();
+  await expect(page.locator('text=/Your Rating:\\s*3\\s\/\\s5/')).toBeVisible();
+  await expect(page.locator('text=/Your Status:\\s*UNREAD/')).toBeVisible();
+
+  await page.locator('text=Your Status:').locator('..').locator('text=Edit').click();
+  await expect(page.locator('text=Save')).toBeVisible();
+  await page.locator('text=Your Status:').locator('..').locator('select').selectOption('READING');
+  await page.locator('text=Save').click();
+  await expect(page.locator('text=/Your Status:\\s*READING/')).toBeVisible();
+
+
+  await page.locator("text=Delete from library").click();
+  await expect(page.locator('text=Add to library')).toBeVisible();
+  await expect(page.locator('text=Add to wishlist')).toBeVisible();
+});
+
+test("Details add to wishlist and delete", async ({page}) =>{
+  await getDetailsLoggedIn(page);
+  await page.click('button:has-text("Add to wishlist")');
+  await expect(page.locator('text=Add to library')).toBeVisible();
+  await expect(page.locator('text=Add to wishlist')).toBeHidden();
+
+  await page.locator("text=Delete from wishlist").click();
+  await expect(page.locator('text=Add to library')).toBeVisible();
+  await expect(page.locator('text=Add to wishlist')).toBeVisible();
+});
+
 
 const signUpNewUser = ( async (username:string, page:Page)=>{
   await page.goto("/");
@@ -107,4 +142,13 @@ const searchLoggedIn = (async (page: Page) =>{
   await expect(page.locator('tr', { hasText: 'Mass Effect Ascension' }).locator('text=Add to wishlist')).toBeVisible();
 });
 
+
+const getDetailsLoggedIn = (async (page: Page)=>{
+  const randomUser = `user${Date.now()}`;
+  await signUpNewUser(randomUser, page);
+  await expect(page.locator('text="Saved books"')).toBeVisible();
+  await page.goto("/book/OL23106658M");
+  await expect(page.locator('text=Add to library')).toBeVisible();
+  await expect(page.locator('text=Add to wishlist')).toBeVisible();
+});
 
