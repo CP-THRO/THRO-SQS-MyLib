@@ -279,4 +279,42 @@ jobs:
           path: |
             ./Playwright/code/playwright-report
             ./Playwright/code/test-result
+
+  zap:
+    runs-on: ubuntu-latest
+    needs:
+      - dockerize-frontend
+      - dockerize-backend
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run OWASP Zap
+        working-directory: ./Zap/code
+        run: |
+          docker compose -f docker-compose-pipeline.yaml up backend frontend postgres-db openlibrary-wiremock
+          docker compose run --rm zap-frontend || true
+          docker compose run --rm zap-frontend-authenticated || true
+          docker compose run --rm zap-backend || true
+          docker compose run --rm zap-backend-authenticated || true
+      - name: Stop container
+        if: always()
+        working-directory: ./Playwright/code
+        run: docker compose -f docker-compose-pipeline.yaml down backend frontend postgres-db openlibrary-wiremock
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pentest-result
+          path: |
+            ./Zap/code/api-report-auth.html
+            ./Zap/code/api-report-auth.json
+            ./Zap/code/api-report.html
+            ./Zap/code/api-report.json
+            ./Zap/code/full-report-authenticated.html
+            ./Zap/code/full-report-authenticated.json
+            ./Zap/code/full-report-unauthenticated.html
+            ./Zap/code/full-report-unauthenticated.json
+
+      
+    
             
