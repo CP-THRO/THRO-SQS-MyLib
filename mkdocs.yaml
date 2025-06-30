@@ -1,7 +1,7 @@
 site_name: MyLib
 
 theme:
-    name: readthedocs
+    name: mkdocs
 
 docs_dir: docs
 nav:
