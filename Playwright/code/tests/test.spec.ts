@@ -122,6 +122,24 @@ test("Details add to wishlist and delete", async ({page}) =>{
 });
 
 
+test("Library go to details", async ({page}) => {
+  await addBookToLibrary(page);
+  await page.goto("/library");
+  await page.locator("text=Details").click()
+  await expect(page.locator("text=Mass effect - Ascension")).toBeVisible()
+  await expect(page.locator("text=Delete from library")).toBeVisible();
+})
+
+test("Library delete", async ({page}) =>{
+  await addBookToLibrary(page);
+  await page.goto("/library");
+  await expect(page.locator("text=Mass effect - Ascension")).toBeVisible()
+  await expect(page.locator("text=Delete from library")).toBeVisible();
+  await page.locator("text=Delete from library").click();
+  await expect(page.locator("text=Mass effect - Ascension")).toBeHidden();
+})
+
+
 const signUpNewUser = ( async (username:string, page:Page)=>{
   await page.goto("/");
   await page.click('text=Account');
@@ -150,5 +168,10 @@ const getDetailsLoggedIn = (async (page: Page)=>{
   await page.goto("/book/OL23106658M");
   await expect(page.locator('text=Add to library')).toBeVisible();
   await expect(page.locator('text=Add to wishlist')).toBeVisible();
+});
+
+const addBookToLibrary = (async (page: Page)=>{
+  await getDetailsLoggedIn(page);
+  await page.locator('text=Add to Library').click();
 });
 
