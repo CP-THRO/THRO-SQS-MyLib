@@ -292,7 +292,7 @@ jobs:
       - name: Run OWASP Zap
         working-directory: ./Zap/code
         run: |
-          docker compose -f docker-compose-pipeline.yaml up backend frontend postgres-db openlibrary-wiremock
+          docker compose -f docker-compose-pipeline.yaml up -d backend frontend postgres-db wiremock
           docker compose run --rm zap-frontend || true
           docker compose run --rm zap-frontend-authenticated || true
           docker compose run --rm zap-backend || true
@@ -300,7 +300,7 @@ jobs:
       - name: Stop container
         if: always()
         working-directory: ./Playwright/code
-        run: docker compose -f docker-compose-pipeline.yaml down backend frontend postgres-db openlibrary-wiremock
+        run: docker compose -f docker-compose-pipeline.yaml down backend frontend postgres-db wiremock
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
