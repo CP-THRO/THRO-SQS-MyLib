@@ -12,7 +12,7 @@ build:
 
 # Build documentation with Mkdocs
 mkdocs:
-   configuration: mkdocs.yml
+   configuration: mkdocs.yaml
 
 # Install required packages
 python:
