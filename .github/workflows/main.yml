@@ -292,6 +292,7 @@ jobs:
         working-directory: ./Zap/code
         run: |
           mkdir report
+          chmod 777 report
           docker compose -f docker-compose-pipeline.yaml up -d backend frontend postgres-db wiremock
           docker compose -f docker-compose-pipeline.yaml run --rm zap-frontend || true
           docker compose -f docker-compose-pipeline.yaml run --rm zap-frontend-authenticated || true
