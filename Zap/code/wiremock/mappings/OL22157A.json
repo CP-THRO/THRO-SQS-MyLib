@@ -1,0 +1,13 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "/authors/OL22157A.json"
+  },
+  "response": {
+    "status": 200,
+    "bodyFileName": "OL22157A.json",
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

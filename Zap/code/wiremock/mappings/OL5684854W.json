@@ -1,0 +1,13 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "/works/OL5684854W.json"
+  },
+  "response": {
+    "status": 200,
+    "bodyFileName": "OL5684854W.json",
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}
