@@ -173,7 +173,7 @@ onMounted(loadBook);
               <div v-if="book.bookIsInLibrary" class="mt-2">
                 <!-- Rating -->
                 <p>
-                  <strong>Your Rating:</strong>
+                  <strong>Your Rating: </strong>
                   <span v-if="!editRating">
                     {{ book.individualRating ? `${book.individualRating} / 5` : 'Not rated' }}
                     <button @click="onEditRating" class="btn btn-primary ms-2">Edit</button>
@@ -194,7 +194,7 @@ onMounted(loadBook);
 
                 <!-- Reading status -->
                 <p>
-                  <strong>Your Status:</strong>
+                  <strong>Your Status: </strong>
                   <span v-if="!editStatus">
                     {{ book.readingStatus }}
                     <button @click="onEditStatus" class="btn btn-primary ms-2">Edit</button>
