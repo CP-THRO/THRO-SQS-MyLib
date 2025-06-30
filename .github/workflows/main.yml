@@ -293,10 +293,10 @@ jobs:
         working-directory: ./Zap/code
         run: |
           docker compose -f docker-compose-pipeline.yaml up -d backend frontend postgres-db wiremock
-          docker compose run --rm zap-frontend || true
-          docker compose run --rm zap-frontend-authenticated || true
-          docker compose run --rm zap-backend || true
-          docker compose run --rm zap-backend-authenticated || true
+          docker compose -f docker-compose-pipeline.yaml run --rm zap-frontend || true
+          docker compose -f docker-compose-pipeline.yaml run --rm zap-frontend-authenticated || true
+          docker compose -f docker-compose-pipeline.yaml run --rm zap-backend || true
+          docker compose -f docker-compose-pipeline.yaml run --rm zap-backend-authenticated || true
       - name: Stop container
         if: always()
         working-directory: ./Playwright/code
