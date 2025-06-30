@@ -116,7 +116,7 @@ services:
         condition: service_healthy # Only if the healthcheck works I can know that the app has fully started
     command: ./wrk/api-test-authenticated.sh
     volumes:
-      - ./:/zap/wrk
+      - ./:/zap/wrk:rw
 
 
 
