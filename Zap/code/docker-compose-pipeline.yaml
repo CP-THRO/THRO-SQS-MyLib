@@ -78,9 +78,10 @@ services:
         condition: service_healthy # Only if the healthcheck works I can know that the app has fully started
       backend:
         condition: service_healthy
-    command: zap-full-scan.py -t http://frontend:80 -r full-report-unauthenticated.html -J full-report-unauthenticated.json -d 
+    command: zap-full-scan.py -t http://frontend:80 -r report/full-report-unauthenticated.html -J report/full-report-unauthenticated.json -d 
     volumes:
-      - ./:/zap/wrk
+      - ./:/zap/wrk:rw
+      - ./report:/zap/wrk/report:rw
 
   zap-frontend-authenticated:
     image: zaproxy/zap-stable
@@ -93,7 +94,8 @@ services:
         condition: service_healthy
     command: ./wrk/test-authenticated.sh
     volumes:
-      - ./:/zap/wrk
+      - ./:/zap/wrk:rw
+      - ./report:/zap/wrk/report:rw
 
   zap-backend:
     image: zaproxy/zap-stable
@@ -102,9 +104,10 @@ services:
     depends_on:
       backend:
         condition: service_healthy # Only if the healthcheck works I can know that the app has fully started
-    command: zap-api-scan.py -t http://backend:8080/v3/api-docs -f openapi -z "auth.header=Origin:\ http://frontend:80" -r api-report.html -J api-report.json -d
+    command: zap-api-scan.py -t http://backend:8080/v3/api-docs -f openapi -z "auth.header=Origin:\ http://frontend:80" -r report/api-report.html -J report/api-report.json -d
     volumes:
-      - ./:/zap/wrk
+      - ./:/zap/wrk:rw
+      - ./report:/zap/wrk/report:rw
 
     
   zap-backend-authenticated:
@@ -117,6 +120,7 @@ services:
     command: ./wrk/api-test-authenticated.sh
     volumes:
       - ./:/zap/wrk:rw
+      - ./report:/zap/wrk/report:rw
 
 
 
