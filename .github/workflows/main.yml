@@ -288,10 +288,10 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
       - name: Run OWASP Zap
         working-directory: ./Zap/code
         run: |
+          mkdir report
           docker compose -f docker-compose-pipeline.yaml up -d backend frontend postgres-db wiremock
           docker compose -f docker-compose-pipeline.yaml run --rm zap-frontend || true
           docker compose -f docker-compose-pipeline.yaml run --rm zap-frontend-authenticated || true
@@ -305,15 +305,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: pentest-result
-          path: |
-            ./Zap/code/api-report-auth.html
-            ./Zap/code/api-report-auth.json
-            ./Zap/code/api-report.html
-            ./Zap/code/api-report.json
-            ./Zap/code/full-report-authenticated.html
-            ./Zap/code/full-report-authenticated.json
-            ./Zap/code/full-report-unauthenticated.html
-            ./Zap/code/full-report-unauthenticated.json
+          path: ./Zap/code/report
 
       
     
