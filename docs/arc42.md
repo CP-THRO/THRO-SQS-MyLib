@@ -62,7 +62,7 @@ Due to the requirements given by the lecuturer, the project has the following co
 This project was developed under time pressure due to delays in my bachelors thesis.
 
 ## 3. System Scope and Context
-![Context Diagram](./pics/Context.png)
+![Context Diagram](img/Context.png)
 
 MyLib is a web application directly accessed by users via a web browser.
 
