@@ -124,17 +124,117 @@ Deployment uses **Docker Compose**, bundling all system components (frontend, ba
 
 - Simplified deployment using a single configuration file
 - System can be deployment with minimal commands
+- Environment consistency across development, testing, and production
 
 
-## 5. Runtime View
+### Security
 
-## 6. Deployment View
+Secured endpoints are protected using JWT (JSON Web Token) authentication:
+- Widespread industry use
+- Straightforward integration into Spring Security
+- Simplifies stateless authentication across frontend and backend
 
-## 7. Crosscutting Concepts
+### External Service Integration
+External Service Integration
 
-## 8. Architectural Desicions
+The backend integrates with the OpenLibrary API to fetch book data. 
 
-## 9. Quality Requirements
+## 5. Building Block View
+### 5.1 Backend
+![Context Diagram](img/Components-Backend.png)
+#### 5.1.1 Overview
+
+The backend of MyLib is implemented in Spring Boot (Java). It consists of:
+- Controllers exposing REST endpoints
+- Services implementing business logic
+- Repositories handling data persistence
+- Flyweights caching external API results
+- Integration with the OpenLibrary API
+
+
+#### 5.1.2 Backend Components
+
+###### Controllers
+
+| Component         | Responsibility                                                         |
+|--------------------|-------------------------------------------------------------------------|
+| **AuthController** | Handles user authentication and registration endpoints.                |
+| **BookController** | Exposes endpoints for book data, user libraries, and wishlists.        |
+| **SearchController** | Exposes endpoint to search books via OpenLibrary API.              |
+
+
+###### Services
+
+| Component                   | Responsibility                                                                  |
+|-----------------------------|---------------------------------------------------------------------------------|
+| **AuthService**             | Implements business logic for user login and registration.                      |
+| **BookService**             | Handles business logic for managing books, personal libraries, and wishlists.   |
+| **CustomUserDetailsService** | Integrates with Spring Security to load user data and create new users.         |
+| **JWTService**              | Generates and validates JWT tokens for secure endpoints.                        |
+| **SearchService**           | Coordinates searches to the OpenLibrary API and manages caching of results.     |
+| **ExternalBookFlyweightFactory** | Caches individual book data fetched from OpenLibrary.                       |
+| **SearchResultFlyweightFactory** | Caches search results from OpenLibrary queries.                            |
+| **OpenLibraryAPI**          | Handles communication with the external OpenLibrary REST API.                  |
+
+
+###### Repositories
+
+| Component               | Responsibility                                                         |
+|--------------------------|-------------------------------------------------------------------------|
+| **BookRepository**       | Stores book data in the database.                                      |
+| **UserRepository**       | Stores user data and wishlist relations.                               |
+| **LibraryBookRepository** | Manages many-to-many relations between users and books, including additional user-specific metadata such as reading status and ratings. |
+
+
+### 5.2 Frontend
+
+![Context Diagram](img/Components-Frontend.png)
+
+#### 5.1.1 Overview
+
+The frontend of MyLib is implemented with Vue.js and TypeScript. It consists of:
+
+- Vue single-file components representing application pages
+- Shared services and composables providing state management and reusable logic
+- A centralized API service handling communication with the backend
+
+#### 5.1.1 Overview
+
+#### 5.1.2 Frontend Components
+
+##### Pages
+
+| Component              | Responsibility                                                                |
+|-------------------------|-------------------------------------------------------------------------------|
+| **AllBooks.vue**       | Displays all books stored in the database; serves as the application homepage. |
+| **Search.vue**         | Displays the book search page for querying the OpenLibrary API.               |
+| **Book.vue**           | Displays details about a specific book.                                       |
+| **Library.vue**        | Shows books currently in the authenticated user's personal library.           |
+| **Wishlist.vue**       | Shows books in the authenticated user's wishlist.                             |
+| **LoginPage.vue**      | Provides login and registration functionality.                                |
+
+
+##### Shared Components & Services
+
+| Component               | Responsibility                                                                 |
+|--------------------------|---------------------------------------------------------------------------------|
+| **ApiService**          | Handles all HTTP communication with the backend via REST.                      |
+| **AuthInfoWrapper**     | Provides global authentication state for elements where it matters if a user is authenticated or not |
+| **useBookActions**      | Exposes shared methods for adding/removing books in library or wishlist.        |
+| **useBookList**         | Manages loading of book lists and pagination.                  |
+| **usePaginationState**  | Stores and restores pagination state for each page for consistent navigation across pages.    |
+| **App.vue**             | Main application entry point, contains global layout and navigation bar. |
+
+
+## 6. Runtime View
+
+## 7. Deployment View
+
+## 8. Crosscutting Concepts
+
+## 9. Architectural Desicions
+
+## 10. Quality Requirements
 
 ## 11. Risks & Technical Debt
 
