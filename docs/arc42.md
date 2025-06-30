@@ -55,21 +55,50 @@ Due to the requirements given by the lecuturer, the project has the following co
 - Must use GitHub for source code and version management
 - Must GitHub Actions for pipelines
 
+- Further personal constraints:
+    - Limited experience in backend development
+    - No experience in frontend development
+
 This project was developed under time pressure due to delays in my bachelors thesis.
 
-## 4. System Scope and Context
+## 3. System Scope and Context
+![Context Diagram](./pics/Context.png)
+
+MyLib is a web application directly accessed by users via a web browser.
+
+Two user types interact with the system:
+
+- **Unregistered User**
+  - Can search for books via the OpenLibrary API
+  - Can view details about books
+  - Can view the aggregated list of books saved by all registered users (anonymized)
+
+- **Registered User**
+  - Has all capabilities of an unregistered user
+  - Can add books to a personal library
+  - Can add books to a wishlist
+  - Can transfer books from wishlist to library
+  - Can set personal ratings for books (1–5)
+  - Can manage reading status for books in the library (unread, currently reading, already read)
+
+MyLib communicates with the following external system:
+
+- **OpenLibrary API**
+  - Provides book metadata (titles, authors, covers, descriptions, etc.)
+  - Accessed via REST API
+
+
+## 4. Solution Strategy
 
 
 
-## 5. Solution Strategy
+## 5. Runtime View
 
-## 6. Runtime View
+## 6. Deployment View
 
-## 7. Deployment View
+## 7. Crosscutting Concepts
 
-## 8. Crosscutting Concepts
+## 8. Architectural Desicions
 
-## 9. Architectural Desicions
-
-## 10. Quality Scenarios
+## 9. Quality Scenarios
 
