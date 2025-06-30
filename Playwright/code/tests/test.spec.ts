@@ -82,7 +82,7 @@ test("Search and add to library", async ({page}) => {
   await expect(page.locator('text=Loading...')).toBeHidden();
   await expect(page.locator('tr', {hasText: 'Mass Effect Ascension'}).locator('text=Add to library')).toBeHidden();
   await expect(page.locator('tr', {hasText: 'Mass Effect Ascension'}).locator('text=Add to wishlist')).toBeHidden();
-}
+});
 
 test("Search and add to wishlist", async ({page}) =>{
   const randomUser = `user${Date.now()}`;
