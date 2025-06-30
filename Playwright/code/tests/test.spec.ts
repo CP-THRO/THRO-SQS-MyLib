@@ -157,6 +157,36 @@ test("Wishlist delete", async ({page}) =>{
   await expect(page.locator("text=Mass effect - Ascension")).toBeHidden();
 })
 
+test.describe.serial("All Books", () =>{
+
+  //Add a book to the library so that another user can see it on the allbooks page
+  test("Add book to database", async ({page}) =>{
+    await addBookToLibrary(page);
+  });
+
+  test("Go to details", async ({page}) =>{
+    await page.goto("/");
+    await expect(page.locator("text=Mass effect - Ascension")).toBeVisible()
+    await page.locator("text=Details").click();
+    await expect(page.locator("text=Mass effect - Ascension")).toBeVisible()
+  });
+
+  test("Add to library", async ({page})=>{
+    await alLBooksSignedIn(page);
+    await page.locator("text=Add to library ").click();
+    await expect(page.locator("text=Add to library")).toBeHidden();
+    await expect(page.locator("text=Add to wishlist")).toBeHidden();
+  })
+
+  test("Add to wishlist", async ({page})=>{
+    await alLBooksSignedIn(page);
+    await page.locator("text=Add to wishlist ").click();
+    await expect(page.locator("text=Add to library")).toBeVisible();
+    await expect(page.locator("text=Add to wishlist")).toBeHidden();
+  })
+
+});
+
 
 const signUpNewUser = ( async (username:string, page:Page)=>{
   await page.goto("/");
@@ -198,4 +228,11 @@ const addBookToWishlist = (async (page: Page)=>{
   await page.locator('text=Add to wishlist').click();
 });
 
+const alLBooksSignedIn = (async (page: Page)=>{
+  const randomUser = `user${Date.now()}`;
+  await signUpNewUser(randomUser, page);
+  await expect(page.locator('text="Saved books"')).toBeVisible();
+  await expect(page.locator("text=Add to library")).toBeVisible();
+  await expect(page.locator("text=Add to wishlist")).toBeVisible();
+});
 
