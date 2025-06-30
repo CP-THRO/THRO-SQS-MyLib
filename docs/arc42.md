@@ -90,6 +90,40 @@ MyLib communicates with the following external system:
 
 ## 4. Solution Strategy
 
+### Backend
+
+The backend is implemented in **Spring Boot** (Java). Reasons for this choice:
+
+- Prior experience with the framework
+- Widespread adoption and large community support
+- Strong integration with persistence frameworks such as Hibernate
+- Built-in support for security and REST API development
+
+
+### Frontend
+
+The frontend is implemented with **Vue.js** and **TypeScript**. Reasons:
+
+- Simplicity and lower learning curve for a single-developer project
+- Good documentation and tooling
+- Allows type safety via TypeScript
+
+
+### Database
+
+**PostgreSQL** is used as the database system. Integrated with Spring Boot via Hibernate, enabling:
+
+- Database interaction without custom SQL statements
+- Automatic handling of database connections and transactions
+- Protection against SQL injection via prepared statements
+- Straightforward configuration within Spring Boot projects
+
+### Deployment
+
+Deployment uses **Docker Compose**, bundling all system components (frontend, backend, database) into containers. This ensures:
+
+- Simplified deployment using a single configuration file
+- System can be deployment with minimal commands
 
 
 ## 5. Runtime View
@@ -100,5 +134,11 @@ MyLib communicates with the following external system:
 
 ## 8. Architectural Desicions
 
-## 9. Quality Scenarios
+## 9. Quality Requirements
+
+## 11. Risks & Technical Debt
+
+## 12. Gloassary
+
+
 
