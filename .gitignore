@@ -27,3 +27,6 @@ replay_pid*
 .env-backend
 .env-frontend
 .env-db
+
+structorizr
+structurizr
