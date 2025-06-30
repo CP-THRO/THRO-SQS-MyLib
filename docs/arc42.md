@@ -3,6 +3,7 @@
 ## 1.1 Purpose
 
 MyLib is a personal library management system allowing users to search for books via the OpenLibrary API and manage a private collection. Users can:
+
 - Search for books
 - View book details (cover, title, authors, description, publish date, ISBNs, average rating by all users in the system)
 - Add books to a personal library or wishlist
@@ -36,7 +37,7 @@ MyLib exposes public endpoints for searching and viewing book details, and secur
 
 ## 2. Constraints
 
-Due to the requirements given by the lecuturer, the project has the following constraints:
+Due to the requirements given by the lecuturer, the project has the following constraints:re
 
 - Programming languages allowed:
   - Python
@@ -53,6 +54,8 @@ Due to the requirements given by the lecuturer, the project has the following co
 - Backend must integrate with at least one external service
 - Must use GitHub for source code and version management
 - Must GitHub Actions for pipelines
+
+This project was developed under time pressure due to delays in my bachelors thesis.
 
 ## 4. System Scope and Context
 
