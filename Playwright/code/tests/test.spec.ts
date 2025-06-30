@@ -67,7 +67,7 @@ test("Search and go to details", async ({page}) =>{
   await expect(page.locator('text="Mass effect - Ascension"')).toBeVisible();
 });
 
-test("Search and add to library", async ({page}) =>{
+test("Search and add to library", async ({page}) => {
   const randomUser = `user${Date.now()}`;
   await signUpNewUser(randomUser, page);
   await expect(page.locator('text="Saved books"')).toBeVisible()
@@ -75,13 +75,14 @@ test("Search and add to library", async ({page}) =>{
   await page.fill('#inputKeywords', 'Mass Effect');
   await page.click('button:has-text("Search")');
   await expect(page.locator('text=Mass Effect Ascension')).toBeVisible();
-  await expect(page.locator('tr', { hasText: 'Mass Effect Ascension' }).locator('text=Details')).toBeVisible();
-  await expect(page.locator('tr', { hasText: 'Mass Effect Ascension' }).locator('text=Add to library')).toBeVisible();
-  await expect(page.locator('tr', { hasText: 'Mass Effect Ascension' }).locator('text=Add to wishlist')).toBeVisible();
-  await page.locator('tr', { hasText: 'Mass Effect Ascension' }).locator('text=Add to library ').click();
+  await expect(page.locator('tr', {hasText: 'Mass Effect Ascension'}).locator('text=Details')).toBeVisible();
+  await expect(page.locator('tr', {hasText: 'Mass Effect Ascension'}).locator('text=Add to library')).toBeVisible();
+  await expect(page.locator('tr', {hasText: 'Mass Effect Ascension'}).locator('text=Add to wishlist')).toBeVisible();
+  await page.locator('tr', {hasText: 'Mass Effect Ascension'}).locator('text=Add to library ').click();
   await expect(page.locator('text=Loading...')).toBeHidden();
-  await expect(page.locator('tr', { hasText: 'Mass Effect Ascension' }).locator('text=Add to library')).toBeHidden();
-  await expect(page.locator('tr', { hasText: 'Mass Effect Ascension' }).locator('text=Add to wishlist')).toBeHidden();
+  await expect(page.locator('tr', {hasText: 'Mass Effect Ascension'}).locator('text=Add to library')).toBeHidden();
+  await expect(page.locator('tr', {hasText: 'Mass Effect Ascension'}).locator('text=Add to wishlist')).toBeHidden();
+}
 
 test("Search and add to wishlist", async ({page}) =>{
   const randomUser = `user${Date.now()}`;
