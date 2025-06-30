@@ -1,7 +1,7 @@
 {
   "request": {
     "method": "GET",
-    "url": "/search?q=Mass%2BEffect&offset=0&limit=10"
+    "url": "/search.json?q=Mass%2BEffect&offset=0&limit=10"
   },
   "response": {
     "status": 200,
