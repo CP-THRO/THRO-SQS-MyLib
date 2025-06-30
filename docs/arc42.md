@@ -211,7 +211,7 @@ The frontend of MyLib is implemented with Vue.js and TypeScript. It consists of:
 | **Book.vue**           | Displays details about a specific book.                                       |
 | **Library.vue**        | Shows books currently in the authenticated user's personal library.           |
 | **Wishlist.vue**       | Shows books in the authenticated user's wishlist.                             |
-| **LoginPage.vue**      | Provides login and registration functionality.                                |
+| **Login.vue**      | Provides login and registration functionality.                                |
 
 
 ##### Shared Components & Services
@@ -227,6 +227,106 @@ The frontend of MyLib is implemented with Vue.js and TypeScript. It consists of:
 
 
 ## 6. Runtime View
+
+This section describes some typical runtime scenarios for MyLib, illustrating how components collaborate at runtime.
+
+### Scenario 1 – Unregistered User Searches for Books
+
+- **Actor:** Unregistered user
+- **Frontend Flow:**
+  - User accesses `Search.vue` via the browser, enters keywords and clicks the search button.
+  - `Search.vue` invokes `useBookList`.
+  - `useBookList` calls `ApiService` to request search results.
+- **Backend Flow:**
+  - `SearchController` receives the request.
+  - `SearchService` checks the `SearchResultFlyweightFactory` cache.
+    - **On Success** (exists and not stale):
+        - Return cached result to frontend.
+    - **On Failure** (does not exist or stale):
+        - `SearchResultFlyweightFactory` calls `OpenLibraryAPI`.
+        - `OpenLibraryAPI` queries the OpenLibrary API with the search keywords and returns the result to `SearchResultFlyweightFactory`.
+        - Result is cached and returned to `SearchService`.
+        - Result is returned to frontend.
+- **End Result:**
+  - `Search.vue` displays the search results.
+
+
+
+## Scenario 2 – Unregistered User Views Book Details
+
+- **Actor:** Unregistered user
+- **Frontend Flow:**
+  - User navigates to `Book.vue` by clicking a "Details" button on `AllBooks.vue`, `Search.vue`, `Library.vue` or `Wishlist.vue`.
+  - `Book.vue` calls `ApiService` for book details.
+- **Backend Flow:**
+  - `BookController` handles the request.
+  - `BookService` attempts to load book data from `BookRepository`.
+    - **On Success** (exists in database):
+        - Return book to frontend.
+    - **On Failure** (does not exist in database):
+        - `BookService` checks the `ExternalBookFlyweightFactory` cache.
+            - **On Success** (exists and not stale):
+                - Return cached book to frontend.
+            - **On Failure** (does not exist or stale):
+                - `ExternalBookFlyweightFactory` calls `OpenLibraryAPI`.
+                - `OpenLibraryAPI` queries OpenLibrary for the book and returns it to `ExternalBookFlyweightFactory`.
+                - Result is cached and returned to `BookService`.
+                - Result is returned to frontend.
+- **End Result:**
+  - `Book.vue` displays the book information.
+
+## Scenario 3 – User Logs In
+
+- **Actor:** Registered user
+- **Frontend Flow:**
+  - User submits credentials in `Login.vue` and clicks the "Login" button.
+  - `ApiService` sends login request.
+- **Backend Flow:**
+  - `AuthController` receives the request.
+  - `AuthService` validates credentials.
+  - On success:
+    - `JWTService` generates a JWT token.
+    - Token is returned to frontend.
+- **Frontend Post-login:**
+  - `ApiService` stores authentication status in `AuthInfoWrapper` and JWT token in LocalStorage for future requests.
+  - `Login.vue` redirects to home page or the page the user was last on.
+
+
+## Scenario 4 – Registered User Adds Book to Library
+
+- **Actor:** Registered user
+- **Frontend Flow:**
+  - User clicks “Add to Library” on any book component (e.g. `Book.vue`).
+  - `useBookActions` calls `ApiService`.
+  - JWT token is included in the request header.
+- **Backend Flow:**
+  - `BookController` receives the secured request.
+  - Spring Security validates user identity.
+  - `BookService` checks if the book exists in `BookRepository`.
+    - **On Failure** (book not in database):
+        - `BookService` checks the `ExternalBookFlyweightFactory` cache.
+            - **On Failure** (does not exist or stale):
+                - `ExternalBookFlyweightFactory` calls `OpenLibraryAPI`.
+                - `OpenLibraryAPI` queries OpenLibrary for the book and returns it to `ExternalBookFlyweightFactory`.
+                - Result is cached and returned to `BookService`.
+    - `BookService` creates a new entry in `LibraryBookRepository`.
+- **Result:**
+  - Success response returned.
+  - Frontend updates the page the user is on.
+
+
+## Scenario 5 – Registered User Updates Book Rating
+
+- **Actor:** Registered user
+- **Frontend Flow:**
+  - User updates personal rating on `Book.vue` and clicks the "Save" button.
+  - `useBookActions` calls `ApiService`.
+- **Backend Flow:**
+  - `BookController` receives the secured request.
+  - `BookService` updates the rating in `LibraryBookRepository`.
+- **Result:**
+  - Success response returned.
+  - Frontend updates the `Book.vue` page.
 
 ## 7. Deployment View
 
