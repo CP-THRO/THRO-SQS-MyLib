@@ -948,7 +948,7 @@ A user wants to add a book to their personal library after finding it via search
   - Cache timeouts
   - Periodic cache cleanups
 
-### 11.3 Technical Debt
+### 11.2 Technical Debt
 
 #### Direct API Calls in Frontend Components
 
