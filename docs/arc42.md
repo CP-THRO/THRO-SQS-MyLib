@@ -776,9 +776,179 @@ I decided to use **two-stage Dockerfiles** for both frontend and backend images.
 
 ## 10. Quality Requirements
 
+
+This section documents scenarios demonstrating how MyLib’s architecture meets key quality requirements.
+
+### 10.1 Security
+
+**Scenario:**  
+A user attempts to access a secured endpoint without a valid JWT token.
+
+- Expected Result:
+  - Backend responds with HTTP 403.
+  - No sensitive user data is exposed.
+- Relevant Mechanisms:
+  - Spring Security integration
+  - JWT validation
+
+
+### 10.2 Performance
+
+**Scenario:**  
+A user performs a book search for a common keyword.
+
+- Expected Result:
+  - Response time should not exceed 2 seconds under normal load.
+- Relevant Mechanisms:
+  - Flyweight caches for repeated queries
+  - Efficient API design
+
+
+### 10.3 Resilience
+
+**Scenario:**  
+The OpenLibrary API is unavailable when a user performs a search.
+
+- Expected Result:
+  - Backend returns an informative error message to the frontend.
+  - System does not crash.
+- Relevant Mechanisms:
+  - Error handling in external service integration
+
+
+### 10.4 Testability
+
+**Scenario:**  
+Developers modify the BookService logic.
+
+- Expected Result:
+  - Unit tests, integration tests and e2e test detect regressions.
+  - Code coverage remains ≥80%.
+- Relevant Mechanisms:
+  - Automated tests
+  - GitHub Actions pipeline
+
+
+### 10.5 Maintainability
+
+**Scenario:**  
+A new developer joins the project and needs to add a feature to the frontend.
+
+- Expected Result:
+  - Developer understands the codebase structure quickly due to clear component separation and documentation.
+- Relevant Mechanisms:
+  - Modular frontend architecture
+  - Use of Vue.js composables
+  - Documentation in arc42 format
+
+## 10.6 Usability
+
+**Scenario:**  
+A user wants to add a book to their personal library after finding it via search.
+
+- Expected Result:
+  - User clearly sees “Add to Library” actions in the UI.
+  - After adding, user receives visual confirmation (button is missing / gets swapped for a delete button).
+  - The UI updates without requiring a manual page refresh.
+- Relevant Mechanisms:
+  - Vue.js components for feedback
+  - Consistent use of Bootstrap for layout and styling
+  - Clear user flow between search results and book detail pages
+
 ## 11. Risks & Technical Debt
+
+### 11.1 Risks
+
+#### External API Dependence
+
+- The system depends on the availability and stability of the OpenLibrary API.
+- If OpenLibrary becomes unavailable:
+  - Searches may fail.
+  - Book details may be incomplete or unavailable if they are not already in the database.
+
+#### Inconsistent Data
+
+- Data inconsistencies exist between OpenLibrary endpoints.
+- Users might observe differences between search results and detailed book views.
+- Mitigation:
+  - Documented handling strategy (see ADR 3).
+
+#### Security Risks
+
+- JWT tokens stored in frontend localStorage could be vulnerable if the frontend code or browser environment is compromised.
+- Mitigation:
+  - HTTPS deployment
+  - Secure coding practices
+  - Short token lifespan
+
+
+#### Resource Usage
+
+- High volume of simultaneous requests for different search parameters or books could increase RAM usage due to in-memory caching.
+- Mitigation:
+  - Cache timeouts
+  - Periodic cache cleanups
+
+### 11.3 Technical Debt
+
+#### Direct API Calls in Frontend Components
+
+- Several frontend components (e.g. `Book.vue`, `Login.vue`) call `ApiService` directly instead of using composables such as `useBookActions`.
+- This introduces tight coupling between the UI and backend communication logic.
+- Refactoring these calls into composables would improve maintainability and separation of concerns.
+
+#### In-Memory Caching Volatility
+
+- Flyweight caches are purely in-memory.
+- Data is lost on container restarts.
+- Persistence or external caching (e.g. Redis) could be added in the future if scalability demands increase.
+
+
+#### Limited Frontend Architecture Experience
+
+- Frontend architecture may not follow all best practices due to limited prior experience with modern web development.
+- Potential consequences:
+  - Higher maintenance effort
+  - Less optimal component separation
+  - Code duplication
+
+
+#### Missing Refresh Token Mechanism
+
+- Currently, JWT tokens simply expire after 30 minutes without a refresh mechanism.
+- No refresh endpoint exists to extend the session without requiring the user to log in again.
+- This could negatively affect user experience due to forced re-authentication.
+
+
+#### Client-Side Only Logout
+
+- Logout functionality is implemented purely on the client side by clearing localStorage.
+- No server-side invalidation or token blacklisting is performed.
+- If a token is leaked or compromised, it remains valid until expiry.
+
 
 ## 12. Gloassary
 
-
+| Term                        | Definition                                                                            |
+|------------------------------|--------------------------------------------------------------------------------------|
+| ADR                         | Architectural Decision Record. A document explaining why a specific architectural choice was made. |
+| API                         | Application Programming Interface. Allows different software components to communicate. |
+| AuthController              | Backend controller handling user authentication and registration in MyLib.           |
+| Backend                     | Server-side part of MyLib responsible for business logic and data management.        |
+| BookController              | Backend controller exposing book-related REST endpoints.                             |
+| BookService                 | Service layer handling business logic for books, libraries, and wishlists.           |
+| CI/CD                       | Continuous Integration and Continuous Deployment. Automated process for building, testing, and deploying software. |
+| Docker Compose              | Tool for defining and running multi-container Docker applications.                   |
+| Flyweight Pattern           | Software design pattern for caching and sharing objects to reduce memory usage and improve performance. |
+| Frontend                    | Client-side part of MyLib, implemented with Vue.js and TypeScript.                   |
+| Hibernate                   | Java ORM framework used for mapping objects to relational database tables.           |
+| JWT                         | JSON Web Token. Compact token format for securely transmitting claims between parties. |
+| LocalStorage                | Browser feature used to store data locally on the user's device. Used in MyLib for storing JWT tokens. |
+| OpenLibrary API             | Public API providing book metadata used by MyLib.                                    |
+| ORM                         | Object-Relational Mapping. Maps programming language objects to database tables.     |
+| PostgreSQL                  | Open-source relational database system used for persistent storage in MyLib.         |
+| REST                        | Representational State Transfer. An architectural style for designing networked applications. |
+| Spring Boot                 | Java-based framework for building backend applications quickly and easily.           |
+| Vue.js                       | JavaScript framework for building frontend user interfaces.                         |
+| Wishlist                    | Feature in MyLib allowing users to save books for potential future addition to their library. |
 
