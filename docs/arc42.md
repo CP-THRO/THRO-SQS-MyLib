@@ -406,6 +406,64 @@ Variable	Description
 
 ## 8. Crosscutting Concepts
 
+This section documents concepts and solutions applied throughout MyLib’s architecture.
+
+### 8.1 Security
+
+- All private API endpoints are secured via **JWT tokens**.
+- JWT is integrated with Spring Security.
+- JWT tokens are stored in frontend localStorage and sent in HTTP Authorization headers.
+- Backend verifies tokens for each secured request.
+- CORS is configured, only requests coming from the backend or Swagger-UI are allowed.
+- Passwords are encrypted with Bcrypt.
+
+### 8.2 Error Handling
+
+- Backend returns standardized HTTP status codes for success and error conditions.
+- Exception handling in Spring Boot is implemented via `@ControllerAdvice`.
+- Frontend displays error messages for API failures.
+
+
+### 8.3 Caching
+
+- APICalls to OpenLibrary can be quite slow
+- **SearchResultFlyweightFactory** caches results of OpenLibrary search queries.
+- **ExternalBookFlyweightFactory** caches detailed book data fetched from OpenLibrary.
+- Caching reduces latency for repeated external API calls. It also reduces the number of API calls actually going out.
+- The cached entries are valid for 1 hour (long enough to handle most user interaction, but also fetching potential updates at some point)
+- Relying on browser caching for cover images since the frontend only gets the URL for the image from the backeend and has to fetch that itself.
+    - This essentially lazy-loads the images, which makes the overall response from the backend quicker.
+
+### 8.4 Logging and Monitoring
+- Backend logs requests, errors, and security-related events using Logback logging facilities.
+- Logs include:
+  - REST endpoint accessed
+  - Process status
+  - User identity (username or ID, no password!) (for secured operations)
+  - Exceptions thrown
+
+### 8.5 Resilience
+
+- External API calls to OpenLibrary include:
+  - Error handling to prevent application crashes
+- When OpenLibrary is unavailable:
+  - Errors are logged
+  - Graceful error responses returned to frontend
+
+
+### 8.6 Configuration Management
+
+- All runtime configuration is externalized via environment variables.
+- Frontend container injects a config.json on startup which is loaded when the user accesses the website to configure the BaseURL of the `ApiService`
+- Backend uses Spring Boot environment variables for:
+  - Database configuration
+  - JWT secrets
+  - CORS URLs
+  - External API URLs
+- Docker Compose integrates all configurations for seamless deployment.
+
+
+
 ## 9. Architectural Desicions
 
 ## 10. Quality Requirements
