@@ -1,3 +1,5 @@
+# arc42 Documentation for MyLib
+
 ## 1. Introduction And Goals
 
 ## 1.1 Purpose
