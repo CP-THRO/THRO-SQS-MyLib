@@ -62,7 +62,8 @@ Open your browser and navigate to: http://localhost:5174
 
 ### 6. Creating a User Account
 
-To use the application:
+To use the secured parts of the application:
+
 - Click Account in the navigation bar.
 - Click Sign Up.
 - Register a new account with your email and password.
