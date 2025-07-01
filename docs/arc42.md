@@ -382,7 +382,6 @@ The system is defined in a single `docker-compose.yml` file, which spins up:
 
 #### Backend
 
-Backend
 | Variable                     | Description                                |
 | ---------------------------- | ------------------------------------------ |
 | `MACHINE`      | Select the application properties to load on statup. Typically "prod". |
@@ -398,7 +397,6 @@ Backend
 | `POSTGRES_PORT` | Docker internal port of the PostgreSQL database |
 
 
-Variable	Description
 | Variable            | Description       |
 | ------------------- | ----------------- |
 | `POSTGRES_USER`     | Database username |
@@ -463,8 +461,318 @@ This section documents concepts and solutions applied throughout MyLib’s archi
 - Docker Compose integrates all configurations for seamless deployment.
 
 
-
 ## 9. Architectural Desicions
+
+### ADR 1: Use Spring Boot for Backend
+
+- **Status:** Accepted
+- **Date:** 2025-06-11
+
+#### Context
+
+I require a backend framework capable of handling REST APIs, security, persistence, and external service integrations for the MyLib application.
+
+#### Decision
+
+I have decided to use **Spring Boot** (Java) as the backend framework for MyLib.
+
+#### Alternatives Considered
+
+- Node.js with Express (TypeScript)
+- Django or FastAPI (Python)
+
+I did not choose these alternatives because I have no prior experience with backend development in TypeScript or Python, and learning a new framework would significantly increase the project’s complexity and time requirements.
+
+#### Consequences
+
+- **Positive:**
+  - More familiarity and confidence using Spring Boot
+  - Strong ecosystem and community support
+  - Integration with Hibernate for database operations
+  - Robust security features via Spring Security
+
+- **Negative:**
+  - Higher memory and resource consumption compared to lightweight frameworks
+  - Increased codebase complexity compared to more minimalistic frameworks
+  - Use of two different programming languages in the project (Java backend, TypeScript frontend)
+
+### ADR 2: Use PostgreSQL for Database
+
+- **Status:** Accepted
+- **Date:** 2025-06-11
+
+#### Context
+
+I required a database system to persist user data, book information, and relationships such as wishlists and personal libraries for MyLib.
+
+#### Decision
+
+I decided to use **PostgreSQL** as the relational database for MyLib, because:
+
+- I have prior experience working with PostgreSQL.
+- Easy to set up with Hibernate in Spring Boot, simplifying ORM setup.
+- It is one of the most feature-rich and advanced open-source relational databases available.
+
+#### Alternatives Considered
+
+- **SQLite**
+  - Very lightweight and simple
+  - But tightly coupled to the backend container’s local filesystem, complicating persistence and scalability
+- **SQL Server**
+  - More complex to set up
+  - Proprietary and not open-source
+- **Document-based Databases** (e.g. MongoDB)
+  - No prior experience
+  - Not ideal for relational data structures like many-to-many relationships required in MyLib
+
+#### Consequences
+
+- **Positive:**
+  - Strong SQL feature set and reliability
+  - Open source and widely supported
+  - Smooth integration with Spring Boot and Hibernate
+  - Supports advanced queries if needed in the future
+
+- **Negative:**
+  - Requires running an additional container alongside backend and frontend
+  - Slightly larger resource footprint compared to lightweight alternatives like SQLite
+  - Additional configuration for backups and data persistence in production deployments
+
+### ADR 3: Handling Inconsistent Data from OpenLibrary API
+
+- **Status:** Accepted
+- **Date:** 2025-06-11
+
+#### Context
+
+The OpenLibrary API provides book data through multiple endpoints (Search, Works, Editions, Books), but its data is inconsistent:
+
+- Data is inconsitent beteen endpoints
+- No single endpoint contains all required book details.
+- Some books lack cover images and therefore a cover edition key.
+- Some works do not have any editions listed.
+- Author details often require separate requests.
+
+A unified strategy is required to reliably fetch and consolidate book data for MyLib, balancing completeness with acceptable response times.
+
+
+##### Decision
+
+I decided to implement different strategies for handling data depending on the operation:
+
+- **On Search:**
+  - Use data directly from the Search API results.
+  - Treat the `cover_edition_key` as the BookID.
+  - If no `cover_edition_key` exists:
+    - Query the Works API for editions.
+    - Use the first available edition as the BookID.
+  - If no editions exist, discard the search result entirely.
+
+- **On Get Book Details:**
+  - Use the Editions API for core book details.
+  - Fetch the description from the Works API because it typically contains more comprehensive information.
+  - Fetch author details separately to complete the book information.
+
+
+#### Alternatives Considered
+
+- **Always use the “Get Book” strategy for all search results:**
+    - Would require an additional three API calls per search result (editions, works, authors).
+    - Performance impact is unacceptable, leading to delays of 30 seconds to 1 minute for search results containing 25 entries.
+
+#### Consequences
+
+- **Positive:**
+  - Provides faster response times for search results.
+  - Avoids excessive API calls and latency during searches.
+
+- **Negative:**
+  - Potential for inconsistent data between search results and detailed book views.
+      - E.g. some fields may appear only in detailed views and not in the initial search result.
+  - Users might observe differences in book information when navigating from search results to book detail pages.
+
+
+### ADR 4: Use JWT for Authentication
+
+- **Status:** Accepted
+- **Date:** 2025-06-20
+
+#### Context
+
+I needed to implement a secure authentication mechanism for MyLib to protect user-specific operations and data. The solution had to work efficiently in a stateless REST API architecture.
+
+#### Decision
+
+I decided to use **JSON Web Tokens (JWT)** for user authentication and authorization in MyLib.
+
+#### Alternatives Considered
+
+- **Session-based authentication:**
+  - Would require server-side session storage and management.
+  - Increases backend statefulness, making scaling more complex.
+
+- **OAuth:**
+  - Designed for third-party integrations and delegated authorization.
+  - Too complex and heavyweight for the simple login requirements of MyLib.
+
+#### Consequences
+
+- **Positive:**
+  - Stateless and scalable authentication.
+  - Easy integration with Spring Security.
+  - Minimal overhead on backend and frontend.
+  - Supports transmitting user claims inside the token payload.
+
+- **Negative:**
+  - Requires careful management of secret keys for signing and verifying tokens.
+  - Potential security risks if tokens are improperly stored on the client side or exposed.
+  - Tokens can grow large if many claims are included, slightly impacting network overhead.
+
+
+### ADR 5: Use Vue.js for Frontend
+
+- **Status:** Accepted
+- **Date:** 2025-06-21
+
+#### Context
+
+I needed a frontend framework to build the user interface for MyLib. I have no prior experience with modern web frontend development beyond basic HTML and CSS, and no significant experience with JavaScript frameworks.
+
+#### Decision
+
+I decided to use **Vue.js** with TypeScript for the frontend implementation of MyLib.
+
+
+#### Alternatives Considered
+
+- **React** – Very popular but appeared more complex for a single-developer project without prior frontend experience.
+- **Angular** – More feature-rich but also heavier and steeper learning curve, which was impractical for the project timeline.
+
+I selected Vue.js because it seemed to have the least overhead and the most approachable learning curve for someone with minimal frontend experience.
+
+#### Consequences
+
+- **Positive:**
+  - Relatively gentle learning curve
+  - Good documentation and community support
+  - Allows type safety via TypeScript
+  - Suitable for building small to medium-sized applications quickly
+
+- **Negative:**
+  - Lack of deep experience may lead to suboptimal architectural choices in the frontend code
+  - Introduces a different technology stack, requiring context switching between Java (backend) and TypeScript (frontend)
+
+### ADR 6: Use Bootstrap for Frontend Styling
+
+- **Status:** Accepted
+- **Date:** 2025-06-21
+
+#### Context
+
+I needed a framework for styling and layouting the frontend of MyLib. While I have no experience with modern frontend frameworks, I have prior experience using Bootstrap in earlier plain HTML projects.
+
+
+#### Decision
+
+I decided to use **Bootstrap** as the styling and layout framework for the frontend of MyLib.
+
+
+#### Alternatives Considered
+
+- Writing custom CSS entirely by hand, which I rejected due to the significant time and effort required for layout, responsiveness, and styling consistency.
+
+
+#### Consequences
+
+- **Positive:**
+  - Faster development of a clean user interface
+  - Some familiarity from previous projects
+  - Reduces time required for custom CSS
+  - Extensive documentation and ready-to-use components
+
+- **Negative:**
+  - Potential for larger CSS bundles
+  - Less unique visual design, as many Bootstrap-based sites look similar
+  - Some styling overrides required if customization is needed
+
+
+### ADR 7: Use Flyweight Pattern for Backend Caching
+
+- **Status:** Accepted
+- **Date:** 2025-06-24
+
+#### Context
+
+The OpenLibrary API can have significant response times, and many navigation flows in MyLib result in the same data being requested multiple times (e.g. searching for books, viewing book details). To reduce latency and minimize repeated external API calls, a caching strategy is required.
+
+#### Decision
+
+I decided to implement **backend caching** using an in-memory Flyweight-like cache. This approach is simple to implement and integrates directly with the backend services responsible for calling the OpenLibrary API.
+
+#### Alternatives Considered
+
+- **No caching**
+  - Would result in slower performance for repeated requests.
+  - Would cause unnecessary traffic between MyLib’s backend and the OpenLibrary API.
+
+- **File-based caching**
+  - Would allow persistence across container restarts.
+  - However, significantly more complex to implement and manage.
+  - Would add complexity for concurrent access and data invalidation.
+
+- **Frontend-side caching**
+  - Not feasible because the frontend cannot determine whether book data comes from MyLib’s database or the external OpenLibrary API.
+  - I want the frontend to always display the most up-to-date data stored in the backend or database.
+
+
+#### Consequences
+
+- **Positive:**
+  - Reduces latency for repeated external API calls.
+  - Decreases network traffic between MyLib and the OpenLibrary API.
+  - Simple to integrate with existing backend services.
+
+- **Negative:**
+  - Cache is in-memory only and not persistent across container restarts.
+  - If many users generate excessive traffic, RAM usage may become high.
+      - Partially mitigated by:
+          - Declaring cache entries stale after 60 minutes.
+          - Performing cache cleanups every 10 minutes.
+
+### ADR 8 Use Two-Stage Dockerfiles
+
+- **Status:** Accepted
+- **Date:** 2025-06-27
+
+#### Context
+
+I needed to containerize both the frontend and backend for MyLib. A key question was whether to:
+
+- Build the application artifacts entirely within the Docker environment (two-stage build).
+- Or build the application artifacts externally in the CI/CD pipeline and simply copy them into a single-stage Docker image (one-stage build).
+
+
+#### Decision
+
+I decided to use **two-stage Dockerfiles** for both frontend and backend images. This approach builds the application directly inside the Docker image during the image creation process.
+
+
+#### Alternatives Considered
+
+- **One-stage Dockerfile:**
+  - Build the application outside Docker (e.g. via GitHub Actions).
+  - Copy the built artifacts into a minimal Docker image in a single stage.
+  - Faster pipeline execution but can introduce inconsistencies between local and pipeline builds.
+
+#### Consequences
+
+- **Positive:**
+  - Guarantees consistent builds across different environments (local machines and CI/CD pipelines).
+  - Simplifies local development by allowing developers to build and run the containers without additional build steps.
+
+- **Negative:**
+  - Longer total build time, as the application build occurs inside the Docker build context and may duplicate work already performed in the pipeline.
+  - Larger build contexts due to including all source files in the Docker build process.
 
 ## 10. Quality Requirements
 
