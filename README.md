@@ -111,6 +111,13 @@ Or, on Windows:
 docker compose down --remove-orphans
 ```
 
+### 8. Reset Database
+
+Once the compose file has been started, and you want to regenerate the env files with the setup script, you have to remove the database beforehand with:
+```
+    sudo docker volume rm thro-sqs-mylib_db
+```
+
 #### Notes
 - The backend, frontend, and PostgreSQL database are all started via Docker Compose.
 - Ensure your Docker Desktop or Docker daemon is running before executing these commands.
