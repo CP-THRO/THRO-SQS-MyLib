@@ -69,11 +69,13 @@ MyLib is a web application directly accessed by users via a web browser.
 Two user types interact with the system:
 
 - **Unregistered User**
+
   - Can search for books via the OpenLibrary API
   - Can view details about books
   - Can view the aggregated list of books saved by all registered users (anonymized)
 
 - **Registered User**
+
   - Has all capabilities of an unregistered user
   - Can add books to a personal library
   - Can add books to a wishlist
@@ -84,6 +86,7 @@ Two user types interact with the system:
 MyLib communicates with the following external system:
 
 - **OpenLibrary API**
+
   - Provides book metadata (titles, authors, covers, descriptions, etc.)
   - Accessed via REST API
 
@@ -135,8 +138,6 @@ Secured endpoints are protected using JWT (JSON Web Token) authentication:
 - Simplifies stateless authentication across frontend and backend
 
 ### External Service Integration
-External Service Integration
-
 The backend integrates with the OpenLibrary API to fetch book data. 
 
 ## 5. Building Block View
@@ -233,21 +234,26 @@ This section describes some typical runtime scenarios for MyLib, illustrating ho
 ### Scenario 1 – Unregistered User Searches for Books
 
 - **Actor:** Unregistered user
+
 - **Frontend Flow:**
   - User accesses `Search.vue` via the browser, enters keywords and clicks the search button.
   - `Search.vue` invokes `useBookList`.
   - `useBookList` calls `ApiService` to request search results.
 - **Backend Flow:**
+
   - `SearchController` receives the request.
   - `SearchService` checks the `SearchResultFlyweightFactory` cache.
     - **On Success** (exists and not stale):
+
         - Return cached result to frontend.
     - **On Failure** (does not exist or stale):
+
         - `SearchResultFlyweightFactory` calls `OpenLibraryAPI`.
         - `OpenLibraryAPI` queries the OpenLibrary API with the search keywords and returns the result to `SearchResultFlyweightFactory`.
         - Result is cached and returned to `SearchService`.
         - Result is returned to frontend.
 - **End Result:**
+
   - `Search.vue` displays the search results.
 
 
@@ -256,38 +262,48 @@ This section describes some typical runtime scenarios for MyLib, illustrating ho
 
 - **Actor:** Unregistered user
 - **Frontend Flow:**
+
   - User navigates to `Book.vue` by clicking a "Details" button on `AllBooks.vue`, `Search.vue`, `Library.vue` or `Wishlist.vue`.
   - `Book.vue` calls `ApiService` for book details.
 - **Backend Flow:**
+
   - `BookController` handles the request.
   - `BookService` attempts to load book data from `BookRepository`.
     - **On Success** (exists in database):
+
         - Return book to frontend.
     - **On Failure** (does not exist in database):
+
         - `BookService` checks the `ExternalBookFlyweightFactory` cache.
             - **On Success** (exists and not stale):
+
                 - Return cached book to frontend.
             - **On Failure** (does not exist or stale):
+
                 - `ExternalBookFlyweightFactory` calls `OpenLibraryAPI`.
                 - `OpenLibraryAPI` queries OpenLibrary for the book and returns it to `ExternalBookFlyweightFactory`.
                 - Result is cached and returned to `BookService`.
                 - Result is returned to frontend.
 - **End Result:**
+
   - `Book.vue` displays the book information.
 
 ## Scenario 3 – User Logs In
 
 - **Actor:** Registered user
 - **Frontend Flow:**
+
   - User submits credentials in `Login.vue` and clicks the "Login" button.
   - `ApiService` sends login request.
 - **Backend Flow:**
+
   - `AuthController` receives the request.
   - `AuthService` validates credentials.
   - On success:
     - `JWTService` generates a JWT token.
     - Token is returned to frontend.
 - **Frontend Post-login:**
+
   - `ApiService` stores authentication status in `AuthInfoWrapper` and JWT token in LocalStorage for future requests.
   - `Login.vue` redirects to home page or the page the user was last on.
 
@@ -296,21 +312,26 @@ This section describes some typical runtime scenarios for MyLib, illustrating ho
 
 - **Actor:** Registered user
 - **Frontend Flow:**
+
   - User clicks “Add to Library” on any book component (e.g. `Book.vue`).
   - `useBookActions` calls `ApiService`.
   - JWT token is included in the request header.
 - **Backend Flow:**
+
   - `BookController` receives the secured request.
   - Spring Security validates user identity.
   - `BookService` checks if the book exists in `BookRepository`.
     - **On Failure** (book not in database):
+
         - `BookService` checks the `ExternalBookFlyweightFactory` cache.
             - **On Failure** (does not exist or stale):
+
                 - `ExternalBookFlyweightFactory` calls `OpenLibraryAPI`.
                 - `OpenLibraryAPI` queries OpenLibrary for the book and returns it to `ExternalBookFlyweightFactory`.
                 - Result is cached and returned to `BookService`.
     - `BookService` creates a new entry in `LibraryBookRepository`.
 - **Result:**
+
   - Success response returned.
   - Frontend updates the page the user is on.
 
@@ -319,12 +340,15 @@ This section describes some typical runtime scenarios for MyLib, illustrating ho
 
 - **Actor:** Registered user
 - **Frontend Flow:**
+
   - User updates personal rating on `Book.vue` and clicks the "Save" button.
   - `useBookActions` calls `ApiService`.
 - **Backend Flow:**
+
   - `BookController` receives the secured request.
   - `BookService` updates the rating in `LibraryBookRepository`.
 - **Result:**
+
   - Success response returned.
   - Frontend updates the `Book.vue` page.
 
@@ -348,17 +372,20 @@ MyLib is deployed using Docker Compose. The architecture consists of three main 
 The system is defined in a single `docker-compose.yml` file, which spins up:
 
 - **Frontend container**
+
   - Vue.js app
   - Serves static frontend files
   - Communicates with backend REST APIs
 
 - **Backend container**
+
   - Spring Boot app
   - Exposes REST endpoints
   - Connects to PostgreSQL database
   - Integrates with OpenLibrary API
 
 - **PostgreSQL container**
+
   - Stores user data, book data, and library relations
 
 ### 7.3 Exposed Ports & Portmapping
@@ -486,12 +513,14 @@ I did not choose these alternatives because I have no prior experience with back
 #### Consequences
 
 - **Positive:**
+
   - More familiarity and confidence using Spring Boot
   - Strong ecosystem and community support
   - Integration with Hibernate for database operations
   - Robust security features via Spring Security
 
 - **Negative:**
+
   - Higher memory and resource consumption compared to lightweight frameworks
   - Increased codebase complexity compared to more minimalistic frameworks
   - Use of two different programming languages in the project (Java backend, TypeScript frontend)
@@ -516,24 +545,31 @@ I decided to use **PostgreSQL** as the relational database for MyLib, because:
 #### Alternatives Considered
 
 - **SQLite**
+
   - Very lightweight and simple
   - But tightly coupled to the backend container’s local filesystem, complicating persistence and scalability
+
 - **SQL Server**
+
   - More complex to set up
   - Proprietary and not open-source
+
 - **Document-based Databases** (e.g. MongoDB)
+
   - No prior experience
   - Not ideal for relational data structures like many-to-many relationships required in MyLib
 
 #### Consequences
 
 - **Positive:**
+
   - Strong SQL feature set and reliability
   - Open source and widely supported
   - Smooth integration with Spring Boot and Hibernate
   - Supports advanced queries if needed in the future
 
 - **Negative:**
+
   - Requires running an additional container alongside backend and frontend
   - Slightly larger resource footprint compared to lightweight alternatives like SQLite
   - Additional configuration for backups and data persistence in production deployments
@@ -561,6 +597,7 @@ A unified strategy is required to reliably fetch and consolidate book data for M
 I decided to implement different strategies for handling data depending on the operation:
 
 - **On Search:**
+
   - Use data directly from the Search API results.
   - Treat the `cover_edition_key` as the BookID.
   - If no `cover_edition_key` exists:
@@ -569,6 +606,7 @@ I decided to implement different strategies for handling data depending on the o
   - If no editions exist, discard the search result entirely.
 
 - **On Get Book Details:**
+
   - Use the Editions API for core book details.
   - Fetch the description from the Works API because it typically contains more comprehensive information.
   - Fetch author details separately to complete the book information.
@@ -577,16 +615,19 @@ I decided to implement different strategies for handling data depending on the o
 #### Alternatives Considered
 
 - **Always use the “Get Book” strategy for all search results:**
+
     - Would require an additional three API calls per search result (editions, works, authors).
     - Performance impact is unacceptable, leading to delays of 30 seconds to 1 minute for search results containing 25 entries.
 
 #### Consequences
 
 - **Positive:**
+
   - Provides faster response times for search results.
   - Avoids excessive API calls and latency during searches.
 
 - **Negative:**
+
   - Potential for inconsistent data between search results and detailed book views.
       - E.g. some fields may appear only in detailed views and not in the initial search result.
   - Users might observe differences in book information when navigating from search results to book detail pages.
@@ -608,22 +649,26 @@ I decided to use **JSON Web Tokens (JWT)** for user authentication and authoriza
 #### Alternatives Considered
 
 - **Session-based authentication:**
+
   - Would require server-side session storage and management.
   - Increases backend statefulness, making scaling more complex.
 
 - **OAuth:**
+
   - Designed for third-party integrations and delegated authorization.
   - Too complex and heavyweight for the simple login requirements of MyLib.
 
 #### Consequences
 
 - **Positive:**
+
   - Stateless and scalable authentication.
   - Easy integration with Spring Security.
   - Minimal overhead on backend and frontend.
   - Supports transmitting user claims inside the token payload.
 
 - **Negative:**
+
   - Requires careful management of secret keys for signing and verifying tokens.
   - Potential security risks if tokens are improperly stored on the client side or exposed.
   - Tokens can grow large if many claims are included, slightly impacting network overhead.
@@ -653,12 +698,14 @@ I selected Vue.js because it seemed to have the least overhead and the most appr
 #### Consequences
 
 - **Positive:**
+
   - Relatively gentle learning curve
   - Good documentation and community support
   - Allows type safety via TypeScript
   - Suitable for building small to medium-sized applications quickly
 
 - **Negative:**
+
   - Lack of deep experience may lead to suboptimal architectural choices in the frontend code
   - Introduces a different technology stack, requiring context switching between Java (backend) and TypeScript (frontend)
 
@@ -685,12 +732,14 @@ I decided to use **Bootstrap** as the styling and layout framework for the front
 #### Consequences
 
 - **Positive:**
+
   - Faster development of a clean user interface
   - Some familiarity from previous projects
   - Reduces time required for custom CSS
   - Extensive documentation and ready-to-use components
 
 - **Negative:**
+
   - Potential for larger CSS bundles
   - Less unique visual design, as many Bootstrap-based sites look similar
   - Some styling overrides required if customization is needed
@@ -712,15 +761,18 @@ I decided to implement **backend caching** using an in-memory Flyweight-like cac
 #### Alternatives Considered
 
 - **No caching**
+
   - Would result in slower performance for repeated requests.
   - Would cause unnecessary traffic between MyLib’s backend and the OpenLibrary API.
 
 - **File-based caching**
+
   - Would allow persistence across container restarts.
   - However, significantly more complex to implement and manage.
   - Would add complexity for concurrent access and data invalidation.
 
 - **Frontend-side caching**
+
   - Not feasible because the frontend cannot determine whether book data comes from MyLib’s database or the external OpenLibrary API.
   - I want the frontend to always display the most up-to-date data stored in the backend or database.
 
@@ -728,11 +780,13 @@ I decided to implement **backend caching** using an in-memory Flyweight-like cac
 #### Consequences
 
 - **Positive:**
+
   - Reduces latency for repeated external API calls.
   - Decreases network traffic between MyLib and the OpenLibrary API.
   - Simple to integrate with existing backend services.
 
 - **Negative:**
+
   - Cache is in-memory only and not persistent across container restarts.
   - If many users generate excessive traffic, RAM usage may become high.
       - Partially mitigated by:
@@ -760,6 +814,7 @@ I decided to use **two-stage Dockerfiles** for both frontend and backend images.
 #### Alternatives Considered
 
 - **One-stage Dockerfile:**
+
   - Build the application outside Docker (e.g. via GitHub Actions).
   - Copy the built artifacts into a minimal Docker image in a single stage.
   - Faster pipeline execution but can introduce inconsistencies between local and pipeline builds.
@@ -767,10 +822,12 @@ I decided to use **two-stage Dockerfiles** for both frontend and backend images.
 #### Consequences
 
 - **Positive:**
+
   - Guarantees consistent builds across different environments (local machines and CI/CD pipelines).
   - Simplifies local development by allowing developers to build and run the containers without additional build steps.
 
 - **Negative:**
+
   - Longer total build time, as the application build occurs inside the Docker build context and may duplicate work already performed in the pipeline.
   - Larger build contexts due to including all source files in the Docker build process.
 
