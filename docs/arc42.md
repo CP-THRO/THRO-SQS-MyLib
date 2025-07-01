@@ -330,6 +330,80 @@ This section describes some typical runtime scenarios for MyLib, illustrating ho
 
 ## 7. Deployment View
 
+![Container Diagram](img/Container.png)
+
+MyLib is deployed using Docker Compose. The architecture consists of three main containers: frontend, backend, and PostgreSQL database. Deployment is automated via GitHub Actions.
+
+
+### 7.1 Deployment Nodes
+
+| Node            | Description                                                    |
+|-----------------|----------------------------------------------------------------|
+| **Frontend**    | Vue.js application, served via a nginx.      |
+| **Backend**     | Spring Boot application exposing REST APIs and handling business logic. |
+| **Database**    | PostgreSQL database for all persistent data.                   |
+
+### 7.2 Deployment Architecture
+
+The system is defined in a single `docker-compose.yml` file, which spins up:
+
+- **Frontend container**
+  - Vue.js app
+  - Serves static frontend files
+  - Communicates with backend REST APIs
+
+- **Backend container**
+  - Spring Boot app
+  - Exposes REST endpoints
+  - Connects to PostgreSQL database
+  - Integrates with OpenLibrary API
+
+- **PostgreSQL container**
+  - Stores user data, book data, and library relations
+
+### 7.3 Exposed Ports & Portmapping
+
+| Service  | External Port | Internal Port |
+| -------- | ---- | ------ |
+| Frontend | 5174 | 80 |
+| Backend  | 8080 |   8080     |
+| Database | 5432 |    5432    |
+
+7.4 Environment Variables
+
+#### Frontend
+
+| Variable            | Description                       |
+| ------------------- | --------------------------------- |
+| `BACKEND_HOST` | Hostname of the backend, from which the backend is reachable from outside the docker environment (typically localhost) |
+| `BACKEND_PORT` | Port of the backend, from which the backend is reachable from outside the docker environment (typically 8080)  |
+| `BACKEND_PROTO` | Transport Protocol to use (http or https) |
+
+
+#### Backend
+
+Backend
+| Variable                     | Description                                |
+| ---------------------------- | ------------------------------------------ |
+| `MACHINE`      | Select the application properties to load on statup. Typically "prod". |
+| `POSTGRES_USER` | Username for the PostgreSQL database |
+| `POSTGRES_PASSWORD` | Password for the PostgreSQL database |
+| `BACKEND_HOST` | Hostname of the backend, from which the backend is reachable from outside the docker environment (typically localhost). For CORS |
+| `BACKEND_PORT` | Port of the backend, from which the backend is reachable from outside the docker environment (typically 8080). For CORS  |
+| `BACKEND_PROTO` | Transport Protocol to use (http or https). For CORS |
+| `FRONTEND_HOST` | Hostname of the frontend, from which the frontend is reachable from outside the docker environment (typically localhost). For CORS |
+| `FRONTEND_PORT` | Port of the frontend, from which the frontend is reachable from outside the docker environment (typically 5174). For CORS  |
+| `FRONTEND_PROTO` | Transport Protocol the frontend uses (http or https). For CORS |
+| `POSTGRES_HOST` | Docker-internal hostname of the PostgreSQL database |
+| `POSTGRES_PORT` | Docker internal port of the PostgreSQL database |
+
+
+Variable	Description
+| Variable            | Description       |
+| ------------------- | ----------------- |
+| `POSTGRES_USER`     | Database username |
+| `POSTGRES_PASSWORD` | Database password |
+
 ## 8. Crosscutting Concepts
 
 ## 9. Architectural Desicions
